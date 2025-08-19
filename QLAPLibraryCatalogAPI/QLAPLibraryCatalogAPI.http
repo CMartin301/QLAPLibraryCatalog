@@ -1,0 +1,6 @@
+@QLAPLibraryCatalogAPI_HostAddress = http://localhost:5236
+
+GET {{QLAPLibraryCatalogAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
