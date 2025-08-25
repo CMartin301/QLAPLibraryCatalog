@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using QLAPLibraryCatalogAPI.Models;
 
-namespace QLAPLibraryCatalogAPI.Models;
+namespace QLAPLibraryCatalogAPI.Data;
 
 public partial class LibraryCatalogContext : DbContext
 {
