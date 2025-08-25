@@ -21,14 +21,6 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
         public MediaTypeDto? MediaType { get; set; }
     }
 
-    public class MediaTypeDto
-    {
-        public int MediaTypeId { get; set; }
-        public string Name { get; set; } = null!;
-        public string? DisplayName { get; set; }
-        public string? Description { get; set; }
-    }
-
     public class CreateMediaDto
     {
         public int MediaTypeId { get; set; }
@@ -46,5 +38,20 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
         public int? PageCount { get; set; }
         public string? IssueNumber { get; set; }
         public string? Volume { get; set; }
+    }
+
+
+    public class MediaTypeDto
+    {
+        public int MediaTypeId { get; set; }
+        public string Name { get; set; } = null!;
+        public string? DisplayName { get; set; }
+        public string? Description { get; set; }
+    }
+    public class CreateMediaTypeDto
+    {
+        public string Name { get; set; } = null!;
+        public string? DisplayName { get; set; }
+        public string? Description { get; set; }
     }
 }

@@ -49,17 +49,17 @@ public partial class LibraryCatalogContext : DbContext
 
             entity.Property(e => e.RequestId).HasColumnName("request_id");
             entity.Property(e => e.ApprovedAt)
-                .HasColumnType("timestamp without time zone")
+                .HasColumnType("timestamptz")
                 .HasColumnName("approved_at");
             entity.Property(e => e.BorrowerId).HasColumnName("borrower_id");
             entity.Property(e => e.CopyId).HasColumnName("copy_id");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("now()")
-                .HasColumnType("timestamp without time zone")
+                .HasColumnType("timestamptz")
                 .HasColumnName("created_at");
             entity.Property(e => e.DenialReason).HasColumnName("denial_reason");
             entity.Property(e => e.DeniedAt)
-                .HasColumnType("timestamp without time zone")
+                .HasColumnType("timestamptz")
                 .HasColumnName("denied_at");
             entity.Property(e => e.Message).HasColumnName("message");
             entity.Property(e => e.RequestedEndDate).HasColumnName("requested_end_date");
@@ -70,7 +70,7 @@ public partial class LibraryCatalogContext : DbContext
                 .HasColumnName("status");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("now()")
-                .HasColumnType("timestamp without time zone")
+                .HasColumnType("timestamptz")
                 .HasColumnName("updated_at");
 
             entity.HasOne(d => d.Borrower).WithMany(p => p.BorrowRequests)
@@ -99,7 +99,7 @@ public partial class LibraryCatalogContext : DbContext
             entity.Property(e => e.LoanId).HasColumnName("loan_id");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("now()")
-                .HasColumnType("timestamp without time zone")
+                .HasColumnType("timestamptz")
                 .HasColumnName("created_at");
             entity.Property(e => e.DueDate).HasColumnName("due_date");
             entity.Property(e => e.LateFeeAmount)
@@ -119,7 +119,7 @@ public partial class LibraryCatalogContext : DbContext
                 .HasColumnName("status");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("now()")
-                .HasColumnType("timestamp without time zone")
+                .HasColumnType("timestamptz")
                 .HasColumnName("updated_at");
 
             entity.HasOne(d => d.Request).WithOne(p => p.Loan)
@@ -139,7 +139,7 @@ public partial class LibraryCatalogContext : DbContext
             entity.Property(e => e.MediaTypeId).HasColumnName("media_type_id");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("now()")
-                .HasColumnType("timestamp without time zone")
+                .HasColumnType("timestamptz")
                 .HasColumnName("created_at");
             entity.Property(e => e.Description).HasColumnName("description");
             entity.Property(e => e.DisplayName)
@@ -153,7 +153,7 @@ public partial class LibraryCatalogContext : DbContext
                 .HasColumnName("name");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("now()")
-                .HasColumnType("timestamp without time zone")
+                .HasColumnType("timestamptz")
                 .HasColumnName("updated_at");
         });
 
@@ -241,7 +241,7 @@ public partial class LibraryCatalogContext : DbContext
             entity.Property(e => e.UserId).HasColumnName("user_id");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("now()")
-                .HasColumnType("timestamp without time zone")
+                .HasColumnType("timestamptz")
                 .HasColumnName("created_at");
             entity.Property(e => e.Email)
                 .HasMaxLength(255)
@@ -257,7 +257,7 @@ public partial class LibraryCatalogContext : DbContext
                 .HasColumnName("password_hash");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("now()")
-                .HasColumnType("timestamp without time zone")
+                .HasColumnType("timestamptz")
                 .HasColumnName("updated_at");
             entity.Property(e => e.Username)
                 .HasMaxLength(50)
@@ -280,7 +280,7 @@ public partial class LibraryCatalogContext : DbContext
                 .HasColumnName("condition");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("now()")
-                .HasColumnType("timestamp without time zone")
+                .HasColumnType("timestamptz")
                 .HasColumnName("created_at");
             entity.Property(e => e.IsAvailable)
                 .HasDefaultValue(true)
@@ -295,7 +295,7 @@ public partial class LibraryCatalogContext : DbContext
                 .HasColumnName("requires_approval");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("now()")
-                .HasColumnType("timestamp without time zone")
+                .HasColumnType("timestamptz")
                 .HasColumnName("updated_at");
             entity.Property(e => e.UserId).HasColumnName("user_id");
 
@@ -326,7 +326,7 @@ public partial class LibraryCatalogContext : DbContext
                 .HasColumnName("auto_approve_requests");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("now()")
-                .HasColumnType("timestamp without time zone")
+                .HasColumnType("timestamptz")
                 .HasColumnName("created_at");
             entity.Property(e => e.DefaultLoanDays)
                 .HasDefaultValue(14)
@@ -342,7 +342,7 @@ public partial class LibraryCatalogContext : DbContext
                 .HasColumnName("sms_notifications");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("now()")
-                .HasColumnType("timestamp without time zone")
+                .HasColumnType("timestamptz")
                 .HasColumnName("updated_at");
             entity.Property(e => e.UserId).HasColumnName("user_id");
 

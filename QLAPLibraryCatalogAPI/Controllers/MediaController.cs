@@ -11,11 +11,6 @@ namespace QLAPLibraryCatalogAPI.Controllers
     [Route("api/[controller]")]
     public class MediaController : ControllerBase
     {
-        // private readonly LibraryCatalogContext dbContext;
-        // public MediaController(LibraryCatalogContext _context)
-        // {
-        //     dbContext = _context;
-        // }
         private readonly IMediaService _mediaService;
         public MediaController(IMediaService mediaService)
         {
@@ -87,12 +82,12 @@ namespace QLAPLibraryCatalogAPI.Controllers
             }
         }
         
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteMedia(int id)
+        [HttpDelete("{mediaId}")]
+        public async Task<IActionResult> DeleteMedia(int mediaId)
         {
             try
             {
-                var result = await _mediaService.DeleteMediaAsync(id);
+                var result = await _mediaService.DeleteMediaAsync(mediaId);
                 if (!result) return NotFound();
                 
                 return NoContent();

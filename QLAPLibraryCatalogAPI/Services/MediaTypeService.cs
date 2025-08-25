@@ -7,11 +7,12 @@ namespace QLAPLibraryCatalogAPI.Services
 {
     public interface IMediaTypeService
     {
-        Task<IEnumerable<MediaTypeDto>> GetAllMediaTypesAsync();
-        // Task<MediaDto?> GetMediaByIdAsync(int mediaId);
-        // Task<MediaDto> CreateMediaAsync(CreateMediaDto createMediaDto);
-        // Task<MediaDto?> UpdateMediaAsync(int id, CreateMediaDto updateMediaDto);
-        // Task<bool> DeleteMediaAsync(int id);
+        Task<IEnumerable<MediaTypeDto>> GetActiveMediaTypesAsync();
+        Task<MediaTypeDto?> GetMediaTypeByIdAsync(int mediaTypeId);
+        Task<MediaTypeDto> CreateMediaTypeAsync(CreateMediaTypeDto createMediaTypeDto);
+        Task<MediaTypeDto?> UpdateMediaTypeAsync(int mediaTypeId, CreateMediaTypeDto updateMediaTypeDto);
+        Task<bool> DeactivateMediaTypeAsync(int mediaTypeId);
+        Task<bool> ReactivateMediaTypeAsync(int mediaTypeId);
     }
     
     public class MediaTypeService : IMediaTypeService
@@ -22,9 +23,10 @@ namespace QLAPLibraryCatalogAPI.Services
         {
             _context = context;
         }
-        public async Task<IEnumerable<MediaTypeDto>> GetAllMediaTypesAsync()
+        public async Task<IEnumerable<MediaTypeDto>> GetActiveMediaTypesAsync()
         {
             return await _context.MediaTypes
+                .Where(m => m.IsActive == true)
                 .Select(m => new MediaTypeDto
                 {
                     MediaTypeId = m.MediaTypeId,
@@ -35,105 +37,75 @@ namespace QLAPLibraryCatalogAPI.Services
                 .ToListAsync();
         }
         
-        // public async Task<MediaDto?> GetMediaByIdAsync(int mediaId)
-        // {
-        //     return await _context.Media
-        //         .Include(m => m.MediaType)
-        //         .Where(m => m.MediaId == mediaId)
-        //         .Select(m => new MediaDto
-        //         {
-        //             MediaId = m.MediaId,
-        //             MediaTypeId = m.MediaTypeId,
-        //             Title = m.Title,
-        //             Subtitle = m.Subtitle,
-        //             Creator = m.Creator,
-        //             Publisher = m.Publisher,
-        //             PublicationDate = m.PublicationDate,
-        //             Language = m.Language,
-        //             Genre = m.Genre,
-        //             Description = m.Description,
-        //             CoverImageUrl = m.CoverImageUrl,
-        //             Isbn10 = m.Isbn10,
-        //             Isbn13 = m.Isbn13,
-        //             PageCount = m.PageCount,
-        //             IssueNumber = m.IssueNumber,
-        //             Volume = m.Volume,
-        //             MediaType = new MediaTypeDto
-        //             {
-        //                 MediaTypeId = m.MediaType.MediaTypeId,
-        //                 Name = m.MediaType.Name,
-        //                 DisplayName = m.MediaType.DisplayName,
-        //                 Description = m.MediaType.Description
-        //             }
-        //         })
-        //         .FirstOrDefaultAsync();
-        // }
+        public async Task<MediaTypeDto?> GetMediaTypeByIdAsync(int mediaTypeId)
+        {
+            return await _context.MediaTypes
+                .Where(m => m.MediaTypeId == mediaTypeId)
+                .Select(m => new MediaTypeDto
+                {
+                    MediaTypeId = m.MediaTypeId,
+                    Name = m.Name,
+                    DisplayName = m.DisplayName,
+                    Description = m.Description
+                })
+                .FirstOrDefaultAsync();
+        }
          
-        // public async Task<MediaDto> CreateMediaAsync(CreateMediaDto createMediaDto)
-        // {
-        //     var media = new Media
-        //     {
-        //         MediaTypeId = createMediaDto.MediaTypeId,
-        //         Title = createMediaDto.Title,
-        //         Subtitle = createMediaDto.Subtitle,
-        //         Creator = createMediaDto.Creator,
-        //         Publisher = createMediaDto.Publisher,
-        //         PublicationDate = createMediaDto.PublicationDate,
-        //         Language = createMediaDto.Language,
-        //         Genre = createMediaDto.Genre,
-        //         Description = createMediaDto.Description,
-        //         CoverImageUrl = createMediaDto.CoverImageUrl,
-        //         Isbn10 = createMediaDto.Isbn10,
-        //         Isbn13 = createMediaDto.Isbn13,
-        //         PageCount = createMediaDto.PageCount,
-        //         IssueNumber = createMediaDto.IssueNumber,
-        //         Volume = createMediaDto.Volume,
-        //         CreatedAt = DateTime.UtcNow,
-        //         UpdatedAt = DateTime.UtcNow
-        //     };
+        public async Task<MediaTypeDto> CreateMediaTypeAsync(CreateMediaTypeDto createMediaTypeDto)
+        {
+            var mediaType = new MediaType
+            {
+                Name = createMediaTypeDto.Name,
+                DisplayName = createMediaTypeDto.DisplayName,
+                Description = createMediaTypeDto.Description,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
             
-        //     _context.Media.Add(media);
-        //     await _context.SaveChangesAsync();
+            _context.MediaTypes.Add(mediaType);
+            await _context.SaveChangesAsync();
             
-        //     return await GetMediaByIdAsync(media.MediaId) ?? throw new InvalidOperationException("Failed to retrieve created media");
-        // }
+            return await GetMediaTypeByIdAsync(mediaType.MediaTypeId) ?? throw new InvalidOperationException("Failed to retrieve created media type");
+        }
         
-        // public async Task<MediaDto?> UpdateMediaAsync(int id, CreateMediaDto updateMediaDto)
-        // {
-        //     var existing = await _context.Media.FindAsync(id);
-        //     if (existing == null) return null;
+        public async Task<MediaTypeDto?> UpdateMediaTypeAsync(int id, CreateMediaTypeDto updateMediaDto)
+        {
+            var existing = await _context.MediaTypes.FindAsync(id);
+            if (existing == null) return null;
+
+            existing.Name = updateMediaDto.Name;
+            existing.DisplayName = updateMediaDto.DisplayName;
+            existing.Description = updateMediaDto.Description;
+            existing.UpdatedAt = DateTime.UtcNow;
             
-        //     existing.MediaTypeId = updateMediaDto.MediaTypeId;
-        //     existing.Title = updateMediaDto.Title;
-        //     existing.Subtitle = updateMediaDto.Subtitle;
-        //     existing.Creator = updateMediaDto.Creator;
-        //     existing.Publisher = updateMediaDto.Publisher;
-        //     existing.PublicationDate = updateMediaDto.PublicationDate;
-        //     existing.Language = updateMediaDto.Language;
-        //     existing.Genre = updateMediaDto.Genre;
-        //     existing.Description = updateMediaDto.Description;
-        //     existing.CoverImageUrl = updateMediaDto.CoverImageUrl;
-        //     existing.Isbn10 = updateMediaDto.Isbn10;
-        //     existing.Isbn13 = updateMediaDto.Isbn13;
-        //     existing.PageCount = updateMediaDto.PageCount;
-        //     existing.IssueNumber = updateMediaDto.IssueNumber;
-        //     existing.Volume = updateMediaDto.Volume;
-        //     existing.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
             
-        //     await _context.SaveChangesAsync();
-            
-        //     return await GetMediaByIdAsync(id);
-        // }
+            return await GetMediaTypeByIdAsync(id);
+        }
         
-        // public async Task<bool> DeleteMediaAsync(int id)
-        // {
-        //     var media = await _context.Media.FindAsync(id);
-        //     if (media == null) return false;
+        public async Task<bool> DeactivateMediaTypeAsync(int id)
+        {
+            var existing = await _context.MediaTypes.FindAsync(id);
+            if (existing == null) return false;
+
+            existing.IsActive = false;
             
-        //     _context.Media.Remove(media);
-        //     await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
-        //     return true;
-        // }
+            return true;
+        }
+        
+        public async Task<bool> ReactivateMediaTypeAsync(int id)
+        {
+            var existing = await _context.MediaTypes.FindAsync(id);
+            if (existing == null) return false;
+
+            existing.IsActive = true;
+            
+            await _context.SaveChangesAsync();
+            
+            return true;
+        }
     }
 }
