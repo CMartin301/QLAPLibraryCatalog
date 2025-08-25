@@ -137,3 +137,4 @@
 /Users/claramartin/Projects/QLAPLibraryCatalog/QLAPLibraryCatalogAPI/obj/Debug/net8.0/QLAPLibraryCatalogAPI.pdb
 /Users/claramartin/Projects/QLAPLibraryCatalog/QLAPLibraryCatalogAPI/obj/Debug/net8.0/QLAPLibraryCatalogAPI.genruntimeconfig.cache
 /Users/claramartin/Projects/QLAPLibraryCatalog/QLAPLibraryCatalogAPI/obj/Debug/net8.0/ref/QLAPLibraryCatalogAPI.dll
+/Users/claramartin/Projects/QLAPLibraryCatalog/QLAPLibraryCatalogAPI/obj/Debug/net8.0/QLAPLibraryCatalogAPI.sourcelink.json
