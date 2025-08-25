@@ -27,7 +27,7 @@ public partial class UserMediaCopy
 
     public virtual ICollection<BorrowRequest> BorrowRequests { get; set; } = new List<BorrowRequest>();
 
-    public virtual Medium Media { get; set; } = null!;
+    public virtual Media Media { get; set; } = null!;
 
     public virtual User User { get; set; } = null!;
 }

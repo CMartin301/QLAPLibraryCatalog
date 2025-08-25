@@ -19,5 +19,5 @@ public partial class MediaType
 
     public DateTime? UpdatedAt { get; set; }
 
-    public virtual ICollection<Medium> Media { get; set; } = new List<Medium>();
+    public virtual ICollection<Media> Media { get; set; } = new List<Media>();
 }

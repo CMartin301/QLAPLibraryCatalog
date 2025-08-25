@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace QLAPLibraryCatalogAPI.Models;
 
-public partial class Medium
+public partial class Media
 {
     public int MediaId { get; set; }
 

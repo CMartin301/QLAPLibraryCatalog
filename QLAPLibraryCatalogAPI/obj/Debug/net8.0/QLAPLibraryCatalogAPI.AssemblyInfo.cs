@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("QLAPLibraryCatalogAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+de3508b6ee0cfbd06046cdd183fd0bde3e51d801")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b07d7be6ed0ec8e038e9193791bfa1acdea6b4df")]
 [assembly: System.Reflection.AssemblyProductAttribute("QLAPLibraryCatalogAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("QLAPLibraryCatalogAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

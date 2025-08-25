@@ -21,7 +21,7 @@ public partial class LibraryCatalogContext : DbContext
 
     public virtual DbSet<MediaType> MediaTypes { get; set; }
 
-    public virtual DbSet<Medium> Media { get; set; }
+    public virtual DbSet<Media> Media { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
 
@@ -156,7 +156,7 @@ public partial class LibraryCatalogContext : DbContext
                 .HasColumnName("updated_at");
         });
 
-        modelBuilder.Entity<Medium>(entity =>
+        modelBuilder.Entity<Media>(entity =>
         {
             entity.HasKey(e => e.MediaId).HasName("media_pkey");
 
