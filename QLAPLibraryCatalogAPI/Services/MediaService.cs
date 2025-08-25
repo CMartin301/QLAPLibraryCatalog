@@ -8,7 +8,7 @@ namespace QLAPLibraryCatalogAPI.Services
     public interface IMediaService
     {
         Task<IEnumerable<MediaDto>> GetAllMediaAsync();
-        // Task<MediaDto?> GetMediaByIdAsync(int id);
+        Task<MediaDto?> GetMediaByIdAsync(int mediaId);
         // Task<MediaDto> CreateMediaAsync(CreateMediaDto createMediaDto);
         // Task<MediaDto?> UpdateMediaAsync(int id, CreateMediaDto updateMediaDto);
         // Task<bool> DeleteMediaAsync(int id);
@@ -55,39 +55,39 @@ namespace QLAPLibraryCatalogAPI.Services
                 .ToListAsync();
         }
         
-        // public async Task<MediaDto?> GetMediaByIdAsync(int id)
-        // {
-        //     return await _context.Media
-        //         .Include(m => m.MediaType)
-        //         .Where(m => m.MediaId == id)
-        //         .Select(m => new MediaDto
-        //         {
-        //             MediaId = m.MediaId,
-        //             MediaTypeId = m.MediaTypeId,
-        //             Title = m.Title,
-        //             Subtitle = m.Subtitle,
-        //             Creator = m.Creator,
-        //             Publisher = m.Publisher,
-        //             PublicationDate = m.PublicationDate,
-        //             Language = m.Language,
-        //             Genre = m.Genre,
-        //             Description = m.Description,
-        //             CoverImageUrl = m.CoverImageUrl,
-        //             Isbn10 = m.Isbn10,
-        //             Isbn13 = m.Isbn13,
-        //             PageCount = m.PageCount,
-        //             IssueNumber = m.IssueNumber,
-        //             Volume = m.Volume,
-        //             MediaType = new MediaTypeDto
-        //             {
-        //                 MediaTypeId = m.MediaType.MediaTypeId,
-        //                 Name = m.MediaType.Name,
-        //                 DisplayName = m.MediaType.DisplayName,
-        //                 Description = m.MediaType.Description
-        //             }
-        //         })
-        //         .FirstOrDefaultAsync();
-        // }
+        public async Task<MediaDto?> GetMediaByIdAsync(int mediaId)
+        {
+            return await _context.Media
+                .Include(m => m.MediaType)
+                .Where(m => m.MediaId == mediaId)
+                .Select(m => new MediaDto
+                {
+                    MediaId = m.MediaId,
+                    MediaTypeId = m.MediaTypeId,
+                    Title = m.Title,
+                    Subtitle = m.Subtitle,
+                    Creator = m.Creator,
+                    Publisher = m.Publisher,
+                    PublicationDate = m.PublicationDate,
+                    Language = m.Language,
+                    Genre = m.Genre,
+                    Description = m.Description,
+                    CoverImageUrl = m.CoverImageUrl,
+                    Isbn10 = m.Isbn10,
+                    Isbn13 = m.Isbn13,
+                    PageCount = m.PageCount,
+                    IssueNumber = m.IssueNumber,
+                    Volume = m.Volume,
+                    MediaType = new MediaTypeDto
+                    {
+                        MediaTypeId = m.MediaType.MediaTypeId,
+                        Name = m.MediaType.Name,
+                        DisplayName = m.MediaType.DisplayName,
+                        Description = m.MediaType.Description
+                    }
+                })
+                .FirstOrDefaultAsync();
+        }
         
         // public async Task<MediaDto> CreateMediaAsync(CreateMediaDto createMediaDto)
         // {

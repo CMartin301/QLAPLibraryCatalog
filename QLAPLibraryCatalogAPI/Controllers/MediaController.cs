@@ -35,6 +35,22 @@ namespace QLAPLibraryCatalogAPI.Controllers
             }
         }
 
-        
+
+        [HttpGet("{mediaId}")]
+        public async Task<IActionResult> GetMediaById(int mediaId)
+        {
+            try
+            {
+                var media = await _mediaService.GetMediaByIdAsync(mediaId);
+                if (media == null) return NotFound();
+                
+                return Ok(media);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
     }
 }
