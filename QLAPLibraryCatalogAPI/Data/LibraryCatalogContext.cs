@@ -173,7 +173,7 @@ public partial class LibraryCatalogContext : DbContext
                 .HasColumnName("cover_image_url");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("now()")
-                .HasColumnType("timestamp without time zone")
+                .HasColumnType("timestamptz")
                 .HasColumnName("created_at");
             entity.Property(e => e.Creator)
                 .HasMaxLength(500)
@@ -212,7 +212,7 @@ public partial class LibraryCatalogContext : DbContext
                 .HasColumnName("title");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("now()")
-                .HasColumnType("timestamp without time zone")
+                .HasColumnType("timestamptz")
                 .HasColumnName("updated_at");
             entity.Property(e => e.Volume)
                 .HasMaxLength(50)
