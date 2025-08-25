@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace QLAPLibraryCatalogAPI.Models;
 
-public partial class UserPreference
+public partial class UserPreferences
 {
     public int PreferenceId { get; set; }
 

@@ -28,7 +28,7 @@ public partial class LibraryCatalogContext : DbContext
 
     public virtual DbSet<UserMediaCopy> UserMediaCopies { get; set; }
 
-    public virtual DbSet<UserPreference> UserPreferences { get; set; }
+    public virtual DbSet<UserPreferences> UserPreferences { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseNpgsql("Name=ConnectionStrings:DefaultConnection");
@@ -310,7 +310,7 @@ public partial class LibraryCatalogContext : DbContext
                 .HasConstraintName("user_media_copies_user_id_fkey");
         });
 
-        modelBuilder.Entity<UserPreference>(entity =>
+        modelBuilder.Entity<UserPreferences>(entity =>
         {
             entity.HasKey(e => e.PreferenceId).HasName("user_preferences_pkey");
 
@@ -346,8 +346,8 @@ public partial class LibraryCatalogContext : DbContext
                 .HasColumnName("updated_at");
             entity.Property(e => e.UserId).HasColumnName("user_id");
 
-            entity.HasOne(d => d.User).WithOne(p => p.UserPreference)
-                .HasForeignKey<UserPreference>(d => d.UserId)
+            entity.HasOne(d => d.User).WithOne(p => p.UserPreferences)
+                .HasForeignKey<UserPreferences>(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("user_preferences_user_id_fkey");
         });

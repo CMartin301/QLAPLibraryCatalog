@@ -5,7 +5,7 @@ using QLAPLibraryCatalogAPI.Models.DTOs;
 
 namespace QLAPLibraryCatalogAPI.Services
 {
-    public interface IMediaTypeService
+    public interface IMediaTypesService
     {
         Task<IEnumerable<MediaTypeDto>> GetActiveMediaTypesAsync();
         Task<MediaTypeDto?> GetMediaTypeByIdAsync(int mediaTypeId);
@@ -15,11 +15,11 @@ namespace QLAPLibraryCatalogAPI.Services
         Task<bool> ReactivateMediaTypeAsync(int mediaTypeId);
     }
     
-    public class MediaTypeService : IMediaTypeService
+    public class MediaTypesService : IMediaTypesService
     {
         private readonly LibraryCatalogContext _context;
 
-        public MediaTypeService(LibraryCatalogContext context)
+        public MediaTypesService(LibraryCatalogContext context)
         {
             _context = context;
         }

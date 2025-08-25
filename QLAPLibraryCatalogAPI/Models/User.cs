@@ -25,5 +25,5 @@ public partial class User
 
     public virtual ICollection<UserMediaCopy> UserMediaCopies { get; set; } = new List<UserMediaCopy>();
 
-    public virtual UserPreference? UserPreference { get; set; }
+    public virtual UserPreferences? UserPreferences { get; set; }
 }
