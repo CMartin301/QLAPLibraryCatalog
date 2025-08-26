@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="../buildMultiTargeting/QLAPLibraryCatalogAPI.props" />
-</Project>
