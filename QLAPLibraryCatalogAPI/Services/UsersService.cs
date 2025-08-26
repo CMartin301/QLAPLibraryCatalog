@@ -9,9 +9,10 @@ namespace QLAPLibraryCatalogAPI.Services
     {
         Task<IEnumerable<UserDto>> GetAllUsersAsync();
         Task<UserDto?> GetUserByIdAsync(int userId);
-        // Task<MediaDto> CreateMediaAsync(CreateMediaDto createMediaDto);
-        // Task<MediaDto?> UpdateMediaAsync(int id, CreateMediaDto updateMediaDto);
-        // Task<bool> DeleteMediaAsync(int id);
+        Task<UserDto?> GetUserByEmailAsync(string email);
+        Task<UserDto> CreateUserAsync(CreateUserDto registerDto);
+        // Task<UserDto?> UpdateUserAsync(int userId, CreateUserDto updateDto);
+        // Task<UserPreferencesDto?> UpdateUserPreferencesAsync(int userId, UserPreferencesDto preferencesDto);
         Task<bool> DeactivateUserAsync(int userId);
         Task<bool> ReactivateUserAsync(int userId);
     }
@@ -19,10 +20,12 @@ namespace QLAPLibraryCatalogAPI.Services
     public class UsersService : IUsersService
     {
         private readonly LibraryCatalogContext _context;
+        private readonly IAuthService _authService;
 
-        public UsersService(LibraryCatalogContext context)
+        public UsersService(LibraryCatalogContext context, IAuthService authService)
         {
             _context = context;
+            _authService = authService;
         }
         public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
         {
@@ -70,35 +73,73 @@ namespace QLAPLibraryCatalogAPI.Services
                 })
                 .FirstOrDefaultAsync();
         }
+        public async Task<UserDto?> GetUserByEmailAsync(string email)
+        {
+            return await _context.Users
+                .Include(m => m.UserPreferences)
+                .Where(m => m.IsActive == true)
+                .Where(m => m.Email == email)
+                .Select(m => new UserDto
+                {
+                    UserId = m.UserId,
+                    Email = m.Email,
+                    Username = m.Username,
+                    UserPreferences = new UserPreferencesDto
+                    {
+                        UserId = m.UserId,
+                        DefaultLoanDays = m.UserPreferences.DefaultLoanDays,
+                        AutoApproveRequests = m.UserPreferences.AutoApproveRequests,
+                        EmailNotifications = m.UserPreferences.EmailNotifications,
+                        SmsNotifications = m.UserPreferences.SmsNotifications,
+                        NotificationSettings = m.UserPreferences.NotificationSettings,
+                    }
+                })
+                .FirstOrDefaultAsync();
+        }
+        public async Task<UserDto> CreateUserAsync(CreateUserDto userDto)
+        {
+            // Check if user already exists
+            var existingUser = await GetUserByEmailAsync(userDto.Email!);
+            if (existingUser != null)
+                throw new ArgumentException("User with this email already exists");
 
-        // public async Task<MediaDto> CreateUserAsync(CreateMediaDto createMediaDto)
-        // {
-        //     var media = new Media
-        //     {
-        //         MediaTypeId = createMediaDto.MediaTypeId,
-        //         Title = createMediaDto.Title,
-        //         Subtitle = createMediaDto.Subtitle,
-        //         Creator = createMediaDto.Creator,
-        //         Publisher = createMediaDto.Publisher,
-        //         PublicationDate = createMediaDto.PublicationDate,
-        //         Language = createMediaDto.Language,
-        //         Genre = createMediaDto.Genre,
-        //         Description = createMediaDto.Description,
-        //         CoverImageUrl = createMediaDto.CoverImageUrl,
-        //         Isbn10 = createMediaDto.Isbn10,
-        //         Isbn13 = createMediaDto.Isbn13,
-        //         PageCount = createMediaDto.PageCount,
-        //         IssueNumber = createMediaDto.IssueNumber,
-        //         Volume = createMediaDto.Volume,
-        //         CreatedAt = DateTime.UtcNow,
-        //         UpdatedAt = DateTime.UtcNow
-        //     };
+            var user = new User
+            {
+                Email = userDto.Email!,
+                Username = userDto.Username,
+                PasswordHash = _authService.HashPassword(userDto.Password!),
+                EmailVerified = false,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
 
-        //     _context.Media.Add(media);
-        //     await _context.SaveChangesAsync();
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
 
-        //     return await GetMediaByIdAsync(media.MediaId) ?? throw new InvalidOperationException("Failed to retrieve created media");
-        // }
+            // Create user preferences if provided
+            if (userDto.UserPreferences != null)
+            {
+                var preferences = new UserPreferences
+                {
+                    UserId = user.UserId,
+                    DefaultLoanDays = userDto.UserPreferences.DefaultLoanDays,
+                    AutoApproveRequests = userDto.UserPreferences.AutoApproveRequests,
+                    EmailNotifications = userDto.UserPreferences.EmailNotifications,
+                    SmsNotifications = userDto.UserPreferences.SmsNotifications,
+                    NotificationSettings = userDto.UserPreferences.NotificationSettings,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                _context.UserPreferences.Add(preferences);
+                await _context.SaveChangesAsync();
+                user.UserPreferences = preferences;
+            }
+
+            return await GetUserByIdAsync(user.UserId) ?? throw new InvalidOperationException("Failed to retrieve created user");
+        }
+
 
         // public async Task<MediaDto?> UpdateMediaAsync(int id, CreateMediaDto updateMediaDto)
         // {

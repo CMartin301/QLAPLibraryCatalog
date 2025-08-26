@@ -48,21 +48,22 @@ namespace QLAPLibraryCatalogAPI.Controllers
             }
         }
 
-        // [HttpPost]
-        // public async Task<IActionResult> CreateUsers([FromBody] CreateUserDto createUserDto)
-        // {
-        //     try
-        //     {
-        //         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        //         var createdUser = await _usersService.CreateUserAsync(createUserDto);
-        //         return CreatedAtAction(nameof(GetUserById), new { mediaId = createdUser.UserId }, createdUser);
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         return StatusCode(500, new { error = ex.Message });
-        //     }
-        // }
+        [HttpPost]
+        public async Task<IActionResult> CreateUser([FromBody] CreateUserDto createUserDto)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+
+                var createdUser = await _usersService.CreateUserAsync(createUserDto);
+                return CreatedAtAction(nameof(GetUserById), new { userId = createdUser.UserId }, createdUser);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
 
         // [HttpPut("{mediaId}")]
         // public async Task<IActionResult> UpdateUser(int mediaId, [FromBody] CreateUserDto updateUserDto)
@@ -91,6 +92,43 @@ namespace QLAPLibraryCatalogAPI.Controllers
         //         if (!result) return NotFound();
 
         //         return NoContent();
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         return StatusCode(500, new { error = ex.Message });
+        //     }
+        // }
+
+
+        // [HttpPut("{userId}")]
+        // public async Task<IActionResult> UpdateUser(int userId, [FromBody] CreateUserDto updateUserDto)
+        // {
+        //     try
+        //     {
+        //         if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        //         var updatedUser = await _usersService.UpdateUserAsync(userId, updateUserDto);
+        //         if (updatedUser == null) return NotFound();
+
+        //         return Ok(updatedUser);
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         return StatusCode(500, new { error = ex.Message });
+        //     }
+        // }
+
+        // [HttpPut("{userId}/preferences")]
+        // public async Task<IActionResult> UpdateUserPreferences(int userId, [FromBody] UserPreferencesDto preferencesDto)
+        // {
+        //     try
+        //     {
+        //         if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        //         var updatedPreferences = await _usersService.UpdateUserPreferencesAsync(userId, preferencesDto);
+        //         if (updatedPreferences == null) return NotFound();
+
+        //         return Ok(updatedPreferences);
         //     }
         //     catch (Exception ex)
         //     {
