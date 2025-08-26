@@ -9,7 +9,7 @@ import { useAuth } from '../hooks/useAuth';
  */
 export function GreetingPage() {
   // Access auth context using our custom hook
-  const { username, userID, logout } = useAuth();
+  const { username, userID, email, logout } = useAuth();
 
   return (
     <div className="p-6 max-w-md mx-auto bg-white rounded-lg shadow-md">
@@ -20,6 +20,9 @@ export function GreetingPage() {
         <div className="text-gray-600">
           <p className="mb-1">
             <span className="font-semibold">Username:</span> {username}
+          </p>
+          <p className="mb-1">
+            <span className="font-semibold">Email:</span> {email}
           </p>
           <p className="mb-4">
             <span className="font-semibold">User ID:</span> {userID}
