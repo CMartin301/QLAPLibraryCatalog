@@ -11,8 +11,7 @@ namespace QLAPLibraryCatalogAPI.Services
         Task<UserDto?> GetUserByIdAsync(int userId);
         Task<UserDto?> GetUserByEmailAsync(string email);
         Task<UserDto> CreateUserAsync(CreateUserDto registerDto);
-        // Task<UserDto?> UpdateUserAsync(int userId, CreateUserDto updateDto);
-        // Task<UserPreferencesDto?> UpdateUserPreferencesAsync(int userId, UserPreferencesDto preferencesDto);
+        Task<UserPreferencesDto?> UpdateUserPreferencesAsync(int userId, UserPreferencesDto preferencesDto);
         Task<bool> DeactivateUserAsync(int userId);
         Task<bool> ReactivateUserAsync(int userId);
     }
@@ -140,45 +139,52 @@ namespace QLAPLibraryCatalogAPI.Services
             return await GetUserByIdAsync(user.UserId) ?? throw new InvalidOperationException("Failed to retrieve created user");
         }
 
+        public async Task<UserPreferencesDto?> UpdateUserPreferencesAsync(int userId, UserPreferencesDto preferencesDto)
+        {
+            var user = await _context.Users
+                .Include(u => u.UserPreferences)
+                .FirstOrDefaultAsync(u => u.UserId == userId);
 
-        // public async Task<MediaDto?> UpdateMediaAsync(int id, CreateMediaDto updateMediaDto)
-        // {
-        //     var existing = await _context.Media.FindAsync(id);
-        //     if (existing == null) return null;
+            if (user == null) return null;
 
-        //     existing.MediaTypeId = updateMediaDto.MediaTypeId;
-        //     existing.Title = updateMediaDto.Title;
-        //     existing.Subtitle = updateMediaDto.Subtitle;
-        //     existing.Creator = updateMediaDto.Creator;
-        //     existing.Publisher = updateMediaDto.Publisher;
-        //     existing.PublicationDate = updateMediaDto.PublicationDate;
-        //     existing.Language = updateMediaDto.Language;
-        //     existing.Genre = updateMediaDto.Genre;
-        //     existing.Description = updateMediaDto.Description;
-        //     existing.CoverImageUrl = updateMediaDto.CoverImageUrl;
-        //     existing.Isbn10 = updateMediaDto.Isbn10;
-        //     existing.Isbn13 = updateMediaDto.Isbn13;
-        //     existing.PageCount = updateMediaDto.PageCount;
-        //     existing.IssueNumber = updateMediaDto.IssueNumber;
-        //     existing.Volume = updateMediaDto.Volume;
-        //     existing.UpdatedAt = DateTime.UtcNow;
+            if (user.UserPreferences == null)
+            {
+                // Create new preferences if they don't exist
+                user.UserPreferences = new UserPreferences
+                {
+                    UserId = userId,
+                    CreatedAt = DateTime.UtcNow
+                };
+                _context.UserPreferences.Add(user.UserPreferences);
+            }
 
-        //     await _context.SaveChangesAsync();
+            var prefs = user.UserPreferences;
 
-        //     return await GetMediaByIdAsync(id);
-        // }
 
-        // public async Task<bool> DeleteMediaAsync(int id)
-        // {
-        //     var media = await _context.Media.FindAsync(id);
-        //     if (media == null) return false;
-
-        //     _context.Media.Remove(media);
-        //     await _context.SaveChangesAsync();
-
-        //     return true;
-        // }
         
+            prefs.DefaultLoanDays = preferencesDto.DefaultLoanDays;
+            prefs.AutoApproveRequests = preferencesDto.AutoApproveRequests;
+            prefs.EmailNotifications = preferencesDto.EmailNotifications;
+            prefs.SmsNotifications = preferencesDto.SmsNotifications;
+            prefs.NotificationSettings = preferencesDto.NotificationSettings;
+            prefs.UpdatedAt = DateTime.UtcNow;
+
+            prefs.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return new UserPreferencesDto
+            {
+                PreferenceId = prefs.PreferenceId,
+                UserId = prefs.UserId,
+                DefaultLoanDays = prefs.DefaultLoanDays,
+                AutoApproveRequests = prefs.AutoApproveRequests,
+                EmailNotifications = prefs.EmailNotifications,
+                SmsNotifications = prefs.SmsNotifications,
+                NotificationSettings = prefs.NotificationSettings
+            };
+        }
+
 
         public async Task<bool> DeactivateUserAsync(int userId)
         {

@@ -120,23 +120,23 @@ namespace QLAPLibraryCatalogAPI.Controllers
         //     }
         // }
 
-        // [HttpPut("{userId}/preferences")]
-        // public async Task<IActionResult> UpdateUserPreferences(int userId, [FromBody] UserPreferencesDto preferencesDto)
-        // {
-        //     try
-        //     {
-        //         if (!ModelState.IsValid) return BadRequest(ModelState);
+        [HttpPut("{userId}/preferences")]
+        public async Task<IActionResult> UpdateUserPreferences(int userId, [FromBody] UserPreferencesDto preferencesDto)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        //         var updatedPreferences = await _usersService.UpdateUserPreferencesAsync(userId, preferencesDto);
-        //         if (updatedPreferences == null) return NotFound();
+                var updatedPreferences = await _usersService.UpdateUserPreferencesAsync(userId, preferencesDto);
+                if (updatedPreferences == null) return NotFound();
 
-        //         return Ok(updatedPreferences);
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         return StatusCode(500, new { error = ex.Message });
-        //     }
-        // }
+                return Ok(updatedPreferences);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
 
 
         [HttpPost("login")]
