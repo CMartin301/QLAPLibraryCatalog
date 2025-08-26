@@ -27,4 +27,20 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
         public bool? SmsNotifications { get; set; }
         public string? NotificationSettings { get; set; }
     }
+
+
+    // Simple login DTO
+    public class LoginDto
+    {
+        public string Email { get; set; } = null!;
+        public string Password { get; set; } = null!;
+    }
+
+    // Auth response
+    public class AuthResponseDto
+    {
+        public string Token { get; set; } = null!;
+        public DateTime ExpiresAt { get; set; }
+        public UserDto User { get; set; } = null!;
+    }
 }

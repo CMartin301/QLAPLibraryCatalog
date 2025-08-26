@@ -12,9 +12,11 @@ namespace QLAPLibraryCatalogAPI.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUsersService _usersService;
-        public UsersController(IUsersService usersService)
+        private readonly IAuthService _authService;
+        public UsersController(IUsersService usersService, IAuthService authService)
         {
             _usersService = usersService;
+            _authService = authService;
         }
 
         [HttpGet]
@@ -136,8 +138,27 @@ namespace QLAPLibraryCatalogAPI.Controllers
         //     }
         // }
 
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+
+                var authResult = await _authService.AuthenticateAsync(loginDto);
+                if (authResult == null) return Unauthorized(new { error = "Invalid credentials" });
+
+                return Ok(authResult);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
         [HttpDelete("{userId}")]
-        public async Task<IActionResult> DeactivateMediaType(int userId)
+        public async Task<IActionResult> DeactivateUser(int userId)
         {
             try
             {
@@ -152,7 +173,7 @@ namespace QLAPLibraryCatalogAPI.Controllers
             }
         }
         [HttpPatch("{userId}/Reactivate")]
-        public async Task<IActionResult> ReactivateMediaType(int userId)
+        public async Task<IActionResult> ReactivateUser(int userId)
         {
             try
             {
