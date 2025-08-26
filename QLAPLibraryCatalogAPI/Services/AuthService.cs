@@ -43,7 +43,7 @@ namespace QLAPLibraryCatalogAPI.Services
 
             var token = GenerateJwtToken(user.UserId, user.Email);
 
-            var hoursValid = _configuration.GetValue<double>("AppSettings:JwtHoursValid");
+            var hoursValid = _configuration.GetValue<double>("JwtHoursValid");
             var expiresAt = DateTime.UtcNow.AddHours(hoursValid);
 
             var userDto = new UserDto
@@ -84,7 +84,7 @@ namespace QLAPLibraryCatalogAPI.Services
             var issuer = jwtSettings["Issuer"] ?? "QLAPLibraryCatalog";
             var audience = jwtSettings["Audience"] ?? "QLAPLibraryCatalog";
             
-            var hoursValid = _configuration.GetValue<double>("AppSettings:JwtHoursValid");
+            var hoursValid = _configuration.GetValue<double>("JwtHoursValid");
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

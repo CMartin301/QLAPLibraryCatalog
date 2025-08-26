@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QLAPLibraryCatalogAPI.Data;
 using QLAPLibraryCatalogAPI.Models;
 using QLAPLibraryCatalogAPI.Models.DTOs;
 using QLAPLibraryCatalogAPI.Services;
+using System.Security.Claims;
 
 namespace QLAPLibraryCatalogAPI.Controllers
 {
@@ -19,6 +21,12 @@ namespace QLAPLibraryCatalogAPI.Controllers
             _authService = authService;
         }
 
+        [HttpGet("test")]
+        [Authorize]
+        public async Task<IActionResult> TestJWT()
+        {
+            return Ok("Success");
+        }
         [HttpGet]
         public async Task<IActionResult> GetUsers()
         {
@@ -67,65 +75,26 @@ namespace QLAPLibraryCatalogAPI.Controllers
             }
         }
 
-        // [HttpPut("{mediaId}")]
-        // public async Task<IActionResult> UpdateUser(int mediaId, [FromBody] CreateUserDto updateUserDto)
-        // {
-        //     try
-        //     {
-        //         if (!ModelState.IsValid) return BadRequest(ModelState);
-
-        //         var updatedUser = await _usersService.UpdateUserAsync(mediaId, updateUserDto);
-        //         if (updatedUser == null) return NotFound();
-
-        //         return Ok(updatedUser);
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         return StatusCode(500, new { error = ex.Message });
-        //     }
-        // }
-
-        // [HttpDelete("{mediaId}")]
-        // public async Task<IActionResult> DeleteUser(int mediaId)
-        // {
-        //     try
-        //     {
-        //         var result = await _usersService.DeleteUserAsync(mediaId);
-        //         if (!result) return NotFound();
-
-        //         return NoContent();
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         return StatusCode(500, new { error = ex.Message });
-        //     }
-        // }
-
-
-        // [HttpPut("{userId}")]
-        // public async Task<IActionResult> UpdateUser(int userId, [FromBody] CreateUserDto updateUserDto)
-        // {
-        //     try
-        //     {
-        //         if (!ModelState.IsValid) return BadRequest(ModelState);
-
-        //         var updatedUser = await _usersService.UpdateUserAsync(userId, updateUserDto);
-        //         if (updatedUser == null) return NotFound();
-
-        //         return Ok(updatedUser);
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         return StatusCode(500, new { error = ex.Message });
-        //     }
-        // }
-
         [HttpPut("{userId}/preferences")]
         public async Task<IActionResult> UpdateUserPreferences(int userId, [FromBody] UserPreferencesDto preferencesDto)
         {
             try
             {
                 if (!ModelState.IsValid) return BadRequest(ModelState);
+
+
+                // Get the authenticated user's ID from the JWT token
+                var authenticatedUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(authenticatedUserIdClaim) || !int.TryParse(authenticatedUserIdClaim, out int authenticatedUserId))
+                {
+                    return Unauthorized(new { error = "Invalid token" });
+                }
+
+                // Check if the authenticated user matches the userId in the route
+                if (authenticatedUserId != userId)
+                {
+                    return Forbid(); // 403 Forbidden - user is authenticated but not authorized for this resource
+                }
 
                 var updatedPreferences = await _usersService.UpdateUserPreferencesAsync(userId, preferencesDto);
                 if (updatedPreferences == null) return NotFound();
@@ -157,7 +126,7 @@ namespace QLAPLibraryCatalogAPI.Controllers
             }
         }
 
-        [HttpDelete("{userId}")]
+        [HttpDelete("{userId}/Deactivate")]
         public async Task<IActionResult> DeactivateUser(int userId)
         {
             try
