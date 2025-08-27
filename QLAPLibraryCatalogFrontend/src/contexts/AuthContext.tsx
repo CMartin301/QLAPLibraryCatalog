@@ -1,4 +1,5 @@
-import React, { createContext, useState, ReactNode } from 'react';
+import { createContext, useState, ReactNode } from 'react';
+import { authService, User } from '../services/authService';
 
 // Define the shape of our auth state
 export interface AuthState {
@@ -8,22 +9,6 @@ export interface AuthState {
   isLoggedIn: boolean;
   isLoading: boolean;
   error: string | null;
-}
-
-// Backend API response types
-interface LoginResponse {
-  token: string;
-  expiresAt: string;
-  user: {
-    userId: number;
-    email: string;
-    username: string;
-    userPreferences: any;
-  };
-}
-
-interface ApiError {
-  error: string;
 }
 
 // Define the shape of our context value
@@ -52,11 +37,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     error: null
   });
 
-  // Get API base URL from environment variables
-  const API_BASE_URL = import.meta.env.REACT_APP_API_BASE_URL || 'http://localhost:5236';
-  const API_TIMEOUT = parseInt(import.meta.env.REACT_APP_API_TIMEOUT || '10000', 10);
-
-  // Login function - now connects to your real backend
+  // Login function - now uses authService
   const login = async (email: string, password: string): Promise<void> => {
     // Set loading state
     setAuthState(prev => ({
@@ -66,71 +47,41 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }));
 
     try {
-      // Create AbortController for timeout handling
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT);
-
-      // Make API call to your backend
-      const response = await fetch(`${API_BASE_URL}/api/Users/Login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          password
-        }),
-        signal: controller.signal
-      });
-
-      // Clear timeout since request completed
-      clearTimeout(timeoutId);
-
-      // Handle different response status codes
-      if (!response.ok) {
-        if (response.status === 401) {
-          // Handle unauthorized (invalid credentials)
-          const errorData: ApiError = await response.json();
-          throw new Error(errorData.error || 'Invalid credentials');
-        } else if (response.status >= 500) {
-          throw new Error('Server error. Please try again later.');
-        } else {
-          throw new Error('Login failed. Please try again.');
-        }
-      }
-
-      // Parse successful response
-      const data: LoginResponse = await response.json();
+      // Use the authService instead of direct API calls
+      const response = await authService.login({ email, password });
 
       // Update state with successful login
       setAuthState({
-        username: data.user.username,
-        userID: data.user.userId,
-        email: data.user.email,
+        username: response.user.username,
+        userID: response.user.userId,
+        email: response.user.email,
         isLoggedIn: true,
         isLoading: false,
         error: null
       });
 
-      // Store JWT token and expiration for session persistence
+      // Store auth data for session persistence
       if (typeof Storage !== 'undefined') {
-        sessionStorage.setItem('authToken', data.token);
-        sessionStorage.setItem('tokenExpiry', data.expiresAt);
-        sessionStorage.setItem('user', JSON.stringify(data.user));
+        sessionStorage.setItem('authToken', response.token);
+        sessionStorage.setItem('tokenExpiry', response.expiresAt);
+        sessionStorage.setItem('user', JSON.stringify(response.user));
       }
 
-      console.log('Login successful:', data.user.username);
+      console.log('Login successful:', response.user.username);
 
-    } catch (error) {
-      // Handle different types of errors
+    } catch (error: any) {
+      // Handle errors from authService
       let errorMessage = 'Login failed. Please try again.';
       
-      if (error instanceof Error) {
-        if (error.name === 'AbortError') {
-          errorMessage = 'Request timed out. Please check your connection.';
-        } else {
-          errorMessage = error.message;
-        }
+      if (error.response?.status === 401) {
+        // Handle unauthorized (invalid credentials)
+        errorMessage = error.response.data?.error || 'Invalid credentials';
+      } else if (error.response?.status >= 500) {
+        errorMessage = 'Server error. Please try again later.';
+      } else if (error.code === 'ECONNABORTED') {
+        errorMessage = 'Request timed out. Please check your connection.';
+      } else if (error.message) {
+        errorMessage = error.message;
       }
 
       setAuthState(prev => ({
@@ -154,7 +105,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       error: null
     });
     
-    // Remove JWT token and user data from session storage
+    // Remove auth data from session storage
     if (typeof Storage !== 'undefined') {
       sessionStorage.removeItem('authToken');
       sessionStorage.removeItem('tokenExpiry');
@@ -179,7 +130,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (now < expiryDate) {
           // Token is still valid, restore user session
           try {
-            const user = JSON.parse(userStr);
+            const user: User = JSON.parse(userStr);
             setAuthState({
               username: user.username,
               userID: user.userId,
