@@ -1,8 +1,9 @@
 
 import { AuthProvider } from './contexts/AuthContext';
-import { LoginForm } from './components/LoginForm';
-import { GreetingPage } from './components/GreetingPage';
+import { LoginForm } from './components/auth/LoginForm';
+import { GreetingPage } from './components/dashboard/GreetingPage';
 import { useAuth } from './hooks/useAuth';
+import AuthContainer from './components/auth/AuthContainer';
 
 /**
  * Main App Content Component
@@ -16,7 +17,8 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      {isLoggedIn ? <GreetingPage /> : <LoginForm />}
+      
+      {isLoggedIn ? <GreetingPage /> : <AuthContainer />}
     </div>
   );
 }
