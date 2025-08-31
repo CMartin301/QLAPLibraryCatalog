@@ -7,6 +7,9 @@ import AuthContainer from './components/auth/AuthContainer';
 import { useEffect } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import RegistrationForm from './components/auth/RegistrationForm';
+import Footer from './components/layout/Footer';
+import Header from './components/layout/Header';
+import MyLibraryPage from './components/myLibrary/MyLibraryPage';
 
 /**
  * Protected Route Component
@@ -33,8 +36,13 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
+// Only decide after loading is complete
+  if (!isLoggedIn) {
+    return <Navigate to="/login" replace />;
+  }
 
-  return isLoggedIn ? <>{children}</> : <Navigate to="/login" replace />;
+  return <>{children}</>;
+  // return isLoggedIn ? <>{children}</> : <Navigate to="/login" replace />;
 }
 
 /**
@@ -103,6 +111,14 @@ function AppRoutes() {
           </ProtectedRoute>
         } 
       />
+      <Route 
+        path="/mylibrary" 
+        element={
+          <ProtectedRoute>
+              <MyLibraryPage />
+          </ProtectedRoute>
+        } 
+      />
 
       {/* Default redirect based on auth status */}
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
@@ -141,7 +157,9 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <Header />
         <AppRoutes />
+        <Footer />
       </AuthProvider>
     </BrowserRouter>
   );

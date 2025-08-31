@@ -13,10 +13,23 @@ export function GreetingPage() {
   const { username, userID, email, logout } = useAuth();
 
   return (
+
+    <div className="login-container">
+      <div className="row justify-content-center">
+        {/* Header Section - Shows on both pages */}
+        <div className="text-center mb-5">
+          <div className="mb-4">
+            <h1 className="display-4 fw-bold mb-3" style={{color: 'var(--primary-lavender)', fontFamily: 'Georgia, "Times New Roman", serif'}}>
+              Welcome back, {username}
+            </h1>
+            <div className="accent-stripes mx-auto mt-3"></div>
+          </div>
+        </div>
+
     <div className="p-6 max-w-md mx-auto bg-white rounded-lg shadow-md">
       <div className="text-center mb-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-2">
-          Welcome Back!
+          Account Information
         </h2>
         <div className="text-gray-600">
           <p className="mb-1">
@@ -45,6 +58,10 @@ export function GreetingPage() {
         </button>
       </div>
     </div>
+
+      </div>
+    </div>
+
   );
 }
 
