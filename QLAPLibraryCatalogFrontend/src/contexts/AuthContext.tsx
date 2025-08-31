@@ -1,5 +1,6 @@
 import { createContext, useState, ReactNode } from 'react';
-import { authService, User } from '../services/authService';
+import { authService } from '../services/authService';
+import { RegisterRequest, User } from '../types/auth';
 
 // Define the shape of our auth state
 export interface AuthState {
@@ -14,6 +15,7 @@ export interface AuthState {
 // Define the shape of our context value
 export interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<void>;
+  register: (userData: RegisterRequest) => Promise<void>;
   logout: () => void;
   initializeAuth: () => void;
 }
@@ -94,6 +96,46 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
+
+  // Registration function
+  const register = async (userData: RegisterRequest): Promise<void> => {
+    setAuthState(prev => ({
+      ...prev,
+      isLoading: true,
+      error: null
+    }));
+
+    try {
+      const user = await authService.register(userData);
+      
+      await login(userData.email, userData.password);
+      
+      console.log('Registration successful:', user.username);
+    } catch (error: any) {
+      // Handle errors from authService
+      let errorMessage = 'Registration failed. Please try again.';
+      
+      if (error.response?.status === 401) {
+        // Handle unauthorized (invalid credentials)
+        errorMessage = error.response.data?.error || 'Invalid credentials';
+      } else if (error.response?.status >= 500) {
+        errorMessage = 'Server error. Please try again later.';
+      } else if (error.code === 'ECONNABORTED') {
+        errorMessage = 'Request timed out. Please check your connection.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      setAuthState(prev => ({
+        ...prev,
+        isLoading: false,
+        error: errorMessage
+      }));
+      console.error('Registration error:', error);
+    }
+  };
+
+
   // Logout function
   const logout = (): void => {
     setAuthState({
@@ -157,6 +199,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const value: AuthContextType = {
     ...authState,
     login,
+    register,
     logout,
     initializeAuth
   };
