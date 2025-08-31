@@ -42,10 +42,26 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
  * 
  * Wraps auth-related components (login, register).
  * Redirects to dashboard if user is already authenticated.
- */
-function AuthRoute({ children }: { children: React.ReactNode }) {
-  const { isLoggedIn } = useAuth();
+ */function AuthRoute({ children }: { children: React.ReactNode }) {
+  const { isLoggedIn, isLoading, initializeAuth } = useAuth();
   
+  // Initialize auth state on mount
+  useEffect(() => {
+    initializeAuth();
+  }, [initializeAuth]);
+  
+  // Show loading while checking auth status
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="loading-spinner mx-auto mb-4"></div>
+          <p>Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
+    
   return isLoggedIn ? <Navigate to="/dashboard" replace /> : <>{children}</>;
 }
 
