@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import useAuth from '../../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, LogIn, AlertTriangle, Loader2 } from 'lucide-react';
+import useAuth from '../../hooks/useAuth';
 
 /**
  * LoginForm Component
@@ -16,6 +17,8 @@ export function LoginForm() {
   
   // Access auth context using our custom hook
   const { login, isLoading, error } = useAuth();
+
+  const navigate = useNavigate();
 
   // Handle form submission
   const handleSubmit = (e: React.SyntheticEvent) => {
@@ -194,7 +197,7 @@ export function LoginForm() {
             <button 
               type="button"
               className="register-link"
-              onClick={() => {/* Handle navigation to register */}}
+              onClick={() => navigate('/register')}
             >
               Create Account
             </button>
