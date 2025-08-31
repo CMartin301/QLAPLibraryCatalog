@@ -64,7 +64,7 @@ function AppRoutes() {
         path="/login" 
         element={
           <AuthRoute>
-              <LoginForm />
+              <AuthContainer />
           </AuthRoute>
         } 
       />
@@ -73,7 +73,7 @@ function AppRoutes() {
         path="/register" 
         element={
           <AuthRoute>
-              <RegistrationForm />
+              <AuthContainer />
           </AuthRoute>
         } 
       />

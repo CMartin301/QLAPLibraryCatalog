@@ -1,4 +1,4 @@
-import { createContext, useState, ReactNode } from 'react';
+import { createContext, useState, useCallback, ReactNode } from 'react';
 import { authService } from '../services/authService';
 import { RegisterRequest, User } from '../types/auth';
 
@@ -40,7 +40,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   });
 
   // Login function - now uses authService
-  const login = async (email: string, password: string): Promise<void> => {
+  const login = useCallback(async (email: string, password: string): Promise<void> => {
     // Set loading state
     setAuthState(prev => ({
       ...prev,
@@ -94,11 +94,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       console.error('Login error:', error);
     }
-  };
+  }, []);
 
 
   // Registration function
-  const register = async (userData: RegisterRequest): Promise<void> => {
+  const register = useCallback(async (userData: RegisterRequest): Promise<void> => {
     setAuthState(prev => ({
       ...prev,
       isLoading: true,
@@ -133,11 +133,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }));
       console.error('Registration error:', error);
     }
-  };
+  }, []);
 
 
   // Logout function
-  const logout = (): void => {
+  const logout = useCallback((): void => {
     setAuthState({
       username: null,
       userID: null,
@@ -155,10 +155,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     console.log('User logged out');
-  };
+  }, []);
 
   // Initialize auth state from stored session (call this on app startup)
-  const initializeAuth = (): void => {
+  const initializeAuth = useCallback((): void => {
     if (typeof Storage !== 'undefined') {
       const token = sessionStorage.getItem('authToken');
       const expiry = sessionStorage.getItem('tokenExpiry');
@@ -193,7 +193,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
       }
     }
-  };
+  }, []);
 
   // Context value that will be provided to children
   const value: AuthContextType = {
