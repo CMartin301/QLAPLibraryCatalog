@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
 
 
@@ -47,8 +47,8 @@ export function Header() {
                 Browse Books
               </Link>
               <Link
-                to="/my-books"
-                className={`nav-link px-3 ${location.pathname === '/mylibrary' ? 'active' : ''}`}
+                to="/my-library"
+                className={`nav-link px-3 ${location.pathname === '/my-library' ? 'active' : ''}`}
               >
                 <i className="bi bi-collection me-2"></i>
                 My Library

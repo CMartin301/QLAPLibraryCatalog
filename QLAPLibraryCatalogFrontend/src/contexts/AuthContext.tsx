@@ -9,6 +9,7 @@ export interface AuthState {
   email: string | null;
   isLoggedIn: boolean;
   isLoading: boolean;
+  hasInitialized: boolean; 
   error: string | null;
 }
 
@@ -36,6 +37,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     email: null,
     isLoggedIn: false,
     isLoading: false,
+    hasInitialized: false,
     error: null
   });
 
@@ -59,6 +61,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         email: response.user.email,
         isLoggedIn: true,
         isLoading: false,
+        hasInitialized: true,
         error: null
       });
 
@@ -129,6 +132,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setAuthState(prev => ({
         ...prev,
         isLoading: false,
+        hasInitialized: true,
         error: errorMessage
       }));
       console.error('Registration error:', error);
@@ -143,6 +147,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       userID: null,
       email: null,
       isLoggedIn: false,
+      hasInitialized: true,
       isLoading: false,
       error: null
     });
@@ -159,6 +164,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Initialize auth state from stored session (call this on app startup)
   const initializeAuth = useCallback((): void => {
+    
     if (typeof Storage !== 'undefined') {
       const token = sessionStorage.getItem('authToken');
       const expiry = sessionStorage.getItem('tokenExpiry');
@@ -179,6 +185,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
               email: user.email,
               isLoggedIn: true,
               isLoading: false,
+              hasInitialized: true,
               error: null
             });
             console.log('Session restored for user:', user.username);
