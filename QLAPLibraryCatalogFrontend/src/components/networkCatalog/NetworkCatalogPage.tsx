@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
-import BookTable from '../books/BookTable';
+import MediaTable from '../media/MediaTable';
 import { Media } from '../../types/media';
 import { mediaService } from '../../services/mediaService';
 
@@ -48,19 +48,8 @@ const NetworkCatalogPage: React.FC = () => {
                 </h1>
             </div>
         </div>
-        {/* <BookTable /> */}
+        <MediaTable media={media}/>
 
-
-      {/* Media Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {media.map((item) => (
-          <div key={item.mediaId} className="border rounded p-4">
-            <h3 className="font-bold">{item.title}</h3>
-            <p className="text-gray-600">{item.creator}</p>
-            <p className="text-sm text-gray-500">{item.genre}</p>
-          </div>
-        ))}
-      </div>
     </div>
   );
 };

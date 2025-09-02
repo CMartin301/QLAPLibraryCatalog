@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
-import BookTable from '../books/BookTable';
+import MediaTable from '../media/MediaTable';
 // import BooksSearchFilters from '../components/books/BooksSearchFilters';
 // import BooksSortControl, { type SortField, SortDirection } from '../components/books/BooksSortControl';
 // import BookCard from '../components/books/BookCard';
@@ -111,7 +111,7 @@ const MyLibraryPage: React.FC = () => {
           </button>
         </div> */}
       </div>
-      <BookTable />
+      <MediaTable />
 {/* 
       <div className="mb-4">
         <BooksTable />    

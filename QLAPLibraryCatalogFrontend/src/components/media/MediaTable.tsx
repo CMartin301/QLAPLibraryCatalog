@@ -10,61 +10,68 @@ import {
   ColumnFiltersState,
 } from '@tanstack/react-table';
 import { ChevronUp, ChevronDown, Search } from 'lucide-react';
+import { Media } from '../../types/media';
 
 // Define the Book type
-interface Book {
-  id: string;
-  title: string;
-  author: string;
-  isbn?: string;
-  genre: string;
-  status: 'available' | 'checked_out' | 'reserved';
-  dateAdded: string;
-}
+// interface Book {
+//   id: string;
+//   title: string;
+//   author: string;
+//   isbn?: string;
+//   genre: string;
+//   status: 'available' | 'checked_out' | 'reserved';
+//   dateAdded: string;
+// }
 
 // Sample data - replace with your actual data
-const sampleBooks: Book[] = [
-  {
-    id: '1',
-    title: 'Giovanni\'s Room',
-    author: 'James Baldwin',
-    isbn: '9780345806567',
-    genre: 'Fiction',
-    status: 'available',
-    dateAdded: '2024-01-15'
-  },
-  {
-    id: '2',
-    title: 'Stone Butch Blues',
-    author: 'Leslie Feinberg',
-    isbn: '9781555838959',
-    genre: 'Fiction',
-    status: 'checked_out',
-    dateAdded: '2024-02-03'
-  },
-  {
-    id: '3',
-    title: 'Fun Home',
-    author: 'Alison Bechdel',
-    isbn: '9780618871711',
-    genre: 'Memoir',
-    status: 'available',
-    dateAdded: '2024-01-28'
-  }
+// const sampleBooks: Book[] = [
+//   {
+//     id: '1',
+//     title: 'Giovanni\'s Room',
+//     author: 'James Baldwin',
+//     isbn: '9780345806567',
+//     genre: 'Fiction',
+//     status: 'available',
+//     dateAdded: '2024-01-15'
+//   },
+//   {
+//     id: '2',
+//     title: 'Stone Butch Blues',
+//     author: 'Leslie Feinberg',
+//     isbn: '9781555838959',
+//     genre: 'Fiction',
+//     status: 'checked_out',
+//     dateAdded: '2024-02-03'
+//   },
+//   {
+//     id: '3',
+//     title: 'Fun Home',
+//     author: 'Alison Bechdel',
+//     isbn: '9780618871711',
+//     genre: 'Memoir',
+//     status: 'available',
+//     dateAdded: '2024-01-28'
+//   }
+
+
+// ];
+const sampleMedia: Media[] = [
+  
 ];
 
-interface BookTableProps {
-  books?: Book[];
+
+interface MediaTableProps {
+  media?: Media[];
 }
 
-export function BookTable({ books = sampleBooks }: BookTableProps) {
+export function MediaTable({ media = sampleMedia }: MediaTableProps) {
   // State for sorting and filtering
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = React.useState('');
 
   // Column helper for type safety
-  const columnHelper = createColumnHelper<Book>();
+  const columnHelper = createColumnHelper<Media>();
 
   // Define columns
   const columns = useMemo(
@@ -77,7 +84,7 @@ export function BookTable({ books = sampleBooks }: BookTableProps) {
           </div>
         ),
       }),
-      columnHelper.accessor('author', {
+      columnHelper.accessor('creator', {
         header: 'Author',
         cell: info => (
           <div className="text-[var(--color-text)]">
@@ -93,38 +100,38 @@ export function BookTable({ books = sampleBooks }: BookTableProps) {
           </span>
         ),
       }),
-      columnHelper.accessor('status', {
-        header: 'Status',
-        cell: info => {
-          const status = info.getValue();
-          const statusStyles = {
-            available: 'bg-green-100 text-green-800',
-            checked_out: 'bg-yellow-100 text-yellow-800',
-            reserved: 'bg-blue-100 text-blue-800'
-          };
+      // columnHelper.accessor('status', {
+      //   header: 'Status',
+      //   cell: info => {
+      //     const status = info.getValue();
+      //     const statusStyles = {
+      //       available: 'bg-green-100 text-green-800',
+      //       checked_out: 'bg-yellow-100 text-yellow-800',
+      //       reserved: 'bg-blue-100 text-blue-800'
+      //     };
           
-          return (
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusStyles[status]}`}>
-              {status.replace('_', ' ').toUpperCase()}
-            </span>
-          );
-        },
-      }),
-      columnHelper.accessor('dateAdded', {
-        header: 'Date Added',
-        cell: info => (
-          <div className="text-[var(--color-muted)] text-sm">
-            {new Date(info.getValue()).toLocaleDateString()}
-          </div>
-        ),
-      }),
+      //     return (
+      //       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusStyles[status]}`}>
+      //         {status.replace('_', ' ').toUpperCase()}
+      //       </span>
+      //     );
+      //   },
+      // }),
+      // columnHelper.accessor('dateAdded', {
+      //   header: 'Date Added',
+      //   cell: info => (
+      //     <div className="text-[var(--color-muted)] text-sm">
+      //       {new Date(info.getValue()).toLocaleDateString()}
+      //     </div>
+      //   ),
+      // }),
     ],
     [columnHelper]
   );
 
   // Create the table instance
   const table = useReactTable({
-    data: books,
+    data: media,
     columns,
     state: {
       sorting,
@@ -231,4 +238,4 @@ export function BookTable({ books = sampleBooks }: BookTableProps) {
   );
 }
 
-export default BookTable;
+export default MediaTable;
