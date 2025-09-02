@@ -48,7 +48,10 @@ const NetworkCatalogPage: React.FC = () => {
                 </h1>
             </div>
         </div>
-        <MediaTable media={media}/>
+        <MediaTable 
+          media={media} 
+          onRefresh={loadMedia}
+        />
 
     </div>
   );

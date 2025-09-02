@@ -19,13 +19,16 @@ import { useModalScrollLock } from '../../hooks/useModalScrollLock';
 
 interface MediaTableProps {
   media?: Media[];
+  onRefresh?: () => void; 
 }
 
-export function MediaTable({ media = [] }: MediaTableProps) {
+export function MediaTable({ media = [], onRefresh }: MediaTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = React.useState('');
   const [isModalOpen, setIsModalOpen] = React.useState(false);
+const [isSubmitting, setIsSubmitting] = React.useState(false);
+const [submitError, setSubmitError] = React.useState<string | null>(null);
 
   // Lock the background scroll when the modal is open
   useModalScrollLock(isModalOpen);
@@ -78,26 +81,41 @@ export function MediaTable({ media = [] }: MediaTableProps) {
     getFilteredRowModel: getFilteredRowModel(),
   });
 
-  const handleAddMedia = async (data: MediaFormData) => {
-    console.log("New media:", data);
-    
-    // Convert form data to API payload
-    const apiPayload: CreateMediaRequest = {
-        title: data.title,
-        creator: data.creator,
-        mediaTypeId: 3, // Assuming this is always a book for now, from POSTCreateNewMedia.json
-        subtitle: null, // The form doesn't have a subtitle field
-    };
-
-    try {
-        await mediaService.createNewMedia(apiPayload);
-        console.log("Media created successfully!");
-        setIsModalOpen(false); // Close modal on success
-    } catch (error) {
-        console.error("Failed to create media:", error);
-        // You can add state here to show an error message to the user
-    }
+const handleAddMedia = async (data: MediaFormData) => {
+  setIsSubmitting(true);
+  setSubmitError(null);
+  
+  const apiPayload: CreateMediaRequest = {
+    mediaTypeId: data.mediaTypeId,
+    title: data.title,
+    creator: data.creator,
+    subtitle: data.subtitle || null,
+    publisher: data.publisher || null,
+    publicationDate: data.publicationDate || null,
+    language: data.language || null,
+    genre: data.genre || null,
+    description: data.description || null,
+    coverImageUrl: data.coverImageUrl || null,
+    isbn10: data.isbn10 || null,
+    isbn13: data.isbn13 || null,
+    pageCount: data.pageCount || null,
+    issueNumber: data.issueNumber ? data.issueNumber.toString() : null,
+    volume: data.volume ? data.volume.toString() : null,
   };
+
+  try {
+    await mediaService.createNewMedia(apiPayload);
+    setIsModalOpen(false);
+    if (onRefresh) {
+      onRefresh();
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to create media';
+    setSubmitError(errorMessage);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <div className="bg-[var(--color-card)] rounded-lg shadow-sm border border-[var(--color-border)]">
@@ -204,7 +222,10 @@ export function MediaTable({ media = [] }: MediaTableProps) {
         onClose={() => setIsModalOpen(false)}
         title="Add New Media"
       >
-        <AddMediaForm onSubmit={handleAddMedia} />
+        <AddMediaForm onSubmit={handleAddMedia}
+          isSubmitting={isSubmitting}
+          submitError={submitError}
+        />
       </Modal>
     </div>
   );
