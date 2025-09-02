@@ -10,6 +10,7 @@ import { ProtectedRoute, AuthRoute } from './components/auth/RouteGuards';
 import Footer from './components/layout/Footer';
 import Header from './components/layout/Header';
 import MyLibraryPage from './components/myLibrary/MyLibraryPage';
+import NetworkCatalogPage from './components/networkCatalog/NetworkCatalogPage';
 
 /**
  * App Layout Component
@@ -62,13 +63,23 @@ function AppRoutes() {
           </ProtectedRoute>
         } 
       />
-      {/* Add the MyLibrary route back */}
+      
       <Route 
         path="/my-library" 
         element={
           <ProtectedRoute>
             <AppLayout>
               <MyLibraryPage />
+            </AppLayout>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/network-catalog" 
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <NetworkCatalogPage />
             </AppLayout>
           </ProtectedRoute>
         } 

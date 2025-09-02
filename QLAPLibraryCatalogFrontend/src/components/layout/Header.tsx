@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
+import { BookOpenIcon } from "lucide-react";
 
 /**
  * Header Component
@@ -13,7 +14,7 @@ export function Header() {
   const location = useLocation();
 
   return (
-    <header className="bg-slate-600 text-white sticky top-0 z-50 shadow-lg">
+    <header className="bg-[var(--color-dark-grey)] text-white sticky top-0 z-50 shadow-lg">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           
@@ -22,9 +23,13 @@ export function Header() {
             to="/dashboard" 
             className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
           >
-            <div>
+            <BookOpenIcon
+                className="h-8 w-8 text-[var(--color-primary)]"
+                aria-hidden="true"
+              />
+            {/* <div>
               <span className="text-3xl">🏳️‍🌈</span>
-            </div>
+            </div> */}
             <div>
               <h1 className="text-xl font-bold text-white">QLAP</h1>
             </div>
@@ -41,7 +46,7 @@ export function Header() {
                 Dashboard
               </Link>
               <Link
-                to="/books"
+                to="/network-catalog"
                 className={location.pathname === '/books' ? 'nav-link--active' : 'nav-link'}
               >
                 <i className="bi bi-book mr-2"></i>
@@ -54,13 +59,13 @@ export function Header() {
                 <i className="bi bi-collection mr-2"></i>
                 My Library
               </Link>
-              <Link
+              {/* <Link
                 to="/notifications"
                 className={location.pathname === '/notifications' ? 'nav-link--active' : 'nav-link'}
               >
                 <i className="bi bi-bell mr-2"></i>
                 Notifications
-              </Link>
+              </Link> */}
             </nav>
           )}
 
