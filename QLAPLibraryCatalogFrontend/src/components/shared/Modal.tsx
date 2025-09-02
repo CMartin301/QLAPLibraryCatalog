@@ -1,3 +1,4 @@
+// Modal.tsx - Updated with wider layout
 import React, { useEffect } from "react";
 
 interface ModalProps {
@@ -24,11 +25,11 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
       role="dialog"
       aria-modal="true"
       className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4"
-      onClick={onClose} // Close when clicking backdrop
+      onClick={onClose}
     >
       <div
-        className="bg-[var(--color-card)] rounded-xl shadow-lg w-full max-w-md relative animate-fade-in"
-        onClick={(e) => e.stopPropagation()} // Prevent closing on modal click
+        className="bg-[var(--color-card)] rounded-xl shadow-lg w-full max-w-4xl relative animate-fade-in"
+        onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6 overflow-hidden">
           {/* Close button */}
@@ -41,12 +42,12 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
           </button>
 
           {title && (
-            <h2 className="text-xl font-semibold text-[var(--color-text)] mb-4 pr-10">
+            <h2 className="text-xl font-semibold text-[var(--color-text)] mb-6 pr-10">
               {title}
             </h2>
           )}
 
-          {/* The new scrollable container */}
+          {/* The scrollable container */}
           <div className="overflow-y-auto max-h-[calc(90vh-120px)] pr-2">
             {children}
           </div>
