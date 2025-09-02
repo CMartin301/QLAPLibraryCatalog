@@ -9,62 +9,14 @@ import {
   SortingState,
   ColumnFiltersState,
 } from '@tanstack/react-table';
-import { ChevronUp, ChevronDown, Search } from 'lucide-react';
+import { ChevronUp, ChevronDown, Search, Plus } from 'lucide-react';
 import { Media } from '../../types/media';
-
-// Define the Book type
-// interface Book {
-//   id: string;
-//   title: string;
-//   author: string;
-//   isbn?: string;
-//   genre: string;
-//   status: 'available' | 'checked_out' | 'reserved';
-//   dateAdded: string;
-// }
-
-// Sample data - replace with your actual data
-// const sampleBooks: Book[] = [
-//   {
-//     id: '1',
-//     title: 'Giovanni\'s Room',
-//     author: 'James Baldwin',
-//     isbn: '9780345806567',
-//     genre: 'Fiction',
-//     status: 'available',
-//     dateAdded: '2024-01-15'
-//   },
-//   {
-//     id: '2',
-//     title: 'Stone Butch Blues',
-//     author: 'Leslie Feinberg',
-//     isbn: '9781555838959',
-//     genre: 'Fiction',
-//     status: 'checked_out',
-//     dateAdded: '2024-02-03'
-//   },
-//   {
-//     id: '3',
-//     title: 'Fun Home',
-//     author: 'Alison Bechdel',
-//     isbn: '9780618871711',
-//     genre: 'Memoir',
-//     status: 'available',
-//     dateAdded: '2024-01-28'
-//   }
-
-
-// ];
-const sampleMedia: Media[] = [
-  
-];
-
 
 interface MediaTableProps {
   media?: Media[];
 }
 
-export function MediaTable({ media = sampleMedia }: MediaTableProps) {
+export function MediaTable({ media = [] }: MediaTableProps) {
   // State for sorting and filtering
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -95,7 +47,7 @@ export function MediaTable({ media = sampleMedia }: MediaTableProps) {
       columnHelper.accessor('genre', {
         header: 'Genre',
         cell: info => (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[var(--color-primary)] bg-opacity-10 text-[var(--color-primary)]">
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-lavender-100 bg-opacity-40 text-lavender-500">
             {info.getValue()}
           </span>
         ),
@@ -150,7 +102,8 @@ export function MediaTable({ media = sampleMedia }: MediaTableProps) {
     <div className="bg-[var(--color-card)] rounded-lg shadow-sm border border-[var(--color-border)]">
       {/* Search Bar */}
       <div className="p-4 border-b border-[var(--color-border)]">
-        <div className="relative max-w-sm">
+  <div className="flex items-center justify-between gap-4">
+        <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" size={18} />
           <input
             type="text"
@@ -160,6 +113,17 @@ export function MediaTable({ media = sampleMedia }: MediaTableProps) {
             className="w-full pl-10 pr-3 py-2 border border-[var(--color-border)] rounded-lg text-sm
                      focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
           />
+        </div>
+          <button
+            type="button"
+            className="py-2 pl-4 pr-5 bg-lavender-400 hover:bg-lavender-500 
+                      text-white text-sm font-medium rounded-lg shadow
+                      transition-all duration-200 transform hover:scale-[1.01]
+                      flex items-center gap-2 justify-center"
+          >
+            <Plus size={16} className="text-white" />
+            Add Book
+          </button>
         </div>
       </div>
 
