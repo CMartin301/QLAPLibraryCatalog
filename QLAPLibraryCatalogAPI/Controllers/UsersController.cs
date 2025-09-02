@@ -47,10 +47,10 @@ namespace QLAPLibraryCatalogAPI.Controllers
         {
             try
             {
-                var media = await _usersService.GetUserByIdAsync(userId);
-                if (media == null) return NotFound();
+                var user = await _usersService.GetUserByIdAsync(userId);
+                if (user == null) return NotFound();
 
-                return Ok(media);
+                return Ok(user);
             }
             catch (Exception ex)
             {

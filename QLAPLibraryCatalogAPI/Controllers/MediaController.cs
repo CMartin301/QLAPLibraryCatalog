@@ -23,7 +23,8 @@ namespace QLAPLibraryCatalogAPI.Controllers
             try
             {
                 var media = await _mediaService.GetAllMediaAsync();
-                return Ok(media);
+                // return Ok(media);
+                return Ok(new { data = media });
             }
             catch (Exception ex)
             {
