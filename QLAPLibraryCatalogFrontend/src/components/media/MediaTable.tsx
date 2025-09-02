@@ -11,6 +11,8 @@ import {
 } from '@tanstack/react-table';
 import { ChevronUp, ChevronDown, Search, Plus } from 'lucide-react';
 import { Media } from '../../types/media';
+import { AddMediaForm, MediaFormData } from './AddMediaForm';
+import { Modal } from '../shared/Modal';
 
 interface MediaTableProps {
   media?: Media[];
@@ -21,6 +23,7 @@ export function MediaTable({ media = [] }: MediaTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = React.useState('');
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
 
   // Column helper for type safety
   const columnHelper = createColumnHelper<Media>();
@@ -98,6 +101,13 @@ export function MediaTable({ media = [] }: MediaTableProps) {
     getFilteredRowModel: getFilteredRowModel(),
   });
 
+
+  const handleAddMedia = (data: MediaFormData) => {
+    console.log("New media:", data);
+    // TODO: send to API or update state
+    setIsModalOpen(false);
+  };
+
   return (
     <div className="bg-[var(--color-card)] rounded-lg shadow-sm border border-[var(--color-border)]">
       {/* Search Bar */}
@@ -116,6 +126,7 @@ export function MediaTable({ media = [] }: MediaTableProps) {
         </div>
           <button
             type="button"
+            onClick={() => setIsModalOpen(true)}
             className="py-2 pl-4 pr-5 bg-lavender-400 hover:bg-lavender-500 
                       text-white text-sm font-medium rounded-lg shadow
                       transition-all duration-200 transform hover:scale-[1.01]
@@ -198,6 +209,16 @@ export function MediaTable({ media = [] }: MediaTableProps) {
           <p className="text-[var(--color-muted)]">No books found</p>
         </div>
       )}
+
+
+      {/* Modal with Form */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Add New Media"
+      >
+        <AddMediaForm onSubmit={handleAddMedia} />
+      </Modal>
     </div>
   );
 }
