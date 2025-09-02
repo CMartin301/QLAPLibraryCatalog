@@ -12,7 +12,9 @@ const NetworkCatalogPage: React.FC = () => {
         {/* Page Header */}
         <div className="row mb-4">
             <div className="col">
-                <h1 className="display-5 text-lavender mb-2">Browse the Network Catalog</h1>
+                <h1 className="text-2xl md:text-3xl font-bold text-lavender-500 mb-3">
+                    Browse the Network Catalog
+                </h1>
             </div>
         </div>
     </div>

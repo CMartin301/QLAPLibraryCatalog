@@ -19,9 +19,9 @@ export function GreetingPage() {
         {/* Header Section - Shows on both pages */}
         <div className="text-center mb-5">
           <div className="mb-4">
-            <h1 className="display-4 fw-bold mb-3" style={{color: 'var(--primary-lavender)', fontFamily: 'Georgia, "Times New Roman", serif'}}>
-              Welcome back, {username}
-            </h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-lavender-500 mb-3">
+            Welcome back, {username}
+          </h1>
             <div className="accent-stripes mx-auto mt-3"></div>
           </div>
         </div>

@@ -35,7 +35,7 @@ export function Header() {
                 to="/dashboard"
                 className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   location.pathname === '/dashboard' 
-                    ? 'bg-lavender-700 text-white' 
+                    ? 'bg-lavender-500 text-white' 
                     : 'text-gray-300 hover:text-white hover:bg-charcoal-light'
                 }`}
               >
@@ -46,7 +46,7 @@ export function Header() {
                 to="/network-catalog"
                 className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   location.pathname === '/network-catalog' 
-                    ? 'bg-lavender-700 text-white' 
+                    ? 'bg-lavender-500 text-white' 
                     : 'text-gray-300 hover:text-white hover:bg-charcoal-light'
                 }`}
               >
@@ -57,7 +57,7 @@ export function Header() {
                 to="/my-library"
                 className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   location.pathname === '/my-library' 
-                    ? 'bg-lavender-700 text-white' 
+                    ? 'bg-lavender-500 text-white' 
                     : 'text-gray-300 hover:text-white hover:bg-charcoal-light'
                 }`}
               >

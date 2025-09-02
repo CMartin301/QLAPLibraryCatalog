@@ -122,14 +122,14 @@ export function LoginForm() {
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
-                  className="w-4 h-4 text-lavender-600 border-gray-300 rounded 
+                  className="w-4 h-4 text-lavender-500 border-gray-300 rounded 
                            focus:ring-lavender-500 focus:ring-2"
                 />
                 <span className="text-sm text-charcoal-light">Remember me</span>
               </label>
               <button
                 type="button"
-                className="text-sm text-lavender-600 hover:text-lavender-700 font-medium
+                className="text-sm text-lavender-500 hover:text-lavender-500 font-medium
                          transition-colors focus:outline-none focus:underline"
               >
                 Forgot password?
@@ -140,7 +140,7 @@ export function LoginForm() {
             <button
               type="submit"
               disabled={isLoading || !email.trim() || !password.trim()}
-              className="w-full py-3 px-4 bg-lavender-600 hover:bg-lavender-700 
+              className="w-full py-3 px-4 bg-lavender-500 hover:bg-lavender-500 
                        disabled:bg-gray-400 disabled:cursor-not-allowed
                        text-white font-medium rounded-xl shadow-lg
                        transition-all duration-200 transform hover:scale-[1.01]
@@ -179,8 +179,8 @@ export function LoginForm() {
             <button
               type="button"
               onClick={() => navigate("/register")}
-              className="w-full py-3 px-4 border-2 border-lavender-600 text-lavender-600 
-                       hover:bg-lavender-600 hover:text-white font-medium rounded-xl
+              className="w-full py-3 px-4 border-2 border-lavender-500 text-lavender-500 
+                       hover:bg-lavender-500 hover:text-white font-medium rounded-xl
                        transition-all duration-200 transform hover:scale-[1.01]
                        focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:ring-offset-2"
             >

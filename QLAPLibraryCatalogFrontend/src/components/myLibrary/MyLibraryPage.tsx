@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
+import BookTable from '../books/BookTable';
 // import BooksSearchFilters from '../components/books/BooksSearchFilters';
 // import BooksSortControl, { type SortField, SortDirection } from '../components/books/BooksSortControl';
 // import BookCard from '../components/books/BookCard';
@@ -96,7 +97,9 @@ const MyLibraryPage: React.FC = () => {
       {/* Page Header */}
       <div className="row mb-4">
         <div className="col">
-            <h1 className="display-5 text-lavender mb-2">{username}'s Library</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-lavender-500 mb-3">
+            {username}'s Library
+          </h1>
           <p className="text-muted">Manage your library</p>
         </div>
         {/* <div className="col-auto">
@@ -108,6 +111,7 @@ const MyLibraryPage: React.FC = () => {
           </button>
         </div> */}
       </div>
+      <BookTable />
 {/* 
       <div className="mb-4">
         <BooksTable />    
