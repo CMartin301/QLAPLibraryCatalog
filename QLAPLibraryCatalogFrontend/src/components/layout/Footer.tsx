@@ -1,63 +1,93 @@
-// src/components/layout/Footer.tsx
+
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Mail, MapPin, Heart, Facebook, Twitter, Instagram } from 'lucide-react';
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-dark text-white py-5">
-      <div className="container">
-        <div className="row g-4">
+    <footer className="bg-charcoal-dark text-white py-12">
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+          
           {/* Brand section */}
-          <div className="col-lg-4">
-            <div className="d-flex align-items-center mb-3">
+          <div className="lg:col-span-2">
+            <div className="flex items-center mb-4">
               <div>
-                <h5 className="mb-1 fw-bold">QLAP</h5>
-                <small className="text-white-50">Queer Library & Archive Project</small>
+                <h5 className="text-xl font-bold mb-1">QLAP</h5>
+                <p className="text-gray-400 text-sm">Queer Library & Archive Project</p>
               </div>
             </div>
-            <p className="text-white-75 mb-3">
+            <p className="text-gray-300 mb-6 leading-relaxed">
               Preserving LGBTQ+ stories, building community, and ensuring our 
               voices are heard and remembered.
             </p>
-            <div className="d-flex gap-3">
-              <a href="#" className="text-white-50 fs-5" aria-label="Facebook">
-                <i className="bi bi-facebook"></i>
+            <div className="flex gap-4">
+              <a 
+                href="#" 
+                className="text-gray-400 hover:text-lavender-400 transition-colors text-xl" 
+                aria-label="Facebook"
+              >
+                <Facebook size={24} />
               </a>
-              <a href="#" className="text-white-50 fs-5" aria-label="Twitter">
-                <i className="bi bi-twitter"></i>
+              <a 
+                href="#" 
+                className="text-gray-400 hover:text-lavender-400 transition-colors text-xl" 
+                aria-label="Twitter"
+              >
+                <Twitter size={24} />
               </a>
-              <a href="#" className="text-white-50 fs-5" aria-label="Instagram">
-                <i className="bi bi-instagram"></i>
+              <a 
+                href="#" 
+                className="text-gray-400 hover:text-lavender-400 transition-colors text-xl" 
+                aria-label="Instagram"
+              >
+                <Instagram size={24} />
               </a>
-              <a href="#" className="text-white-50 fs-5" aria-label="Email">
-                <i className="bi bi-envelope"></i>
+              <a 
+                href="#" 
+                className="text-gray-400 hover:text-lavender-400 transition-colors text-xl" 
+                aria-label="Email"
+              >
+                <Mail size={24} />
               </a>
             </div>
           </div>
 
           {/* Quick links */}
-          <div className="col-lg-2 col-6">
-            <h6 className="fw-bold mb-3">Quick Links</h6>
-            <ul className="list-unstyled">
-              <li className="mb-2">
-                <Link to="/about" className="text-white-50 text-decoration-none">
+          <div>
+            <h6 className="font-bold mb-4 text-white">Quick Links</h6>
+            <ul className="space-y-2">
+              <li>
+                <Link 
+                  to="/about" 
+                  className="text-gray-400 hover:text-lavender-400 transition-colors text-sm"
+                >
                   About Us
                 </Link>
               </li>
-              <li className="mb-2">
-                <Link to="/books" className="text-white-50 text-decoration-none">
+              <li>
+                <Link 
+                  to="/books" 
+                  className="text-gray-400 hover:text-lavender-400 transition-colors text-sm"
+                >
                   Browse Books
                 </Link>
               </li>
-              <li className="mb-2">
-                <Link to="/archive" className="text-white-50 text-decoration-none">
+              <li>
+                <Link 
+                  to="/archive" 
+                  className="text-gray-400 hover:text-lavender-400 transition-colors text-sm"
+                >
                   Archive
                 </Link>
               </li>
-              <li className="mb-2">
-                <Link to="/community" className="text-white-50 text-decoration-none">
+              <li>
+                <Link 
+                  to="/community" 
+                  className="text-gray-400 hover:text-lavender-400 transition-colors text-sm"
+                >
                   Community
                 </Link>
               </li>
@@ -65,94 +95,107 @@ const Footer: React.FC = () => {
           </div>
 
           {/* Support */}
-          <div className="col-lg-2 col-6">
-            <h6 className="fw-bold mb-3">Support</h6>
-            <ul className="list-unstyled">
-              <li className="mb-2">
-                <Link to="/help" className="text-white-50 text-decoration-none">
+          <div>
+            <h6 className="font-bold mb-4 text-white">Support</h6>
+            <ul className="space-y-2">
+              <li>
+                <Link 
+                  to="/help" 
+                  className="text-gray-400 hover:text-lavender-400 transition-colors text-sm"
+                >
                   Help Center
                 </Link>
               </li>
-              <li className="mb-2">
-                <Link to="/contact" className="text-white-50 text-decoration-none">
+              <li>
+                <Link 
+                  to="/contact" 
+                  className="text-gray-400 hover:text-lavender-400 transition-colors text-sm"
+                >
                   Contact Us
                 </Link>
               </li>
-              <li className="mb-2">
-                <Link to="/donate" className="text-white-50 text-decoration-none">
+              <li>
+                <Link 
+                  to="/donate" 
+                  className="text-gray-400 hover:text-lavender-400 transition-colors text-sm"
+                >
                   Donate
                 </Link>
               </li>
-              <li className="mb-2">
-                <Link to="/volunteer" className="text-white-50 text-decoration-none">
+              <li>
+                <Link 
+                  to="/volunteer" 
+                  className="text-gray-400 hover:text-lavender-400 transition-colors text-sm"
+                >
                   Volunteer
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Resources */}
-          <div className="col-lg-2 col-6">
-            <h6 className="fw-bold mb-3">Resources</h6>
-            <ul className="list-unstyled">
-              <li className="mb-2">
-                <Link to="/safety" className="text-white-50 text-decoration-none">
+          {/* Resources & Contact combined */}
+          <div>
+            <h6 className="font-bold mb-4 text-white">Resources</h6>
+            <ul className="space-y-2 mb-6">
+              <li>
+                <Link 
+                  to="/safety" 
+                  className="text-gray-400 hover:text-lavender-400 transition-colors text-sm"
+                >
                   Safety Guidelines
                 </Link>
               </li>
-              <li className="mb-2">
-                <Link to="/privacy" className="text-white-50 text-decoration-none">
+              <li>
+                <Link 
+                  to="/privacy" 
+                  className="text-gray-400 hover:text-lavender-400 transition-colors text-sm"
+                >
                   Privacy Policy
                 </Link>
               </li>
-              <li className="mb-2">
-                <Link to="/terms" className="text-white-50 text-decoration-none">
+              <li>
+                <Link 
+                  to="/terms" 
+                  className="text-gray-400 hover:text-lavender-400 transition-colors text-sm"
+                >
                   Terms of Service
                 </Link>
               </li>
-              <li className="mb-2">
-                <Link to="/accessibility" className="text-white-50 text-decoration-none">
+              <li>
+                <Link 
+                  to="/accessibility" 
+                  className="text-gray-400 hover:text-lavender-400 transition-colors text-sm"
+                >
                   Accessibility
                 </Link>
               </li>
             </ul>
-          </div>
-
-          {/* Contact info */}
-          <div className="col-lg-2 col-6">
-            <h6 className="fw-bold mb-3">Connect</h6>
-            <div className="text-white-75 small">
-              <div className="mb-2">
-                <i className="bi bi-envelope me-2"></i>
-                qlap-houston@proton.me
+            
+            {/* Contact info */}
+            <div className="text-gray-300 text-sm space-y-2">
+              <div className="flex items-center">
+                <Mail size={16} className="mr-2 text-lavender-400" />
+                <span>qlap-houston@proton.me</span>
               </div>
-              <div className="mb-2">
-                <i className="bi bi-geo-alt me-2"></i>
-                Community-Based
+              <div className="flex items-center">
+                <MapPin size={16} className="mr-2 text-lavender-400" />
+                <span>Community-Based</span>
               </div>
-              {/* <div>
-                <i className="bi bi-clock me-2"></i>
-                Always Available
-              </div> */}
             </div>
           </div>
         </div>
 
-        <hr className="my-4 text-white-25" />
+        <hr className="my-8 border-gray-600" />
 
         {/* Bottom footer */}
-        <div className="row align-items-center">
-          <div className="col-md-6">
-            <p className="text-white-50 small mb-0">
-              © {currentYear} Queer Library and Archive Project. 
-              Built with ❤️ for our community.
-            </p>
-          </div>
-          <div className="col-md-6 text-md-end">
-            <small className="text-white-50">
-              <i className="bi bi-heart-fill text-danger me-1"></i>
-              Made by and for the LGBTQ+ community
-            </small>
+        <div className="flex flex-col md:flex-row justify-between items-center">
+          <p className="text-gray-400 text-sm mb-4 md:mb-0">
+            © {currentYear} Queer Library and Archive Project. 
+            Built with ❤️ for our community.
+          </p>
+          <div className="text-gray-400 text-sm flex items-center">
+            <Heart size={16} className="text-red-500 mr-2" />
+            Made by and for the LGBTQ+ community
           </div>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 import { Mail, Lock, User, Eye, EyeOff, UserPlus, AlertTriangle, Loader2 } from 'lucide-react';
 
@@ -11,6 +12,7 @@ export function RegistrationForm() {
   const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
   
   const { register, isLoading, error } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -20,7 +22,6 @@ export function RegistrationForm() {
     }
 
     if (password !== confirmPassword) {
-      // Handle password mismatch - you might want to add local state for this error
       return;
     }
     
@@ -28,54 +29,61 @@ export function RegistrationForm() {
       email,
       username,
       password,
-      userPreferences: {} // Default empty preferences
+      userPreferences: {}
     });
   };
 
+  const passwordsMatch = !confirmPassword || password === confirmPassword;
+
   return (
-    <div className="login-container">
-      <div className="login-card">
-        {/* Header */}
-        <div className="login-header">
-          <div className="login-header-content">
-            <h1 className="login-title">Create Account</h1>
-            <p className="login-subtitle">Join the Queer Library and Archive Project</p>
-          </div>
+    <div className="min-h-screen flex justify-center bg-gray-100 px-4 py-8">
+      <div className="w-full max-w-md bg-white shadow-xl rounded-3xl overflow-hidden">
+        
+        {/* Header Section */}
+        <div className="px-8 pt-8 pb-2">
+          <h1 className="text-2xl font-bold text-charcoal text-center mb-2">
+            Create Account
+          </h1>
+          <p className="text-sm text-charcoal-light text-center">
+            Join the Queer Library and Archive Project
+          </p>
         </div>
 
-        {/* Form */}
-        <div className="login-body">
-          <form onSubmit={handleSubmit} noValidate>
-            {/* Error Display */}
-            {error && (
-              <div className="error-alert" role="alert" aria-live="polite">
-                <div className="error-icon" aria-hidden="true">
-                  <AlertTriangle size={20} />
-                </div>
-                <div className="error-content">
-                  <strong>Registration Failed</strong>
-                  <span>{error}</span>
-                </div>
+        {/* Form Section */}
+        <div className="px-8 pb-8">
+          {/* Error Alert */}
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
+              <AlertTriangle className="text-red-500 flex-shrink-0 mt-0.5" size={18} />
+              <div className="text-red-700 text-sm">
+                <p className="font-medium mb-1">Registration Failed</p>
+                <p>{error}</p>
               </div>
-            )}
+            </div>
+          )}
 
+          <form onSubmit={handleSubmit} noValidate className="space-y-5">
             {/* Email Field */}
-            <div className="form-group">
-              <label htmlFor="reg-email" className="form-label">
+            <div>
+              <label htmlFor="reg-email" className="block text-sm font-medium text-charcoal mb-2">
                 Email Address
               </label>
-              <div className="input-wrapper">
-                <div className="input-icon" aria-hidden="true">
-                  <Mail size={20} />
-                </div>
+              <div className="relative">
+                <Mail 
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-charcoal-light" 
+                  size={20} 
+                />
                 <input
                   type="email"
                   id="reg-email"
-                  className={`form-input ${error ? 'form-input-error' : ''}`}
-                  placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={isLoading}
+                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl
+                           focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:border-transparent
+                           disabled:bg-gray-50 disabled:text-gray-500 text-charcoal
+                           placeholder-charcoal-light transition-all duration-200"
+                  placeholder="Enter your email"
                   autoComplete="email"
                   aria-required="true"
                 />
@@ -83,22 +91,26 @@ export function RegistrationForm() {
             </div>
 
             {/* Username Field */}
-            <div className="form-group">
-              <label htmlFor="reg-username" className="form-label">
+            <div>
+              <label htmlFor="reg-username" className="block text-sm font-medium text-charcoal mb-2">
                 Username
               </label>
-              <div className="input-wrapper">
-                <div className="input-icon" aria-hidden="true">
-                  <User size={20} />
-                </div>
+              <div className="relative">
+                <User 
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-charcoal-light" 
+                  size={20} 
+                />
                 <input
                   type="text"
                   id="reg-username"
-                  className={`form-input ${error ? 'form-input-error' : ''}`}
-                  placeholder="Choose a username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   disabled={isLoading}
+                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl
+                           focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:border-transparent
+                           disabled:bg-gray-50 disabled:text-gray-500 text-charcoal
+                           placeholder-charcoal-light transition-all duration-200"
+                  placeholder="Choose a username"
                   autoComplete="username"
                   aria-required="true"
                 />
@@ -106,29 +118,34 @@ export function RegistrationForm() {
             </div>
 
             {/* Password Field */}
-            <div className="form-group">
-              <label htmlFor="reg-password" className="form-label">
+            <div>
+              <label htmlFor="reg-password" className="block text-sm font-medium text-charcoal mb-2">
                 Password
               </label>
-              <div className="input-wrapper">
-                <div className="input-icon" aria-hidden="true">
-                  <Lock size={20} />
-                </div>
+              <div className="relative">
+                <Lock 
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-charcoal-light" 
+                  size={20} 
+                />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   id="reg-password"
-                  className={`form-input ${error ? 'form-input-error' : ''}`}
-                  placeholder="Create a password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={isLoading}
+                  className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-xl
+                           focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:border-transparent
+                           disabled:bg-gray-50 disabled:text-gray-500 text-charcoal
+                           placeholder-charcoal-light transition-all duration-200"
+                  placeholder="Create a password"
                   autoComplete="new-password"
                   aria-required="true"
                 />
                 <button
                   type="button"
-                  className="password-toggle"
                   onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-charcoal-light 
+                           hover:text-charcoal transition-colors focus:outline-none"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -137,72 +154,92 @@ export function RegistrationForm() {
             </div>
 
             {/* Confirm Password Field */}
-            <div className="form-group">
-              <label htmlFor="reg-confirm-password" className="form-label">
+            <div>
+              <label htmlFor="reg-confirm-password" className="block text-sm font-medium text-charcoal mb-2">
                 Confirm Password
               </label>
-              <div className="input-wrapper">
-                <div className="input-icon" aria-hidden="true">
-                  <Lock size={20} />
-                </div>
+              <div className="relative">
+                <Lock 
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-charcoal-light" 
+                  size={20} 
+                />
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
                   id="reg-confirm-password"
-                  className={`form-input ${error || (confirmPassword && password !== confirmPassword) ? 'form-input-error' : ''}`}
-                  placeholder="Confirm your password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   disabled={isLoading}
+                  className={`w-full pl-12 pr-12 py-3 border rounded-xl
+                           focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:border-transparent
+                           disabled:bg-gray-50 disabled:text-gray-500 text-charcoal
+                           placeholder-charcoal-light transition-all duration-200
+                           ${!passwordsMatch ? 'border-red-300 bg-red-50' : 'border-gray-300'}`}
+                  placeholder="Confirm your password"
                   autoComplete="new-password"
                   aria-required="true"
+                  aria-invalid={!passwordsMatch ? 'true' : 'false'}
                 />
                 <button
                   type="button"
-                  className="password-toggle"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-charcoal-light 
+                           hover:text-charcoal transition-colors focus:outline-none"
                   aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
                 >
                   {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
-              {confirmPassword && password !== confirmPassword && (
-                <div className="field-error" role="alert">
+              {!passwordsMatch && (
+                <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                  <AlertTriangle size={16} />
                   Passwords do not match
-                </div>
+                </p>
               )}
             </div>
 
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={isLoading || !email.trim() || !username.trim() || !password.trim() || password !== confirmPassword}
-              className="submit-button"
+              disabled={isLoading || !email.trim() || !username.trim() || !password.trim() || !passwordsMatch}
+              className="w-full py-3 px-4 bg-lavender-600 hover:bg-lavender-700 
+                       disabled:bg-gray-400 disabled:cursor-not-allowed
+                       text-white font-medium rounded-xl shadow-lg
+                       transition-all duration-200 transform hover:scale-[1.01]
+                       focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:ring-offset-2
+                       flex items-center justify-center gap-2"
             >
-              <span className="button-content">
-                {isLoading ? (
-                  <>
-                    <Loader2 size={20} className="loading-spinner" />
-                    <span>Creating Account...</span>
-                  </>
-                ) : (
-                  <>
-                    <UserPlus size={20} />
-                    <span>Create Account</span>
-                  </>
-                )}
-              </span>
+              {isLoading ? (
+                <>
+                  <Loader2 className="animate-spin" size={20} />
+                  <span>Creating Account...</span>
+                </>
+              ) : (
+                <>
+                  <UserPlus size={20} />
+                  <span>Create Account</span>
+                </>
+              )}
             </button>
           </form>
 
           {/* Footer */}
-          <div className="login-footer">
-            <div className="divider">
-              <span className="divider-text">Already have an account?</span>
+          <div className="mt-6 text-center">
+            <div className="relative mb-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-4 bg-white text-charcoal-light">Already have an account?</span>
+              </div>
             </div>
+            
             <button 
               type="button"
-              className="register-link"
-              onClick={() => {/* Handle navigation to login */}}
+              onClick={() => navigate("/login")}
+              className="w-full py-3 px-4 border-2 border-lavender-600 text-lavender-600 
+                       hover:bg-lavender-600 hover:text-white font-medium rounded-xl
+                       transition-all duration-200 transform hover:scale-[1.01]
+                       focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:ring-offset-2"
             >
               Sign In
             </button>

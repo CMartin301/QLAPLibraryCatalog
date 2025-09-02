@@ -24,136 +24,169 @@ export function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)] px-4">
-      <div className="w-full max-w-md bg-[var(--color-card)] shadow-lg rounded-2xl p-8">
-        {/* Header */}
-        <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-[var(--color-text)]">Welcome Back</h1>
-          <p className="text-sm text-[var(--color-muted)]">Sign in to access your book collection</p>
+    <div className="flex justify-center bg-gray-100 px-4 py-8">
+      <div className="w-full max-w-md bg-white shadow-xl rounded-3xl overflow-hidden">
+        
+        {/* Header Section */}
+        <div className="px-8 pt-8 pb-2">
+          <h1 className="text-2xl font-bold text-charcoal text-center mb-2">
+            Welcome Back
+          </h1>
+          <p className="text-sm text-charcoal-light text-center">
+            Sign in to access your book collection
+          </p>
         </div>
 
-        {/* Error */}
-        {error && (
-          <div
-            className="flex items-center gap-2 mb-4 p-3 rounded-md bg-red-100 text-red-700 text-sm"
-            role="alert"
-          >
-            <AlertTriangle size={18} />
-            <span>{error}</span>
-          </div>
-        )}
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} noValidate className="space-y-4">
-          {/* Email */}
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-[var(--color-text)]"
-            >
-              Email Address
-            </label>
-            <div className="mt-1 relative">
-              <Mail
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)]"
-                size={18}
-              />
-              <input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={isLoading}
-                className="w-full pl-10 pr-3 py-2 border border-[var(--color-border)] rounded-lg shadow-sm 
-                           focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] text-sm"
-                placeholder="Enter your email"
-                autoComplete="email"
-                aria-required="true"
-              />
+        {/* Form Section */}
+        <div className="px-8 pb-8">
+          {/* Error Alert */}
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
+              <AlertTriangle className="text-red-500 flex-shrink-0 mt-0.5" size={18} />
+              <div className="text-red-700 text-sm">
+                <p className="font-medium mb-1">Login Failed</p>
+                <p>{error}</p>
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Password */}
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-[var(--color-text)]"
-            >
-              Password
-            </label>
-            <div className="mt-1 relative">
-              <Lock
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)]"
-                size={18}
-              />
-              <input
-                type={showPassword ? "text" : "password"}
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onKeyDown={handleKeyDown}
-                disabled={isLoading}
-                className="w-full pl-10 pr-10 py-2 border border-[var(--color-border)] rounded-lg shadow-sm 
-                           focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] text-sm"
-                placeholder="Enter your password"
-                autoComplete="current-password"
-                aria-required="true"
-              />
+          <form onSubmit={handleSubmit} noValidate className="space-y-5">
+            {/* Email Field */}
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-charcoal mb-2">
+                Email Address
+              </label>
+              <div className="relative">
+                <Mail 
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-charcoal-light" 
+                  size={20} 
+                />
+                <input
+                  type="email"
+                  id="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isLoading}
+                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl
+                           focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:border-transparent
+                           disabled:bg-gray-50 disabled:text-gray-500 text-charcoal
+                           placeholder-charcoal-light transition-all duration-200"
+                  placeholder="Enter your email"
+                  autoComplete="email"
+                  aria-required="true"
+                  aria-invalid={error ? 'true' : 'false'}
+                />
+              </div>
+            </div>
+
+            {/* Password Field */}
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-charcoal mb-2">
+                Password
+              </label>
+              <div className="relative">
+                <Lock 
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-charcoal-light" 
+                  size={20} 
+                />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  disabled={isLoading}
+                  className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-xl
+                           focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:border-transparent
+                           disabled:bg-gray-50 disabled:text-gray-500 text-charcoal
+                           placeholder-charcoal-light transition-all duration-200"
+                  placeholder="Enter your password"
+                  autoComplete="current-password"
+                  aria-required="true"
+                  aria-invalid={error ? 'true' : 'false'}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-charcoal-light 
+                           hover:text-charcoal transition-colors focus:outline-none"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+            </div>
+
+            {/* Form Options */}
+            <div className="flex items-center justify-between pt-2">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="w-4 h-4 text-lavender-600 border-gray-300 rounded 
+                           focus:ring-lavender-500 focus:ring-2"
+                />
+                <span className="text-sm text-charcoal-light">Remember me</span>
+              </label>
               <button
                 type="button"
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)] hover:text-[var(--color-text)]"
-                onClick={() => setShowPassword(!showPassword)}
-                aria-label={showPassword ? "Hide password" : "Show password"}
+                className="text-sm text-lavender-600 hover:text-lavender-700 font-medium
+                         transition-colors focus:outline-none focus:underline"
               >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                Forgot password?
               </button>
             </div>
-          </div>
 
-          {/* Options */}
-          <div className="flex items-center justify-between text-sm">
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                className="h-4 w-4 text-[var(--color-primary)] border-[var(--color-border)] rounded"
-              />
-              <span className="text-[var(--color-muted)]">Remember me</span>
-            </label>
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={isLoading || !email.trim() || !password.trim()}
+              className="w-full py-3 px-4 bg-lavender-600 hover:bg-lavender-700 
+                       disabled:bg-gray-400 disabled:cursor-not-allowed
+                       text-white font-medium rounded-xl shadow-lg
+                       transition-all duration-200 transform hover:scale-[1.01]
+                       focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:ring-offset-2
+                       flex items-center justify-center gap-2"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="animate-spin" size={20} />
+                  <span>Signing in...</span>
+                </>
+              ) : (
+                <>
+                  <LogIn size={20} />
+                  <span>Sign In</span>
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Footer */}
+          <div className="mt-6 text-center">
+            <div className="relative mb-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-4 bg-white text-charcoal-light">New to QLAP?</span>
+              </div>
+            </div>
+            
+            <p className="text-sm text-charcoal-light mb-4">
+              Join thousands of book lovers in your community
+            </p>
+            
             <button
               type="button"
-              className="text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] font-medium"
+              onClick={() => navigate("/register")}
+              className="w-full py-3 px-4 border-2 border-lavender-600 text-lavender-600 
+                       hover:bg-lavender-600 hover:text-white font-medium rounded-xl
+                       transition-all duration-200 transform hover:scale-[1.01]
+                       focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:ring-offset-2"
             >
-              Forgot password?
+              Create Account
             </button>
           </div>
-
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={isLoading || !email.trim() || !password.trim()}
-            className="w-full flex justify-center items-center gap-2 py-2 px-4 
-                       bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] 
-                       text-white rounded-lg font-medium shadow-md disabled:opacity-50"
-          >
-            {isLoading ? <Loader2 className="animate-spin" size={18} /> : <LogIn size={18} />}
-            {isLoading ? "Signing in..." : "Sign In"}
-          </button>
-        </form>
-
-        {/* Footer */}
-        <div className="mt-6 text-center">
-          <div className="text-[var(--color-muted)] text-sm">New to QLAP?</div>
-          <p className="text-[var(--color-text)] text-sm">
-            Join thousands of book lovers in your community
-          </p>
-          <button
-            type="button"
-            onClick={() => navigate("/register")}
-            className="mt-3 w-full py-2 px-4 border border-[var(--color-primary)] text-[var(--color-primary)] 
-                       rounded-lg font-medium hover:bg-[var(--color-primary)] hover:text-white"
-          >
-            Create Account
-          </button>
         </div>
       </div>
     </div>
@@ -161,216 +194,3 @@ export function LoginForm() {
 }
 
 export default LoginForm;
-
-
-// import React, { useState } from 'react';
-// import { useNavigate } from 'react-router-dom';
-// import { Mail, Lock, Eye, EyeOff, LogIn, AlertTriangle, Loader2 } from 'lucide-react';
-// import useAuth from '../../hooks/useAuth';
-
-// /**
-//  * LoginForm Component
-//  * 
-//  * Modern, accessible login form with mobile-first design
-//  * Following WCAG 2.1 guidelines and modern UX patterns
-//  */
-// export function LoginForm() {
-//   // Local state for form inputs
-//   const [email, setEmail] = useState<string>('');
-//   const [password, setPassword] = useState<string>('');
-//   const [showPassword, setShowPassword] = useState<boolean>(false);
-  
-//   // Access auth context using our custom hook
-//   const { login, isLoading, error } = useAuth();
-
-//   const navigate = useNavigate();
-
-//   // Handle form submission
-//   const handleSubmit = (e: React.SyntheticEvent) => {
-//     e.preventDefault();
-    
-//     // Basic validation
-//     if (!email.trim() || !password.trim()) {
-//       return;
-//     }
-    
-//     login(email, password);
-//   };
-
-//   // Handle Enter key press in password field
-//   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-//     if (e.key === 'Enter') {
-//       handleSubmit(e);
-//     }
-//   };
-
-//   return (
-//     <div className="login-container">
-//       <div className="login-card">
-//         {/* Header Section */}
-//         <div className="login-header">
-//           <div className="login-header-content">
-//             <h1 className="login-title">Welcome Back</h1>
-//             <p className="login-subtitle">Sign in to access your book collection</p>
-//           </div>
-//         </div>
-
-//         {/* Form Section */}
-//         <div className="login-body">
-//           <form onSubmit={handleSubmit} noValidate>
-//             {/* Global Error Display */}
-//             {error && (
-//               <div className="error-alert" role="alert" aria-live="polite">
-//                 <div className="error-icon" aria-hidden="true">
-//                   <AlertTriangle size={20} />
-//                 </div>
-//                 <div className="error-content">
-//                   <strong>Login Failed</strong>
-//                   <span>{error}</span>
-//                 </div>
-//               </div>
-//             )}
-
-//             {/* Email Field */}
-//             <div className="form-group">
-//               <label htmlFor="email" className="form-label">
-//                 Email Address
-//               </label>
-//               <div className="input-wrapper">
-//                 <div className="input-icon" aria-hidden="true">
-//                   <Mail size={20} />
-//                 </div>
-//                 <input
-//                   type="email"
-//                   id="email"
-//                   className={`form-input ${error ? 'form-input-error' : ''}`}
-//                   placeholder="Enter your email"
-//                   value={email}
-//                   onChange={(e) => setEmail(e.target.value)}
-//                   disabled={isLoading}
-//                   autoComplete="email"
-//                   autoCapitalize="none"
-//                   spellCheck="false"
-//                   aria-required="true"
-//                   aria-invalid={error ? 'true' : 'false'}
-//                   aria-describedby={error ? 'email-error' : undefined}
-//                 />
-//               </div>
-//               {error && (
-//                 <div id="email-error" className="field-error" role="alert">
-//                   Please check your email address
-//                 </div>
-//               )}
-//             </div>
-
-//             {/* Password Field */}
-//             <div className="form-group">
-//               <label htmlFor="password" className="form-label">
-//                 Password
-//               </label>
-//               <div className="input-wrapper">
-//                 <div className="input-icon" aria-hidden="true">
-//                   <Lock size={20} />
-//                 </div>
-//                 <input
-//                   type={showPassword ? 'text' : 'password'}
-//                   id="password"
-//                   className={`form-input ${error ? 'form-input-error' : ''}`}
-//                   placeholder="Enter your password"
-//                   value={password}
-//                   onChange={(e) => setPassword(e.target.value)}
-//                   onKeyDown={handleKeyDown}
-//                   disabled={isLoading}
-//                   autoComplete="current-password"
-//                   aria-required="true"
-//                   aria-invalid={error ? 'true' : 'false'}
-//                   aria-describedby={error ? 'password-error' : undefined}
-//                 />
-//                 <button
-//                   type="button"
-//                   className="password-toggle"
-//                   onClick={() => setShowPassword(!showPassword)}
-//                   aria-label={showPassword ? 'Hide password' : 'Show password'}
-//                   tabIndex={0}
-//                 >
-//                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-//                 </button>
-//               </div>
-//               {error && (
-//                 <div id="password-error" className="field-error" role="alert">
-//                   Please check your password
-//                 </div>
-//               )}
-//             </div>
-
-//             {/* Remember Me & Forgot Password */}
-//             <div className="form-options">
-//               <label className="checkbox-wrapper">
-//                 <input 
-//                   type="checkbox" 
-//                   className="checkbox-input"
-//                   id="rememberMe"
-//                 />
-//                 <span className="checkbox-custom" aria-hidden="true"></span>
-//                 <span className="checkbox-label">Remember me</span>
-//               </label>
-              
-//               <button 
-//                 type="button" 
-//                 className="forgot-link"
-//                 onClick={() => {/* Handle forgot password */}}
-//               >
-//                 Forgot Password?
-//               </button>
-//             </div>
-
-//             {/* Submit Button */}
-//             <button
-//               type="submit"
-//               disabled={isLoading || !email.trim() || !password.trim()}
-//               className="submit-button"
-//               aria-describedby="submit-help"
-//             >
-//               <span className="button-content">
-//                 {isLoading ? (
-//                   <>
-//                     <Loader2 size={20} className="loading-spinner" />
-//                     <span>Signing In...</span>
-//                   </>
-//                 ) : (
-//                   <>
-//                     <LogIn size={20} />
-//                     <span>Sign In</span>
-//                   </>
-//                 )}
-//               </span>
-//             </button>
-            
-//             <div id="submit-help" className="sr-only">
-//               {isLoading ? 'Please wait while we sign you in' : 'Click to sign in to your account'}
-//             </div>
-//           </form>
-
-//           {/* Footer Section */}
-//           <div className="login-footer">
-//             <div className="divider">
-//               <span className="divider-text">New to QLAP?</span>
-//             </div>
-//             <p className="signup-text">
-//               Join thousands of book lovers in your community
-//             </p>
-//             <button 
-//               type="button"
-//               className="register-link"
-//               onClick={() => navigate('/register')}
-//             >
-//               Create Account
-//             </button>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default LoginForm;
