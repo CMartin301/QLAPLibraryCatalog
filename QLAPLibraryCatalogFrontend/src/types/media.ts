@@ -26,6 +26,48 @@ export interface Media {
   mediaType: MediaType;
 }
 
+export interface CreateMediaRequest {
+  mediaTypeId: number;
+  title: string;
+  subtitle: string | null;
+  creator: string;
+}
+// export interface CreateMediaRequest {
+//   mediaTypeId: number;
+//   title: string;
+//   subtitle: string | null;
+//   creator: string | null;
+//   publisher: string | null;
+//   publicationDate: string | null;
+//   language: string | null;
+//   genre: string | null;
+//   description: string | null;
+//   coverImageUrl: string | null;
+//   isbn10: string | null;
+//   isbn13: string | null;
+//   pageCount: number | null;
+//   issueNumber: number | null;
+//   volume: number | null;
+// }
+
+export interface MediaFormData {
+  mediaTypeId: number;
+  title: string;
+  subtitle: string | null;
+  creator: string;
+  publisher?: string;
+  publicationDate?: string;
+  language?: string;
+  genre?: string;
+  description?: string;
+  coverImageUrl?: string;
+  isbn10?: string | null;
+  isbn13?: string | null;
+  pageCount?: number | null;
+  issueNumber?: number | null;
+  volume?: number | null;
+}
+
 // API request/response types
 // export interface GetMediaResponse {
 //   data: Media[];

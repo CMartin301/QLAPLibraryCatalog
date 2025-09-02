@@ -1,3 +1,4 @@
+// MediaTable.tsx
 import React, { useMemo } from 'react';
 import {
   createColumnHelper,
@@ -10,25 +11,27 @@ import {
   ColumnFiltersState,
 } from '@tanstack/react-table';
 import { ChevronUp, ChevronDown, Search, Plus } from 'lucide-react';
-import { Media } from '../../types/media';
-import { AddMediaForm, MediaFormData } from './AddMediaForm';
+import { Media, MediaFormData, CreateMediaRequest } from '../../types/media';
+import { AddMediaForm } from './AddMediaForm';
 import { Modal } from '../shared/Modal';
+import { mediaService } from '../../services/mediaService';
+import { useModalScrollLock } from '../../hooks/useModalScrollLock';
 
 interface MediaTableProps {
   media?: Media[];
 }
 
 export function MediaTable({ media = [] }: MediaTableProps) {
-  // State for sorting and filtering
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = React.useState('');
   const [isModalOpen, setIsModalOpen] = React.useState(false);
 
-  // Column helper for type safety
+  // Lock the background scroll when the modal is open
+  useModalScrollLock(isModalOpen);
+
   const columnHelper = createColumnHelper<Media>();
 
-  // Define columns
   const columns = useMemo(
     () => [
       columnHelper.accessor('title', {
@@ -55,36 +58,10 @@ export function MediaTable({ media = [] }: MediaTableProps) {
           </span>
         ),
       }),
-      // columnHelper.accessor('status', {
-      //   header: 'Status',
-      //   cell: info => {
-      //     const status = info.getValue();
-      //     const statusStyles = {
-      //       available: 'bg-green-100 text-green-800',
-      //       checked_out: 'bg-yellow-100 text-yellow-800',
-      //       reserved: 'bg-blue-100 text-blue-800'
-      //     };
-          
-      //     return (
-      //       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusStyles[status]}`}>
-      //         {status.replace('_', ' ').toUpperCase()}
-      //       </span>
-      //     );
-      //   },
-      // }),
-      // columnHelper.accessor('dateAdded', {
-      //   header: 'Date Added',
-      //   cell: info => (
-      //     <div className="text-[var(--color-muted)] text-sm">
-      //       {new Date(info.getValue()).toLocaleDateString()}
-      //     </div>
-      //   ),
-      // }),
     ],
     [columnHelper]
   );
 
-  // Create the table instance
   const table = useReactTable({
     data: media,
     columns,
@@ -101,36 +78,49 @@ export function MediaTable({ media = [] }: MediaTableProps) {
     getFilteredRowModel: getFilteredRowModel(),
   });
 
-
-  const handleAddMedia = (data: MediaFormData) => {
+  const handleAddMedia = async (data: MediaFormData) => {
     console.log("New media:", data);
-    // TODO: send to API or update state
-    setIsModalOpen(false);
+    
+    // Convert form data to API payload
+    const apiPayload: CreateMediaRequest = {
+        title: data.title,
+        creator: data.creator,
+        mediaTypeId: 3, // Assuming this is always a book for now, from POSTCreateNewMedia.json
+        subtitle: null, // The form doesn't have a subtitle field
+    };
+
+    try {
+        await mediaService.createNewMedia(apiPayload);
+        console.log("Media created successfully!");
+        setIsModalOpen(false); // Close modal on success
+    } catch (error) {
+        console.error("Failed to create media:", error);
+        // You can add state here to show an error message to the user
+    }
   };
 
   return (
     <div className="bg-[var(--color-card)] rounded-lg shadow-sm border border-[var(--color-border)]">
-      {/* Search Bar */}
       <div className="p-4 border-b border-[var(--color-border)]">
-  <div className="flex items-center justify-between gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" size={18} />
-          <input
-            type="text"
-            placeholder="Search books..."
-            value={globalFilter ?? ''}
-            onChange={e => setGlobalFilter(e.target.value)}
-            className="w-full pl-10 pr-3 py-2 border border-[var(--color-border)] rounded-lg text-sm
-                     focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
-          />
-        </div>
+        <div className="flex items-center justify-between gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" size={18} />
+            <input
+              type="text"
+              placeholder="Search books..."
+              value={globalFilter ?? ''}
+              onChange={e => setGlobalFilter(e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-[var(--color-border)] rounded-lg text-sm
+                         focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
+            />
+          </div>
           <button
             type="button"
             onClick={() => setIsModalOpen(true)}
-            className="py-2 pl-4 pr-5 bg-lavender-400 hover:bg-lavender-500 
-                      text-white text-sm font-medium rounded-lg shadow
-                      transition-all duration-200 transform hover:scale-[1.01]
-                      flex items-center gap-2 justify-center"
+            className="py-2 pl-4 pr-5 bg-lavender-400 hover:bg-lavender-500
+                        text-white text-sm font-medium rounded-lg shadow
+                        transition-all duration-200 transform hover:scale-[1.01]
+                        flex items-center gap-2 justify-center"
           >
             <Plus size={16} className="text-white" />
             Add Book
@@ -138,7 +128,6 @@ export function MediaTable({ media = [] }: MediaTableProps) {
         </div>
       </div>
 
-      {/* Table */}
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-[var(--color-border)]">
           <thead className="bg-[var(--color-bg)]">
@@ -164,21 +153,21 @@ export function MediaTable({ media = [] }: MediaTableProps) {
                         </span>
                         {header.column.getCanSort() && (
                           <span className="flex flex-col">
-                            <ChevronUp 
-                              size={12} 
+                            <ChevronUp
+                              size={12}
                               className={`${
-                                header.column.getIsSorted() === 'asc' 
-                                  ? 'text-[var(--color-primary)]' 
+                                header.column.getIsSorted() === 'asc'
+                                  ? 'text-[var(--color-primary)]'
                                   : 'text-[var(--color-muted)]'
-                              }`} 
+                              }`}
                             />
-                            <ChevronDown 
-                              size={12} 
+                            <ChevronDown
+                              size={12}
                               className={`-mt-1 ${
-                                header.column.getIsSorted() === 'desc' 
-                                  ? 'text-[var(--color-primary)]' 
+                                header.column.getIsSorted() === 'desc'
+                                  ? 'text-[var(--color-primary)]'
                                   : 'text-[var(--color-muted)]'
-                              }`} 
+                              }`}
                             />
                           </span>
                         )}
@@ -203,15 +192,13 @@ export function MediaTable({ media = [] }: MediaTableProps) {
         </table>
       </div>
 
-      {/* Empty State */}
       {table.getRowModel().rows.length === 0 && (
         <div className="text-center py-8">
           <p className="text-[var(--color-muted)]">No books found</p>
         </div>
       )}
 
-
-      {/* Modal with Form */}
+      {/* The modal is now used as a reusable wrapper */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

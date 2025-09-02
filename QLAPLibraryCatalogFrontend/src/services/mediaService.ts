@@ -1,4 +1,4 @@
-import { Media, GetMediaResponse, MediaSearchParams } from '../types/media';
+import { Media, GetMediaResponse, MediaSearchParams, CreateMediaRequest } from '../types/media';
 import api from './apiService';
 
 export const mediaService = {
@@ -27,6 +27,11 @@ export const mediaService = {
   // Get a single media item by ID
   async getMediaById(mediaId: number): Promise<Media> {
     const response = await api.get<Media>(`/api/Media/${mediaId}`);
+    return response.data;
+  },
+  
+  async createNewMedia(newMedia: CreateMediaRequest): Promise<Media> {
+    const response = await api.post<Media>('/api/Media', newMedia);
     return response.data;
   },
 
