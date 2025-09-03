@@ -12,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IMediaService, MediaService>();
+builder.Services.AddScoped<IUserMediaCopiesService, UserMediaCopiesService>();
 builder.Services.AddScoped<IMediaTypesService, MediaTypesService>();
 builder.Services.AddScoped<IUsersService, UsersService>();
 
