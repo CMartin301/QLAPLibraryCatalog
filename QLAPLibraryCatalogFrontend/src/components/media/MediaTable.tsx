@@ -20,9 +20,10 @@ import { useModalScrollLock } from '../../hooks/useModalScrollLock';
 interface MediaTableProps {
   media?: Media[];
   onRefresh?: () => void; 
+  onSaveNewMedia?: (message: string) => void; 
 }
 
-export function MediaTable({ media = [], onRefresh }: MediaTableProps) {
+export function MediaTable({ media = [], onRefresh, onSaveNewMedia: onSaveNewMedia }: MediaTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = React.useState('');
@@ -108,6 +109,10 @@ const handleAddMedia = async (data: MediaFormData) => {
     setIsModalOpen(false);
     if (onRefresh) {
       onRefresh();
+    }
+    // Add this success callback
+    if (onSaveNewMedia) {
+      onSaveNewMedia('Media added successfully!');
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Failed to create media';

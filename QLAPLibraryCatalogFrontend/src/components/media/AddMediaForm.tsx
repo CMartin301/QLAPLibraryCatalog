@@ -1,7 +1,8 @@
 // components/forms/AddMediaForm.tsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { MediaFormData } from "../../types/media";
+import { MediaFormData, MediaType } from "../../types/media";
+import { mediaService } from "../../services/mediaService";
 
 interface AddMediaFormProps {
   onSubmit: (data: MediaFormData) => void;
@@ -10,12 +11,36 @@ interface AddMediaFormProps {
 }
 
 export function AddMediaForm({ onSubmit, isSubmitting = false, submitError }: AddMediaFormProps) {
+  const [mediaTypes, setMediaTypes] = useState<MediaType[]>([]);
+  const [isLoadingTypes, setIsLoadingTypes] = useState(true);
+  const [mediaTypesError, setMediaTypesError] = useState<string | null>(null);
+
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors },
   } = useForm<MediaFormData>();
+
+  // Fetch media types when component mounts
+  useEffect(() => {
+    const fetchMediaTypes = async () => {
+      try {
+        setIsLoadingTypes(true);
+        setMediaTypesError(null);
+        const types = await mediaService.getMediaTypes();
+        setMediaTypes(types);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to load media types';
+        setMediaTypesError(errorMessage);
+        console.error('Error fetching media types:', error);
+      } finally {
+        setIsLoadingTypes(false);
+      }
+    };
+
+    fetchMediaTypes();
+  }, []);
 
   const submitHandler: SubmitHandler<MediaFormData> = (data) => {
     onSubmit(data);
@@ -30,6 +55,15 @@ export function AddMediaForm({ onSubmit, isSubmitting = false, submitError }: Ad
         </div>
       )}
 
+      {/* Media Types Loading Error */}
+      {mediaTypesError && (
+        <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg" role="alert">
+          <p className="text-yellow-700 text-sm">
+            Warning: {mediaTypesError}. The form may not work correctly.
+          </p>
+        </div>
+      )}
+
       {/* Media Type & Title Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Media Type */}
@@ -39,6 +73,7 @@ export function AddMediaForm({ onSubmit, isSubmitting = false, submitError }: Ad
           </label>
           <select
             id="mediaTypeId"
+            disabled={isLoadingTypes || isSubmitting}
             {...register("mediaTypeId", { 
               required: "Please select a media type",
               valueAsNumber: true 
@@ -46,13 +81,17 @@ export function AddMediaForm({ onSubmit, isSubmitting = false, submitError }: Ad
             aria-describedby={errors.mediaTypeId ? "mediaType-error" : undefined}
             aria-invalid={errors.mediaTypeId ? "true" : "false"}
             className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm
-                       focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
+                       focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]
+                       disabled:bg-gray-50 disabled:cursor-not-allowed"
           >
-            <option value="">Select a media type</option>
-            <option value="1">Movie</option>
-            <option value="2">Series</option>
-            <option value="3">Book</option>
-            <option value="4">Podcast</option>
+            <option value="">
+              {isLoadingTypes ? "Loading media types..." : "Select a media type"}
+            </option>
+            {mediaTypes.map((type) => (
+              <option key={type.mediaTypeId} value={type.mediaTypeId}>
+                {type.displayName}
+              </option>
+            ))}
           </select>
           {errors.mediaTypeId && (
             <p id="mediaType-error" className="text-red-500 text-xs mt-1" role="alert">
@@ -87,6 +126,7 @@ export function AddMediaForm({ onSubmit, isSubmitting = false, submitError }: Ad
         </div>
       </div>
 
+      {/* Rest of your existing form fields remain the same */}
       {/* Subtitle */}
       <div>
         <label htmlFor="subtitle" className="block text-sm font-medium text-[var(--color-muted)] mb-1">
@@ -109,7 +149,8 @@ export function AddMediaForm({ onSubmit, isSubmitting = false, submitError }: Ad
           </p>
         )}
       </div>
-{/* Creator & Publisher Row */}
+
+      {/* Creator & Publisher Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Creator */}
         <div>
@@ -237,7 +278,6 @@ export function AddMediaForm({ onSubmit, isSubmitting = false, submitError }: Ad
         </div>
       </div>
 
-
       {/* Description */}
       <div>
         <label htmlFor="description" className="block text-sm font-medium text-[var(--color-muted)] mb-1">
@@ -344,7 +384,6 @@ export function AddMediaForm({ onSubmit, isSubmitting = false, submitError }: Ad
         </div>
       </div>
 
-
       {/* Numbers Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Page Count */}
@@ -423,16 +462,17 @@ export function AddMediaForm({ onSubmit, isSubmitting = false, submitError }: Ad
           )}
         </div>
       </div> 
+
       {/* Submit */}
       <div className="flex justify-end pt-2">
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || isLoadingTypes}
           className="py-2 px-4 bg-lavender-400 hover:bg-lavender-500 disabled:bg-gray-300 
                      disabled:cursor-not-allowed text-white rounded-lg transition-all duration-200
                      focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:ring-offset-2"
         >
-          {isSubmitting ? 'Saving...' : 'Save Media'}
+          {isSubmitting ? 'Saving...' : isLoadingTypes ? 'Loading...' : 'Save Media'}
         </button>
       </div>
     </form>
