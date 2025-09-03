@@ -1,0 +1,16 @@
+
+{
+    "Request":{"URL":"http://localhost:5236/api/Media",
+        "HTTP":"POST",
+    "Body":{
+  "mediaTypeId": 3,
+  "title": "New Book",
+  "subtitle": "The newest book of all",
+  "creator": "A. Thor"
+}},
+"Response": {
+    "mediaId":54,
+    "mediaTypeId":3,
+    "title":"New Book","subtitle":"The newest book of all","creator":"A. Thor","publisher":null,"publicationDate":null,"language":"en","genre":null,"description":null,"coverImageUrl":null,"isbn10":null,"isbn13":null,"pageCount":null,"issueNumber":null,"volume":null,"mediaType":{"mediaTypeId":3,"name":"book","displayName":"Books","description":"Physical and digital books including novels, textbooks, and reference materials"}
+}
+}

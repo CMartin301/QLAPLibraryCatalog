@@ -20,13 +20,13 @@ public partial class LibraryCatalogContext : DbContext
 
     public virtual DbSet<Loan> Loans { get; set; }
 
+    public virtual DbSet<MediaCopy> MediaCopies { get; set; }
+
     public virtual DbSet<MediaType> MediaTypes { get; set; }
 
     public virtual DbSet<Media> Media { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
-
-    public virtual DbSet<UserMediaCopy> UserMediaCopies { get; set; }
 
     public virtual DbSet<UserPreferences> UserPreferences { get; set; }
 
@@ -48,19 +48,14 @@ public partial class LibraryCatalogContext : DbContext
             entity.HasIndex(e => e.Status, "idx_borrow_requests_status");
 
             entity.Property(e => e.RequestId).HasColumnName("request_id");
-            entity.Property(e => e.ApprovedAt)
-                .HasColumnType("timestamptz")
-                .HasColumnName("approved_at");
+            entity.Property(e => e.ApprovedAt).HasColumnName("approved_at");
             entity.Property(e => e.BorrowerId).HasColumnName("borrower_id");
             entity.Property(e => e.CopyId).HasColumnName("copy_id");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("now()")
-                .HasColumnType("timestamptz")
                 .HasColumnName("created_at");
             entity.Property(e => e.DenialReason).HasColumnName("denial_reason");
-            entity.Property(e => e.DeniedAt)
-                .HasColumnType("timestamptz")
-                .HasColumnName("denied_at");
+            entity.Property(e => e.DeniedAt).HasColumnName("denied_at");
             entity.Property(e => e.Message).HasColumnName("message");
             entity.Property(e => e.RequestedEndDate).HasColumnName("requested_end_date");
             entity.Property(e => e.RequestedStartDate).HasColumnName("requested_start_date");
@@ -70,7 +65,6 @@ public partial class LibraryCatalogContext : DbContext
                 .HasColumnName("status");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("now()")
-                .HasColumnType("timestamptz")
                 .HasColumnName("updated_at");
 
             entity.HasOne(d => d.Borrower).WithMany(p => p.BorrowRequests)
@@ -99,7 +93,6 @@ public partial class LibraryCatalogContext : DbContext
             entity.Property(e => e.LoanId).HasColumnName("loan_id");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("now()")
-                .HasColumnType("timestamptz")
                 .HasColumnName("created_at");
             entity.Property(e => e.DueDate).HasColumnName("due_date");
             entity.Property(e => e.LateFeeAmount)
@@ -119,13 +112,58 @@ public partial class LibraryCatalogContext : DbContext
                 .HasColumnName("status");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("now()")
-                .HasColumnType("timestamptz")
                 .HasColumnName("updated_at");
 
             entity.HasOne(d => d.Request).WithOne(p => p.Loan)
                 .HasForeignKey<Loan>(d => d.RequestId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("loans_request_id_fkey");
+        });
+
+        modelBuilder.Entity<MediaCopy>(entity =>
+        {
+            entity.HasKey(e => e.CopyId).HasName("user_media_copies_pkey");
+
+            entity.ToTable("media_copies");
+
+            entity.HasIndex(e => e.MediaId, "idx_user_media_copies_media_id");
+
+            entity.HasIndex(e => e.UserId, "idx_user_media_copies_user_id");
+
+            entity.Property(e => e.CopyId)
+                .HasDefaultValueSql("nextval('user_media_copies_copy_id_seq'::regclass)")
+                .HasColumnName("copy_id");
+            entity.Property(e => e.Condition)
+                .HasMaxLength(50)
+                .HasColumnName("condition");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("now()")
+                .HasColumnName("created_at");
+            entity.Property(e => e.IsAvailable)
+                .HasDefaultValue(true)
+                .HasColumnName("is_available");
+            entity.Property(e => e.MaxLoanDays)
+                .HasDefaultValue(14)
+                .HasColumnName("max_loan_days");
+            entity.Property(e => e.MediaId).HasColumnName("media_id");
+            entity.Property(e => e.Notes).HasColumnName("notes");
+            entity.Property(e => e.RequiresApproval)
+                .HasDefaultValue(true)
+                .HasColumnName("requires_approval");
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("now()")
+                .HasColumnName("updated_at");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+
+            entity.HasOne(d => d.Media).WithMany(p => p.MediaCopies)
+                .HasForeignKey(d => d.MediaId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("user_media_copies_media_id_fkey");
+
+            entity.HasOne(d => d.User).WithMany(p => p.MediaCopies)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("user_media_copies_user_id_fkey");
         });
 
         modelBuilder.Entity<MediaType>(entity =>
@@ -139,7 +177,6 @@ public partial class LibraryCatalogContext : DbContext
             entity.Property(e => e.MediaTypeId).HasColumnName("media_type_id");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("now()")
-                .HasColumnType("timestamptz")
                 .HasColumnName("created_at");
             entity.Property(e => e.Description).HasColumnName("description");
             entity.Property(e => e.DisplayName)
@@ -153,7 +190,6 @@ public partial class LibraryCatalogContext : DbContext
                 .HasColumnName("name");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("now()")
-                .HasColumnType("timestamptz")
                 .HasColumnName("updated_at");
         });
 
@@ -173,7 +209,6 @@ public partial class LibraryCatalogContext : DbContext
                 .HasColumnName("cover_image_url");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("now()")
-                .HasColumnType("timestamptz")
                 .HasColumnName("created_at");
             entity.Property(e => e.Creator)
                 .HasMaxLength(500)
@@ -212,7 +247,6 @@ public partial class LibraryCatalogContext : DbContext
                 .HasColumnName("title");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("now()")
-                .HasColumnType("timestamptz")
                 .HasColumnName("updated_at");
             entity.Property(e => e.Volume)
                 .HasMaxLength(50)
@@ -241,7 +275,6 @@ public partial class LibraryCatalogContext : DbContext
             entity.Property(e => e.UserId).HasColumnName("user_id");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("now()")
-                .HasColumnType("timestamptz")
                 .HasColumnName("created_at");
             entity.Property(e => e.Email)
                 .HasMaxLength(255)
@@ -257,57 +290,10 @@ public partial class LibraryCatalogContext : DbContext
                 .HasColumnName("password_hash");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("now()")
-                .HasColumnType("timestamptz")
                 .HasColumnName("updated_at");
             entity.Property(e => e.Username)
                 .HasMaxLength(50)
                 .HasColumnName("username");
-        });
-
-        modelBuilder.Entity<UserMediaCopy>(entity =>
-        {
-            entity.HasKey(e => e.CopyId).HasName("user_media_copies_pkey");
-
-            entity.ToTable("user_media_copies");
-
-            entity.HasIndex(e => e.MediaId, "idx_user_media_copies_media_id");
-
-            entity.HasIndex(e => e.UserId, "idx_user_media_copies_user_id");
-
-            entity.Property(e => e.CopyId).HasColumnName("copy_id");
-            entity.Property(e => e.Condition)
-                .HasMaxLength(50)
-                .HasColumnName("condition");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("now()")
-                .HasColumnType("timestamptz")
-                .HasColumnName("created_at");
-            entity.Property(e => e.IsAvailable)
-                .HasDefaultValue(true)
-                .HasColumnName("is_available");
-            entity.Property(e => e.MaxLoanDays)
-                .HasDefaultValue(14)
-                .HasColumnName("max_loan_days");
-            entity.Property(e => e.MediaId).HasColumnName("media_id");
-            entity.Property(e => e.Notes).HasColumnName("notes");
-            entity.Property(e => e.RequiresApproval)
-                .HasDefaultValue(true)
-                .HasColumnName("requires_approval");
-            entity.Property(e => e.UpdatedAt)
-                .HasDefaultValueSql("now()")
-                .HasColumnType("timestamptz")
-                .HasColumnName("updated_at");
-            entity.Property(e => e.UserId).HasColumnName("user_id");
-
-            entity.HasOne(d => d.Media).WithMany(p => p.UserMediaCopies)
-                .HasForeignKey(d => d.MediaId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("user_media_copies_media_id_fkey");
-
-            entity.HasOne(d => d.User).WithMany(p => p.UserMediaCopies)
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("user_media_copies_user_id_fkey");
         });
 
         modelBuilder.Entity<UserPreferences>(entity =>
@@ -326,7 +312,6 @@ public partial class LibraryCatalogContext : DbContext
                 .HasColumnName("auto_approve_requests");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("now()")
-                .HasColumnType("timestamptz")
                 .HasColumnName("created_at");
             entity.Property(e => e.DefaultLoanDays)
                 .HasDefaultValue(14)
@@ -342,7 +327,6 @@ public partial class LibraryCatalogContext : DbContext
                 .HasColumnName("sms_notifications");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("now()")
-                .HasColumnType("timestamptz")
                 .HasColumnName("updated_at");
             entity.Property(e => e.UserId).HasColumnName("user_id");
 

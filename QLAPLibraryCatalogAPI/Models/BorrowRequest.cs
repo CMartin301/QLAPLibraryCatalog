@@ -31,7 +31,7 @@ public partial class BorrowRequest
 
     public virtual User Borrower { get; set; } = null!;
 
-    public virtual UserMediaCopy Copy { get; set; } = null!;
+    public virtual MediaCopy Copy { get; set; } = null!;
 
     public virtual Loan? Loan { get; set; }
 }

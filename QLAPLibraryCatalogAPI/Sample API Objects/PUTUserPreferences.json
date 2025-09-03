@@ -1,0 +1,12 @@
+
+{
+    "request": {"URL":"/Users/16/Preferences", "body": {
+    "defaultLoanDays": 50,
+    "autoApproveRequests": true,
+    "emailNotifications": false,
+    "smsNotifications": false,
+    "notificationSettings": "{\"reminders\": true, \"overdue\": true}"
+}},
+    "response":
+{"preferenceId":14,"userId":16,"defaultLoanDays":50,"autoApproveRequests":true,"emailNotifications":false,"smsNotifications":false,"notificationSettings":"{\"reminders\": true, \"overdue\": true}"}
+}

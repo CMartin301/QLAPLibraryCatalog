@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace QLAPLibraryCatalogAPI.Models;
 
-public partial class UserMediaCopy
+public partial class MediaCopy
 {
     public int CopyId { get; set; }
 
