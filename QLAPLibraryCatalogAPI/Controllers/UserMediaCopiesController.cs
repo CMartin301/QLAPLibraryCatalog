@@ -33,37 +33,37 @@ namespace QLAPLibraryCatalogAPI.Controllers
         }
 
 
-        // [HttpGet("{mediaId}")]
-        // public async Task<IActionResult> GetMediaById(int mediaId)
-        // {
-        //     try
-        //     {
-        //         var media = await _userMediaCopiesService.GetMediaByIdAsync(mediaId);
-        //         if (media == null) return NotFound();
+        [HttpGet("{mediaCopyId}")]
+        public async Task<IActionResult> GetMediaCopyById(int mediaCopyId)
+        {
+            try
+            {
+                var mediaCopy = await _userMediaCopiesService.GetMediaCopyByIdAsync(mediaCopyId);
+                if (mediaCopy == null) return NotFound();
                 
-        //         return Ok(media);
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         return StatusCode(500, new { error = ex.Message });
-        //     }
-        // }
+                return Ok(mediaCopy);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
         
-        // [HttpPost]
-        // public async Task<IActionResult> CreateMedia([FromBody] CreateMediaDto createMediaDto)
-        // {
-        //     try
-        //     {
-        //         if (!ModelState.IsValid) return BadRequest(ModelState);
+        [HttpPost]
+        public async Task<IActionResult> CreateMediaCopy([FromBody] CreateUserMediaCopyDto createMediaCopyDto)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
                 
-        //         var createdMedia = await _userMediaCopiesService.CreateMediaAsync(createMediaDto);
-        //         return CreatedAtAction(nameof(GetMediaById), new { mediaId = createdMedia.MediaId }, createdMedia);
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         return StatusCode(500, new { error = ex.Message });
-        //     }
-        // }
+                var createdMediaCopy = await _userMediaCopiesService.CreateMediaCopyAsync(createMediaCopyDto);
+                return CreatedAtAction(nameof(GetMediaCopyById), new { mediaCopyId = createdMediaCopy.CopyId }, createdMediaCopy);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
         
         // [HttpPut("{mediaId}")]
         // public async Task<IActionResult> UpdateMedia(int mediaId, [FromBody] CreateMediaDto updateMediaDto)
