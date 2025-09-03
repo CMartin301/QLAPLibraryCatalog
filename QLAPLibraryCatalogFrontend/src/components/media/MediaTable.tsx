@@ -254,7 +254,7 @@ useEffect(() => {
       </div>
 
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-[var(--color-border)]">
+        <table className="w-full table-fixed divide-y divide-[var(--color-border)]">
           <thead className="bg-[var(--color-bg)]">
             {table.getHeaderGroups().map(headerGroup => (
               <tr key={headerGroup.id}>
