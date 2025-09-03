@@ -11,7 +11,7 @@ import Footer from './components/layout/Footer';
 import Header from './components/layout/Header';
 import MyLibraryPage from './components/myLibrary/MyLibraryPage';
 import NetworkCatalogPage from './components/networkCatalog/NetworkCatalogPage';
-import UserPreferences from './components/preferences/UserPreferences';
+import UserPreferencesContainer from './components/preferences/UserPreferencesContainer';
 
 /**
  * App Layout Component
@@ -90,7 +90,7 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <AppLayout>
-              <UserPreferences />
+              <UserPreferencesContainer />
             </AppLayout>
           </ProtectedRoute>
         } 

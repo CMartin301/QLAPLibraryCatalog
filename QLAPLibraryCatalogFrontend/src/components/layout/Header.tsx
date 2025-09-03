@@ -1,15 +1,13 @@
 import { Link, useLocation } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
-import { BookOpen, Home, Book, FolderOpen, LogOut, LogIn, UserPlus } from "lucide-react";
+import { BookOpen, Home, Book, FolderOpen, LogIn, UserPlus } from "lucide-react";
+import { UserMenu } from "./UserMenu";
 
 /**
  * Header Component
- * 
- * Displays a welcome message with user information
- * and provides logout functionality
  */
 export function Header() {
-  const { username, logout, isLoggedIn } = useAuth();
+  const { isLoggedIn } = useAuth();
   const location = useLocation();
 
   return (
@@ -17,18 +15,16 @@ export function Header() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           
-          {/* Logo and Brand - Far Left */}
+          {/* Logo */}
           <Link 
             to="/dashboard" 
             className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
           >
             <BookOpen className="h-8 w-8 text-lavender-400" />
-            <div>
-              <h1 className="text-xl font-bold text-white">QLAP</h1>
-            </div>
+            <h1 className="text-xl font-bold text-white">QLAP</h1>
           </Link>
 
-          {/* Navigation - Center (for authenticated users) */}
+          {/* Navigation */}
           {isLoggedIn && (
             <nav className="hidden lg:flex items-center space-x-6">
               <Link
@@ -67,22 +63,10 @@ export function Header() {
             </nav>
           )}
 
-          {/* Auth Buttons - Far Right */}
+          {/* Auth Controls */}
           <div className="hidden lg:flex items-center space-x-3">
             {isLoggedIn ? (
-              <>
-                <span className="text-gray-300 text-sm">
-                  Welcome, {username}!
-                </span>
-                <button
-                  onClick={logout}
-                  className="flex items-center px-4 py-2 bg-white text-charcoal rounded-md 
-                           hover:bg-gray-100 transition-colors font-medium text-sm"
-                >
-                  <LogOut size={18} className="mr-2" />
-                  Logout
-                </button>
-              </>
+              <UserMenu />
             ) : (
               <>
                 <Link

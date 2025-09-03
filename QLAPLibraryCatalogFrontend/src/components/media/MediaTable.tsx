@@ -27,8 +27,8 @@ export function MediaTable({ media = [], onRefresh }: MediaTableProps) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = React.useState('');
   const [isModalOpen, setIsModalOpen] = React.useState(false);
-const [isSubmitting, setIsSubmitting] = React.useState(false);
-const [submitError, setSubmitError] = React.useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [submitError, setSubmitError] = React.useState<string | null>(null);
 
   // Lock the background scroll when the modal is open
   useModalScrollLock(isModalOpen);

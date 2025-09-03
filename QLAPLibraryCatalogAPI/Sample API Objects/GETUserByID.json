@@ -1,0 +1,9 @@
+
+{
+    "request": {"URL":"/Users/16"},
+    "response":
+
+{"userId":16,"email":"jane.smith@email.com","username":"janesmith","userPreferences":{"preferenceId":null,"userId":16,"defaultLoanDays":14,"autoApproveRequests":true,"emailNotifications":true,"smsNotifications":false,"notificationSettings":null}
+}
+
+}

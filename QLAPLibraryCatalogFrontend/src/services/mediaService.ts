@@ -1,4 +1,4 @@
-import { Media, GetMediaResponse, MediaSearchParams, CreateMediaRequest } from '../types/media';
+import { Media, GetMediaResponse, MediaSearchParams, CreateMediaRequest, MediaType } from '../types/media';
 import api from './apiService';
 
 export const mediaService = {
@@ -35,6 +35,10 @@ export const mediaService = {
     return response.data;
   },
 
+  async getMediaTypes(): Promise<MediaType[]> {    
+    const response = await api.get<MediaType[]>('/api/MediaTypes');
+    return response.data;
+  },
 //   // Get media by genre
 //   async getMediaByGenre(genre: string): Promise<Media[]> {
 //     const response = await this.getMedia({ genre });

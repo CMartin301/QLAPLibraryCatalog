@@ -1,25 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Settings, Bell, Mail, MessageSquare, Calendar, CheckSquare, Loader2 } from 'lucide-react';
-
-interface UserPreferences {
-  preferenceId: number | null;
-  userId: number;
-  defaultLoanDays: number;
-  autoApproveRequests: boolean;
-  emailNotifications: boolean;
-  smsNotifications: boolean;
-  notificationSettings: any | null;
-}
+import { Save, Settings, Bell, Mail, MessageSquare, Calendar, Loader2 } from 'lucide-react';
+import { UserPreferences } from '../../types/preferences';
+import { userService } from '../../services/userService';
+import useAuth from '../../hooks/useAuth';
 
 interface UserPreferencesProps {
-  initialPreferences?: UserPreferences;
   onSave?: (preferences: UserPreferences) => Promise<void>;
-  isLoading?: boolean;
 }
 
 const defaultPreferences: UserPreferences = {
   preferenceId: null,
-  userId: 20,
+  userId: 0,
   defaultLoanDays: 14,
   autoApproveRequests: true,
   emailNotifications: true,
@@ -27,20 +18,47 @@ const defaultPreferences: UserPreferences = {
   notificationSettings: null
 };
 
-export function UserPreferences({ 
-  initialPreferences = defaultPreferences, 
-  onSave,
-  isLoading = false 
-}: UserPreferencesProps) {
-  const [preferences, setPreferences] = useState<UserPreferences>(initialPreferences);
+function UserPreferencesContainer({ onSave }: UserPreferencesProps) {
+  const [preferences, setPreferences] = useState<UserPreferences>(defaultPreferences);
   const [isDirty, setIsDirty] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  const { userID } = useAuth();
 
+  // Load user preferences on component mount
   useEffect(() => {
-    setPreferences(initialPreferences);
-  }, [initialPreferences]);
+    if (userID) {
+      loadUserPreferences();
+    }
+  }, [userID]);
 
+  const loadUserPreferences = async () => {
+    if (!userID) return;
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const userPrefs = await userService.getUserPreferences(userID);
+      console.log('Loaded user preferences:', userPrefs);
+      setPreferences({
+        ...defaultPreferences,
+        ...userPrefs,
+        userId: userID // Ensure userId is set
+      });
+    } catch (err: any) {
+      console.error('Failed to load user preferences:', err);
+      setError('Failed to load preferences');
+      // Keep default preferences if loading fails
+      setPreferences({ ...defaultPreferences, userId: userID });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
   const handleInputChange = (field: keyof UserPreferences, value: any) => {
     setPreferences(prev => ({
       ...prev,
@@ -51,21 +69,63 @@ export function UserPreferences({
   };
 
   const handleSave = async () => {
-    if (!onSave) return;
+    if (!userID) {
+      setSaveMessage('User ID not available. Please log in again.');
+      return;
+    }
     
     setIsSaving(true);
+    setSaveMessage(null);
+    
     try {
-      await onSave(preferences);
+      // Use custom onSave if provided, otherwise use the default service
+      if (onSave) {
+        await onSave(preferences);
+      } else {
+        const updatedPrefs = await userService.updateUserPreferences(userID, preferences);
+        console.log('Updated preferences:', updatedPrefs);
+        // Update local state with server response
+        setPreferences(updatedPrefs);
+      }
+      
       setIsDirty(false);
       setSaveMessage('Preferences saved successfully!');
       setTimeout(() => setSaveMessage(null), 3000);
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Failed to save preferences:', error);
       setSaveMessage('Failed to save preferences. Please try again.');
       setTimeout(() => setSaveMessage(null), 5000);
     } finally {
       setIsSaving(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="animate-spin text-[var(--color-primary)]" size={32} />
+          <span className="ml-3 text-[var(--color-text)]">Loading preferences...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && !preferences.preferenceId) {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg">
+          <p>{error}</p>
+          <button
+            onClick={loadUserPreferences}
+            className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
@@ -108,9 +168,10 @@ export function UserPreferences({
               max="90"
               value={preferences.defaultLoanDays}
               onChange={(e) => handleInputChange('defaultLoanDays', parseInt(e.target.value) || 14)}
-              disabled={isLoading}
+              disabled={isSaving}
               className="w-32 px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm
-                       focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
+                       focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]
+                       disabled:opacity-50"
             />
             <p className="text-xs text-[var(--color-muted)] mt-1">
               How many days books are loaned by default (1-90 days)
@@ -123,9 +184,9 @@ export function UserPreferences({
               id="autoApproveRequests"
               checked={preferences.autoApproveRequests}
               onChange={(e) => handleInputChange('autoApproveRequests', e.target.checked)}
-              disabled={isLoading}
+              disabled={isSaving}
               className="mt-1 h-4 w-4 text-[var(--color-primary)] border-[var(--color-border)] rounded
-                       focus:ring-[var(--color-primary)] focus:ring-2"
+                       focus:ring-[var(--color-primary)] focus:ring-2 disabled:opacity-50"
             />
             <div>
               <label htmlFor="autoApproveRequests" className="text-sm font-medium text-[var(--color-text)]">
@@ -153,9 +214,9 @@ export function UserPreferences({
               id="emailNotifications"
               checked={preferences.emailNotifications}
               onChange={(e) => handleInputChange('emailNotifications', e.target.checked)}
-              disabled={isLoading}
+              disabled={isSaving}
               className="mt-1 h-4 w-4 text-[var(--color-primary)] border-[var(--color-border)] rounded
-                       focus:ring-[var(--color-primary)] focus:ring-2"
+                       focus:ring-[var(--color-primary)] focus:ring-2 disabled:opacity-50"
             />
             <div className="flex items-start gap-2">
               <Mail size={16} className="text-[var(--color-muted)] mt-0.5" />
@@ -176,9 +237,9 @@ export function UserPreferences({
               id="smsNotifications"
               checked={preferences.smsNotifications}
               onChange={(e) => handleInputChange('smsNotifications', e.target.checked)}
-              disabled={isLoading}
+              disabled={isSaving}
               className="mt-1 h-4 w-4 text-[var(--color-primary)] border-[var(--color-border)] rounded
-                       focus:ring-[var(--color-primary)] focus:ring-2"
+                       focus:ring-[var(--color-primary)] focus:ring-2 disabled:opacity-50"
             />
             <div className="flex items-start gap-2">
               <MessageSquare size={16} className="text-[var(--color-muted)] mt-0.5" />
@@ -200,7 +261,7 @@ export function UserPreferences({
         <button
           type="button"
           onClick={handleSave}
-          disabled={!isDirty || isSaving || isLoading}
+          disabled={!isDirty || isSaving}
           className="flex items-center gap-2 px-6 py-2 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)]
                    text-white rounded-lg font-medium shadow-md disabled:opacity-50 disabled:cursor-not-allowed
                    transition-colors"
@@ -222,4 +283,4 @@ export function UserPreferences({
   );
 }
 
-export default UserPreferences;
+export default UserPreferencesContainer;

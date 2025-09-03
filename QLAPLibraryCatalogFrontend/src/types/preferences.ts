@@ -1,4 +1,4 @@
-interface UserPreferences {
+export interface UserPreferences {
   preferenceId: number | null;
   userId: number;
   defaultLoanDays: number;
@@ -8,8 +8,12 @@ interface UserPreferences {
   notificationSettings: any | null;
 }
 
-interface UserPreferencesProps {
+export interface UserPreferencesProps {
   initialPreferences?: UserPreferences;
   onSave?: (preferences: UserPreferences) => Promise<void>;
   isLoading?: boolean;
 }
+
+// export interface GetUserPreferencesResponse {
+//   data: Media[];
+// }
