@@ -25,5 +25,5 @@ public partial class Media
     public DateTime? CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public virtual MediaType MediaType { get; set; } = null!;
-    public virtual ICollection<UserMediaCopy> UserMediaCopies { get; set; } = new List<UserMediaCopy>();
+    public virtual ICollection<MediaCopy> MediaCopies { get; set; } = new List<MediaCopy>();
 }

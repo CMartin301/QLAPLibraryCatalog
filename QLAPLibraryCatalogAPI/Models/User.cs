@@ -23,7 +23,7 @@ public partial class User
 
     public virtual ICollection<BorrowRequest> BorrowRequests { get; set; } = new List<BorrowRequest>();
 
-    public virtual ICollection<UserMediaCopy> UserMediaCopies { get; set; } = new List<UserMediaCopy>();
+    public virtual ICollection<MediaCopy> MediaCopies { get; set; } = new List<MediaCopy>();
 
     public virtual UserPreferences? UserPreferences { get; set; }
 }

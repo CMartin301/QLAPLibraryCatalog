@@ -52,7 +52,7 @@ export function MediaTable({ media = [], onRefresh, onSaveNewMedia: onSaveNewMed
       columnHelper.accessor('title', {
         header: 'Title',
         cell: info => (
-          <div className="font-medium text-[var(--color-text)]">
+          <div className="font-Media text-[var(--color-text)]">
             {info.getValue()}
           </div>
         ),
@@ -68,7 +68,7 @@ export function MediaTable({ media = [], onRefresh, onSaveNewMedia: onSaveNewMed
       columnHelper.accessor('genre', {
         header: 'Genre',
         cell: info => (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-lavender-100 bg-opacity-40 text-lavender-500">
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-Media bg-lavender-100 bg-opacity-40 text-lavender-500">
             {info.getValue()}
           </span>
         ),
@@ -242,7 +242,7 @@ useEffect(() => {
     type="button"
     onClick={() => setIsModalOpen(true)}
     className="py-2 pl-4 pr-5 bg-lavender-400 hover:bg-lavender-500
-               text-white text-sm font-medium rounded-lg shadow
+               text-white text-sm font-Media rounded-lg shadow
                transition-all duration-200 transform hover:scale-[1.01]
                flex items-center gap-2 justify-center whitespace-nowrap"
   >
@@ -261,7 +261,7 @@ useEffect(() => {
                 {headerGroup.headers.map(header => (
                   <th
                     key={header.id}
-                    className="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase tracking-wider"
+                    className="px-6 py-3 text-left text-xs font-Media text-[var(--color-muted)] uppercase tracking-wider"
                   >
                     {header.isPlaceholder ? null : (
                       <div

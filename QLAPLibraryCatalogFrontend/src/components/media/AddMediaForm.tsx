@@ -68,7 +68,7 @@ export function AddMediaForm({ onSubmit, isSubmitting = false, submitError }: Ad
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Media Type */}
         <div>
-          <label htmlFor="mediaTypeId" className="block text-sm font-medium text-[var(--color-muted)] mb-1">
+          <label htmlFor="mediaTypeId" className="block text-sm font-Media text-[var(--color-muted)] mb-1">
             Media Type
           </label>
           <select
@@ -102,7 +102,7 @@ export function AddMediaForm({ onSubmit, isSubmitting = false, submitError }: Ad
 
         {/* Title */}
         <div>
-          <label htmlFor="title" className="block text-sm font-medium text-[var(--color-muted)] mb-1">
+          <label htmlFor="title" className="block text-sm font-Media text-[var(--color-muted)] mb-1">
             Title
           </label>
           <input
@@ -129,7 +129,7 @@ export function AddMediaForm({ onSubmit, isSubmitting = false, submitError }: Ad
       {/* Rest of your existing form fields remain the same */}
       {/* Subtitle */}
       <div>
-        <label htmlFor="subtitle" className="block text-sm font-medium text-[var(--color-muted)] mb-1">
+        <label htmlFor="subtitle" className="block text-sm font-Media text-[var(--color-muted)] mb-1">
           Subtitle
         </label>
         <input
@@ -154,7 +154,7 @@ export function AddMediaForm({ onSubmit, isSubmitting = false, submitError }: Ad
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Creator */}
         <div>
-          <label htmlFor="creator" className="block text-sm font-medium text-[var(--color-muted)] mb-1">
+          <label htmlFor="creator" className="block text-sm font-Media text-[var(--color-muted)] mb-1">
             Creator
           </label>
           <input
@@ -179,7 +179,7 @@ export function AddMediaForm({ onSubmit, isSubmitting = false, submitError }: Ad
 
         {/* Publisher */}
         <div>
-          <label htmlFor="publisher" className="block text-sm font-medium text-[var(--color-muted)] mb-1">
+          <label htmlFor="publisher" className="block text-sm font-Media text-[var(--color-muted)] mb-1">
             Publisher
           </label>
           <input
@@ -205,7 +205,7 @@ export function AddMediaForm({ onSubmit, isSubmitting = false, submitError }: Ad
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Publication Date */}
         <div>
-          <label htmlFor="publicationDate" className="block text-sm font-medium text-[var(--color-muted)] mb-1">
+          <label htmlFor="publicationDate" className="block text-sm font-Media text-[var(--color-muted)] mb-1">
             Publication Date
           </label>
           <input
@@ -233,7 +233,7 @@ export function AddMediaForm({ onSubmit, isSubmitting = false, submitError }: Ad
 
         {/* Language */}
         <div>
-          <label htmlFor="language" className="block text-sm font-medium text-[var(--color-muted)] mb-1">
+          <label htmlFor="language" className="block text-sm font-Media text-[var(--color-muted)] mb-1">
             Language
           </label>
           <input
@@ -256,7 +256,7 @@ export function AddMediaForm({ onSubmit, isSubmitting = false, submitError }: Ad
 
         {/* Genre */}
         <div>
-          <label htmlFor="genre" className="block text-sm font-medium text-[var(--color-muted)] mb-1">
+          <label htmlFor="genre" className="block text-sm font-Media text-[var(--color-muted)] mb-1">
             Genre
           </label>
           <input
@@ -280,7 +280,7 @@ export function AddMediaForm({ onSubmit, isSubmitting = false, submitError }: Ad
 
       {/* Description */}
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-[var(--color-muted)] mb-1">
+        <label htmlFor="description" className="block text-sm font-Media text-[var(--color-muted)] mb-1">
           Description
         </label>
         <textarea
@@ -303,7 +303,7 @@ export function AddMediaForm({ onSubmit, isSubmitting = false, submitError }: Ad
 
       {/* Cover Image URL */}
       <div>
-        <label htmlFor="coverImageUrl" className="block text-sm font-medium text-[var(--color-muted)] mb-1">
+        <label htmlFor="coverImageUrl" className="block text-sm font-Media text-[var(--color-muted)] mb-1">
           Cover Image URL
         </label>
         <input
@@ -331,7 +331,7 @@ export function AddMediaForm({ onSubmit, isSubmitting = false, submitError }: Ad
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* ISBN-10 */}
         <div>
-          <label htmlFor="isbn10" className="block text-sm font-medium text-[var(--color-muted)] mb-1">
+          <label htmlFor="isbn10" className="block text-sm font-Media text-[var(--color-muted)] mb-1">
             ISBN-10
           </label>
           <input
@@ -358,7 +358,7 @@ export function AddMediaForm({ onSubmit, isSubmitting = false, submitError }: Ad
 
         {/* ISBN-13 */}
         <div>
-          <label htmlFor="isbn13" className="block text-sm font-medium text-[var(--color-muted)] mb-1">
+          <label htmlFor="isbn13" className="block text-sm font-Media text-[var(--color-muted)] mb-1">
             ISBN-13
           </label>
           <input
@@ -388,7 +388,7 @@ export function AddMediaForm({ onSubmit, isSubmitting = false, submitError }: Ad
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Page Count */}
         <div>
-          <label htmlFor="pageCount" className="block text-sm font-medium text-[var(--color-muted)] mb-1">
+          <label htmlFor="pageCount" className="block text-sm font-Media text-[var(--color-muted)] mb-1">
             Page Count
           </label>
           <input
@@ -414,7 +414,7 @@ export function AddMediaForm({ onSubmit, isSubmitting = false, submitError }: Ad
 
         {/* Issue Number */}
         <div>
-          <label htmlFor="issueNumber" className="block text-sm font-medium text-[var(--color-muted)] mb-1">
+          <label htmlFor="issueNumber" className="block text-sm font-Media text-[var(--color-muted)] mb-1">
             Issue Number
           </label>
           <input
@@ -439,7 +439,7 @@ export function AddMediaForm({ onSubmit, isSubmitting = false, submitError }: Ad
 
         {/* Volume */}
         <div>
-          <label htmlFor="volume" className="block text-sm font-medium text-[var(--color-muted)] mb-1">
+          <label htmlFor="volume" className="block text-sm font-Media text-[var(--color-muted)] mb-1">
             Volume
           </label>
           <input

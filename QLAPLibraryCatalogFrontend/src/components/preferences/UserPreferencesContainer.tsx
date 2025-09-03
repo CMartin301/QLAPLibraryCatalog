@@ -158,7 +158,7 @@ function UserPreferencesContainer({ onSave }: UserPreferencesProps) {
         
         <div className="space-y-4">
           <div>
-            <label htmlFor="defaultLoanDays" className="block text-sm font-medium text-[var(--color-text)] mb-2">
+            <label htmlFor="defaultLoanDays" className="block text-sm font-Media text-[var(--color-text)] mb-2">
               Default Loan Period (Days)
             </label>
             <input
@@ -189,7 +189,7 @@ function UserPreferencesContainer({ onSave }: UserPreferencesProps) {
                        focus:ring-[var(--color-primary)] focus:ring-2 disabled:opacity-50"
             />
             <div>
-              <label htmlFor="autoApproveRequests" className="text-sm font-medium text-[var(--color-text)]">
+              <label htmlFor="autoApproveRequests" className="text-sm font-Media text-[var(--color-text)]">
                 Auto-approve loan requests
               </label>
               <p className="text-xs text-[var(--color-muted)] mt-1">
@@ -221,7 +221,7 @@ function UserPreferencesContainer({ onSave }: UserPreferencesProps) {
             <div className="flex items-start gap-2">
               <Mail size={16} className="text-[var(--color-muted)] mt-0.5" />
               <div>
-                <label htmlFor="emailNotifications" className="text-sm font-medium text-[var(--color-text)]">
+                <label htmlFor="emailNotifications" className="text-sm font-Media text-[var(--color-text)]">
                   Email notifications
                 </label>
                 <p className="text-xs text-[var(--color-muted)] mt-1">
@@ -244,7 +244,7 @@ function UserPreferencesContainer({ onSave }: UserPreferencesProps) {
             <div className="flex items-start gap-2">
               <MessageSquare size={16} className="text-[var(--color-muted)] mt-0.5" />
               <div>
-                <label htmlFor="smsNotifications" className="text-sm font-medium text-[var(--color-text)]">
+                <label htmlFor="smsNotifications" className="text-sm font-Media text-[var(--color-text)]">
                   SMS notifications
                 </label>
                 <p className="text-xs text-[var(--color-muted)] mt-1">
@@ -263,7 +263,7 @@ function UserPreferencesContainer({ onSave }: UserPreferencesProps) {
           onClick={handleSave}
           disabled={!isDirty || isSaving}
           className="flex items-center gap-2 px-6 py-2 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)]
-                   text-white rounded-lg font-medium shadow-md disabled:opacity-50 disabled:cursor-not-allowed
+                   text-white rounded-lg font-Media shadow-md disabled:opacity-50 disabled:cursor-not-allowed
                    transition-colors"
         >
           {isSaving ? (

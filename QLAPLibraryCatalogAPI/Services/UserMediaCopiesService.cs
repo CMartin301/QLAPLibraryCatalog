@@ -5,29 +5,29 @@ using QLAPLibraryCatalogAPI.Models.DTOs;
 
 namespace QLAPLibraryCatalogAPI.Services
 {
-    public interface IUserMediaCopiesService
+    public interface IMediaCopiesService
     {
-        Task<IEnumerable<UserMediaCopyDto>> GetAllUserMediaCopiesAsync();
-        Task<UserMediaCopyDto?> GetMediaCopyByIdAsync(int mediaCopyId);
-        Task<UserMediaCopyDto> CreateMediaCopyAsync(CreateUserMediaCopyDto createUserMediaCopyDto);
+        Task<IEnumerable<MediaCopyDto>> GetAllMediaCopiesAsync();
+        Task<MediaCopyDto?> GetMediaCopyByIdAsync(int mediaCopyId);
+        Task<MediaCopyDto> CreateMediaCopyAsync(CreateMediaCopyDto createMediaCopyDto);
         // Task<MediaDto?> UpdateMediaAsync(int id, CreateMediaDto updateMediaDto);
         // Task<bool> DeleteMediaAsync(int id);
     }
     
-    public class UserMediaCopiesService : IUserMediaCopiesService
+    public class MediaCopiesService : IMediaCopiesService
     {
         private readonly LibraryCatalogContext _context;
 
-        public UserMediaCopiesService(LibraryCatalogContext context)
+        public MediaCopiesService(LibraryCatalogContext context)
         {
             _context = context;
         }
         
-        public async Task<IEnumerable<UserMediaCopyDto>> GetAllUserMediaCopiesAsync()
+        public async Task<IEnumerable<MediaCopyDto>> GetAllMediaCopiesAsync()
         {
-            return await _context.UserMediaCopies
+            return await _context.MediaCopies
                 .Include(m => m.Media)
-                .Select(m => new UserMediaCopyDto
+                .Select(m => new MediaCopyDto
                 {
                     CopyId = m.CopyId,
                     UserId = m.UserId,
@@ -60,12 +60,12 @@ namespace QLAPLibraryCatalogAPI.Services
                 .ToListAsync();
         }
         
-        public async Task<UserMediaCopyDto?> GetMediaCopyByIdAsync(int mediaCopyId)
+        public async Task<MediaCopyDto?> GetMediaCopyByIdAsync(int mediaCopyId)
         {
-            return await _context.UserMediaCopies
+            return await _context.MediaCopies
                 .Include(m => m.Media)
                 .Where(m => m.CopyId == mediaCopyId)
-                .Select(m => new UserMediaCopyDto
+                .Select(m => new MediaCopyDto
                 {
                     CopyId = m.CopyId,
                     UserId = m.UserId,
@@ -98,25 +98,25 @@ namespace QLAPLibraryCatalogAPI.Services
                 .FirstOrDefaultAsync();
         }
          
-        public async Task<UserMediaCopyDto> CreateMediaCopyAsync(CreateUserMediaCopyDto createUserMediaCopyDto)
+        public async Task<MediaCopyDto> CreateMediaCopyAsync(CreateMediaCopyDto createMediaCopyDto)
         {
-            var userMediaCopy = new UserMediaCopy
+            var mediaCopy = new MediaCopy
             {
-                UserId = createUserMediaCopyDto.UserId,
-                MediaId = createUserMediaCopyDto.MediaId,
-                Condition = createUserMediaCopyDto.Condition,
-                Notes = createUserMediaCopyDto.Notes,
-                IsAvailable = createUserMediaCopyDto.IsAvailable,
-                MaxLoanDays = createUserMediaCopyDto.MaxLoanDays,
-                RequiresApproval = createUserMediaCopyDto.RequiresApproval,
+                UserId = createMediaCopyDto.UserId,
+                MediaId = createMediaCopyDto.MediaId,
+                Condition = createMediaCopyDto.Condition,
+                Notes = createMediaCopyDto.Notes,
+                IsAvailable = createMediaCopyDto.IsAvailable,
+                MaxLoanDays = createMediaCopyDto.MaxLoanDays,
+                RequiresApproval = createMediaCopyDto.RequiresApproval,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
             
-            _context.UserMediaCopies.Add(userMediaCopy);
+            _context.MediaCopies.Add(mediaCopy);
             await _context.SaveChangesAsync();
             
-            return await GetMediaCopyByIdAsync(userMediaCopy.CopyId) ?? throw new InvalidOperationException("Failed to retrieve created media copy");
+            return await GetMediaCopyByIdAsync(mediaCopy.CopyId) ?? throw new InvalidOperationException("Failed to retrieve created media copy");
         }
         
         // public async Task<MediaDto?> UpdateMediaAsync(int id, CreateMediaDto updateMediaDto)

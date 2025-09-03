@@ -56,7 +56,7 @@ export function RegistrationForm() {
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
               <AlertTriangle className="text-red-500 flex-shrink-0 mt-0.5" size={18} />
               <div className="text-red-700 text-sm">
-                <p className="font-medium mb-1">Registration Failed</p>
+                <p className="font-Media mb-1">Registration Failed</p>
                 <p>{error}</p>
               </div>
             </div>
@@ -65,7 +65,7 @@ export function RegistrationForm() {
           <form onSubmit={handleSubmit} noValidate className="space-y-5">
             {/* Email Field */}
             <div>
-              <label htmlFor="reg-email" className="block text-sm font-medium text-charcoal mb-2">
+              <label htmlFor="reg-email" className="block text-sm font-Media text-charcoal mb-2">
                 Email Address
               </label>
               <div className="relative">
@@ -92,7 +92,7 @@ export function RegistrationForm() {
 
             {/* Username Field */}
             <div>
-              <label htmlFor="reg-username" className="block text-sm font-medium text-charcoal mb-2">
+              <label htmlFor="reg-username" className="block text-sm font-Media text-charcoal mb-2">
                 Username
               </label>
               <div className="relative">
@@ -119,7 +119,7 @@ export function RegistrationForm() {
 
             {/* Password Field */}
             <div>
-              <label htmlFor="reg-password" className="block text-sm font-medium text-charcoal mb-2">
+              <label htmlFor="reg-password" className="block text-sm font-Media text-charcoal mb-2">
                 Password
               </label>
               <div className="relative">
@@ -155,7 +155,7 @@ export function RegistrationForm() {
 
             {/* Confirm Password Field */}
             <div>
-              <label htmlFor="reg-confirm-password" className="block text-sm font-medium text-charcoal mb-2">
+              <label htmlFor="reg-confirm-password" className="block text-sm font-Media text-charcoal mb-2">
                 Confirm Password
               </label>
               <div className="relative">
@@ -203,7 +203,7 @@ export function RegistrationForm() {
               disabled={isLoading || !email.trim() || !username.trim() || !password.trim() || !passwordsMatch}
               className="w-full py-3 px-4 bg-lavender-500 hover:bg-lavender-500 
                        disabled:bg-gray-400 disabled:cursor-not-allowed
-                       text-white font-medium rounded-xl shadow-lg
+                       text-white font-Media rounded-xl shadow-lg
                        transition-all duration-200 transform hover:scale-[1.01]
                        focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:ring-offset-2
                        flex items-center justify-center gap-2"
@@ -237,7 +237,7 @@ export function RegistrationForm() {
               type="button"
               onClick={() => navigate("/login")}
               className="w-full py-3 px-4 border-2 border-lavender-500 text-lavender-500 
-                       hover:bg-lavender-500 hover:text-white font-medium rounded-xl
+                       hover:bg-lavender-500 hover:text-white font-Media rounded-xl
                        transition-all duration-200 transform hover:scale-[1.01]
                        focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:ring-offset-2"
             >

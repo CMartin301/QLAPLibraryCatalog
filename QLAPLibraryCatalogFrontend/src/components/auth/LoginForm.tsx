@@ -44,7 +44,7 @@ export function LoginForm() {
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
               <AlertTriangle className="text-red-500 flex-shrink-0 mt-0.5" size={18} />
               <div className="text-red-700 text-sm">
-                <p className="font-medium mb-1">Login Failed</p>
+                <p className="font-Media mb-1">Login Failed</p>
                 <p>{error}</p>
               </div>
             </div>
@@ -53,7 +53,7 @@ export function LoginForm() {
           <form onSubmit={handleSubmit} noValidate className="space-y-5">
             {/* Email Field */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-charcoal mb-2">
+              <label htmlFor="email" className="block text-sm font-Media text-charcoal mb-2">
                 Email Address
               </label>
               <div className="relative">
@@ -81,7 +81,7 @@ export function LoginForm() {
 
             {/* Password Field */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-charcoal mb-2">
+              <label htmlFor="password" className="block text-sm font-Media text-charcoal mb-2">
                 Password
               </label>
               <div className="relative">
@@ -129,7 +129,7 @@ export function LoginForm() {
               </label>
               <button
                 type="button"
-                className="text-sm text-lavender-500 hover:text-lavender-500 font-medium
+                className="text-sm text-lavender-500 hover:text-lavender-500 font-Media
                          transition-colors focus:outline-none focus:underline"
               >
                 Forgot password?
@@ -142,7 +142,7 @@ export function LoginForm() {
               disabled={isLoading || !email.trim() || !password.trim()}
               className="w-full py-3 px-4 bg-lavender-500 hover:bg-lavender-500 
                        disabled:bg-gray-400 disabled:cursor-not-allowed
-                       text-white font-medium rounded-xl shadow-lg
+                       text-white font-Media rounded-xl shadow-lg
                        transition-all duration-200 transform hover:scale-[1.01]
                        focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:ring-offset-2
                        flex items-center justify-center gap-2"
@@ -180,7 +180,7 @@ export function LoginForm() {
               type="button"
               onClick={() => navigate("/register")}
               className="w-full py-3 px-4 border-2 border-lavender-500 text-lavender-500 
-                       hover:bg-lavender-500 hover:text-white font-medium rounded-xl
+                       hover:bg-lavender-500 hover:text-white font-Media rounded-xl
                        transition-all duration-200 transform hover:scale-[1.01]
                        focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:ring-offset-2"
             >

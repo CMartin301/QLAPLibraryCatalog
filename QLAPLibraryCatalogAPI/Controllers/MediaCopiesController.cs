@@ -9,20 +9,20 @@ namespace QLAPLibraryCatalogAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class UserMediaCopiesController : ControllerBase
+    public class MediaCopiesController : ControllerBase
     {
-        private readonly IUserMediaCopiesService _userMediaCopiesService;
-        public UserMediaCopiesController(IUserMediaCopiesService userMediaCopiesService)
+        private readonly IMediaCopiesService _mediaCopiesService;
+        public MediaCopiesController(IMediaCopiesService mediaCopiesService)
         {
-            _userMediaCopiesService = userMediaCopiesService;
+            _mediaCopiesService = mediaCopiesService;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetUserMediaCopies()
+        public async Task<IActionResult> GetMediaCopies()
         {
             try
             {
-                var media = await _userMediaCopiesService.GetAllUserMediaCopiesAsync();
+                var media = await _mediaCopiesService.GetAllMediaCopiesAsync();
                 // return Ok(media);
                 return Ok(new { data = media });
             }
@@ -38,7 +38,7 @@ namespace QLAPLibraryCatalogAPI.Controllers
         {
             try
             {
-                var mediaCopy = await _userMediaCopiesService.GetMediaCopyByIdAsync(mediaCopyId);
+                var mediaCopy = await _mediaCopiesService.GetMediaCopyByIdAsync(mediaCopyId);
                 if (mediaCopy == null) return NotFound();
                 
                 return Ok(mediaCopy);
@@ -50,13 +50,13 @@ namespace QLAPLibraryCatalogAPI.Controllers
         }
         
         [HttpPost]
-        public async Task<IActionResult> CreateMediaCopy([FromBody] CreateUserMediaCopyDto createMediaCopyDto)
+        public async Task<IActionResult> CreateMediaCopy([FromBody] CreateMediaCopyDto createMediaCopyDto)
         {
             try
             {
                 if (!ModelState.IsValid) return BadRequest(ModelState);
                 
-                var createdMediaCopy = await _userMediaCopiesService.CreateMediaCopyAsync(createMediaCopyDto);
+                var createdMediaCopy = await _mediaCopiesService.CreateMediaCopyAsync(createMediaCopyDto);
                 return CreatedAtAction(nameof(GetMediaCopyById), new { mediaCopyId = createdMediaCopy.CopyId }, createdMediaCopy);
             }
             catch (Exception ex)

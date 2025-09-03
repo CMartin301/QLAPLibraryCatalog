@@ -29,7 +29,7 @@ export function Header() {
             <nav className="hidden lg:flex items-center space-x-6">
               <Link
                 to="/dashboard"
-                className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`flex items-center px-3 py-2 rounded-md text-sm font-Media transition-colors ${
                   location.pathname === '/dashboard' 
                     ? 'bg-lavender-500 text-white' 
                     : 'text-gray-300 hover:text-white hover:bg-charcoal-light'
@@ -40,7 +40,7 @@ export function Header() {
               </Link>
               <Link
                 to="/network-catalog"
-                className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`flex items-center px-3 py-2 rounded-md text-sm font-Media transition-colors ${
                   location.pathname === '/network-catalog' 
                     ? 'bg-lavender-500 text-white' 
                     : 'text-gray-300 hover:text-white hover:bg-charcoal-light'
@@ -51,7 +51,7 @@ export function Header() {
               </Link>
               <Link
                 to="/my-library"
-                className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`flex items-center px-3 py-2 rounded-md text-sm font-Media transition-colors ${
                   location.pathname === '/my-library' 
                     ? 'bg-lavender-500 text-white' 
                     : 'text-gray-300 hover:text-white hover:bg-charcoal-light'
@@ -72,7 +72,7 @@ export function Header() {
                 <Link
                   to="/login"
                   className="flex items-center px-4 py-2 border border-white text-white rounded-md 
-                           hover:bg-white hover:text-charcoal transition-colors font-medium text-sm"
+                           hover:bg-white hover:text-charcoal transition-colors font-Media text-sm"
                 >
                   <LogIn size={18} className="mr-2" />
                   Login
@@ -80,7 +80,7 @@ export function Header() {
                 <Link
                   to="/register"
                   className="flex items-center px-4 py-2 bg-white text-charcoal rounded-md 
-                           hover:bg-gray-100 transition-colors font-medium text-sm"
+                           hover:bg-gray-100 transition-colors font-Media text-sm"
                 >
                   <UserPlus size={18} className="mr-2" />
                   Register

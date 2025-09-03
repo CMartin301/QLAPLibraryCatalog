@@ -1,6 +1,6 @@
 namespace QLAPLibraryCatalogAPI.Models.DTOs
 {
-    public class UserMediaCopyDto
+    public class MediaCopyDto
     {
         public int CopyId { get; set; }
         public int UserId { get; set; }
@@ -13,7 +13,7 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
         public MediaDto Media { get; set; } = null!;
     }
 
-    public class CreateUserMediaCopyDto
+    public class CreateMediaCopyDto
     {
         public int UserId { get; set; }
         public int MediaId { get; set; }

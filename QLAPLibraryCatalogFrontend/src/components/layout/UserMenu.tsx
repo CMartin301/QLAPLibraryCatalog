@@ -29,7 +29,7 @@ export function UserMenu() {
         aria-expanded={isOpen}
         aria-controls="user-menu"
         className="flex items-center px-4 py-2 bg-white text-charcoal rounded-md 
-                   hover:bg-gray-100 transition-colors font-medium text-sm"
+                   hover:bg-gray-100 transition-colors font-Media text-sm"
       >
         <User size={18} className="mr-2" />
         {username}
