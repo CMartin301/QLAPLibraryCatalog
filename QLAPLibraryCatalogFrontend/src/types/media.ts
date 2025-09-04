@@ -75,6 +75,8 @@ export interface MediaCopy {
 }
 
 export interface CreateMediaCopyRequest {
+  userId: number;
+  mediaId: number;
   condition: string;
   maxLoanDays: number;
   requiresApproval: boolean;

@@ -13,19 +13,21 @@ import {
   PaginationState,
 } from '@tanstack/react-table';
 import { ChevronUp, ChevronDown, Search, Plus, Filter, X, ChevronRight, ChevronLeft } from 'lucide-react';
-import { Media, MediaFormData, CreateMediaRequest } from '../../types/media';
+import { Media, MediaFormData, CreateMediaRequest, CreateMediaCopyRequest } from '../../types/media';
 import { AddMediaForm } from './AddMediaForm';
 import { Modal } from '../shared/Modal';
 import { mediaService } from '../../services/mediaService';
 import { useModalScrollLock } from '../../hooks/useModalScrollLock';
+import { AddMediaCopyForm } from './AddMediaCopyForm';
 
 interface MediaTableProps {
   media?: Media[];
   onRefresh?: () => void; 
   onSaveNewMedia?: (message: string) => void; 
+  mode?: 'allMedia' | 'myLibrary';
 }
 
-export function MediaTable({ media = [], onRefresh, onSaveNewMedia: onSaveNewMedia }: MediaTableProps) {
+export function MediaTable({ media = [], onRefresh, onSaveNewMedia: onSaveNewMedia, mode = 'allMedia'}: MediaTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -41,6 +43,9 @@ export function MediaTable({ media = [], onRefresh, onSaveNewMedia: onSaveNewMed
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [submitError, setSubmitError] = React.useState<string | null>(null);
+
+  const [isCopyModalOpen, setIsCopyModalOpen] = React.useState(false);
+
 
   // Lock the background scroll when the modal is open
   useModalScrollLock(isModalOpen);
@@ -154,6 +159,29 @@ const handleAddMedia = async (data: MediaFormData) => {
   }
 };
 
+const handleAddMediaCopy = async (data: CreateMediaCopyRequest) => {
+  setIsSubmitting(true);
+  setSubmitError(null);
+
+  try {
+    await mediaService.createNewMediaCopy(data);
+    setIsCopyModalOpen(false);
+    if (onRefresh) {
+      onRefresh();
+    }
+    if (onSaveNewMedia) {
+      onSaveNewMedia('Media copy added successfully!');
+    }
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Failed to add media copy';
+    setSubmitError(errorMessage);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+
 //TODO: API Call instead
 const availableGenres = useMemo(() => {
   const genres = media
@@ -254,9 +282,37 @@ useEffect(() => {
       )}
     </div>
   </div>
+
+  {/* Action Button */}
+  {mode === 'allMedia' ? (
+    <button
+      type="button"
+      onClick={() => setIsModalOpen(true)}
+      className="py-2 pl-4 pr-5 bg-lavender-400 hover:bg-lavender-500
+                text-white text-sm font-medium rounded-lg shadow
+                transition-all duration-200 transform hover:scale-[1.01]
+                flex items-center gap-2 justify-center whitespace-nowrap"
+    >
+      <Plus size={16} className="text-white" />
+      Add Book
+    </button>
+  ) : (
+    <button
+      type="button"
+      onClick={() => setIsCopyModalOpen(true)}
+      className="py-2 pl-4 pr-5 bg-lavender-400 hover:bg-lavender-500
+                text-white text-sm font-medium rounded-lg shadow
+                transition-all duration-200 transform hover:scale-[1.01]
+                flex items-center gap-2 justify-center whitespace-nowrap"
+    >
+      <Plus size={16} className="text-white" />
+      Add to My Collection
+    </button>
+  )}
+
   
   {/* Add Book Button */}
-  <button
+  {/* <button
     type="button"
     onClick={() => setIsModalOpen(true)}
     className="py-2 pl-4 pr-5 bg-lavender-400 hover:bg-lavender-500
@@ -266,7 +322,7 @@ useEffect(() => {
   >
     <Plus size={16} className="text-white" />
     Add Book
-  </button>
+  </button> */}
 </div>
 
       </div>
@@ -330,7 +386,7 @@ useEffect(() => {
                   </td>
                 ))}
               </tr>
-              
+
               // For expanded Media Copies rows:
 
                 //           <React.Fragment key={row.id}>
@@ -453,7 +509,6 @@ useEffect(() => {
     </button>
   </div>
 </div>
-      {/* The modal is now used as a reusable wrapper */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -464,6 +519,19 @@ useEffect(() => {
           submitError={submitError}
         />
       </Modal>
+
+      <Modal
+        isOpen={isCopyModalOpen}
+        onClose={() => setIsCopyModalOpen(false)}
+        title="Add to my Collection"
+      >
+        <AddMediaCopyForm
+          onSubmit={(formData) => handleAddMediaCopy(formData)}
+          isSubmitting={isSubmitting}
+          submitError={submitError}
+        />
+      </Modal>
+
     </div>
   );
 }

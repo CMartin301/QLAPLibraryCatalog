@@ -1,4 +1,4 @@
-import { Media, CreateMediaRequest, MediaType } from '../types/media';
+import { Media, CreateMediaRequest, MediaType, CreateMediaCopyRequest, MediaCopy } from '../types/media';
 import api from './apiService';
 
 export const mediaService = {
@@ -22,6 +22,10 @@ export const mediaService = {
   async getUserMedia(userId: number, includeCopies: boolean = false): Promise<Media[]> {    
     const response = await api.get<Media[]>(`/api/Media/User/${userId}?includeCopies=${includeCopies}`);
     console.log(response.data);
+    return response.data;
+  },
+  async createNewMediaCopy(newMediaCopy: CreateMediaCopyRequest): Promise<MediaCopy> {
+    const response = await api.post<MediaCopy>('/api/MediaCopy', newMediaCopy);
     return response.data;
   },
 

@@ -66,6 +66,7 @@ const MyLibraryPage: React.FC = () => {
       <MediaTable 
                 media={media} 
                 onRefresh={loadMedia}
+                mode='myLibrary'
               />
 {/* 
       <div className="mb-4">
