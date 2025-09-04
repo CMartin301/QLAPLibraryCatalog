@@ -48,6 +48,20 @@ namespace QLAPLibraryCatalogAPI.Controllers
             }
         }
         
+        [HttpGet("User/{userId}")]
+        public async Task<IActionResult> GetUserMedia(int userId, [FromQuery] bool includeCopies = false)
+        {
+            try
+            {
+                var media = await _mediaService.GetUserMediaAsync(userId, includeCopies);
+                return Ok(media);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+        
         [HttpPost]
         public async Task<IActionResult> CreateMedia([FromBody] CreateMediaDto createMediaDto)
         {

@@ -34,7 +34,7 @@ const MyLibraryPage: React.FC = () => {
       
       try {
         const response = await mediaService.getMedia(true);
-        console.log(response);
+        // console.log(response);
         setMedia(response);
       } catch (err: any) {
         setError('Failed to load media');

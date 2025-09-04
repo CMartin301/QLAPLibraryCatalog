@@ -330,6 +330,47 @@ useEffect(() => {
                   </td>
                 ))}
               </tr>
+              
+              // For expanded Media Copies rows:
+
+                //           <React.Fragment key={row.id}>
+                //   <tr className="hover:bg-[var(--color-bg)] transition-colors">
+                //     {row.getVisibleCells().map(cell => (
+                //       <td key={cell.id} className="px-6 py-4 whitespace-nowrap">
+                //         {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                //       </td>
+                //     ))}
+                //   </tr>
+
+                //   {row.original.copies && row.original.copies.length > 0 && (
+                //     <tr className="bg-[var(--color-bg)]">
+                //       <td colSpan={columns.length} className="px-6 py-3">
+                //         <div className="space-y-2">
+                //           {row.original.copies.map(copy => (
+                //             <div
+                //               key={copy.copyId}
+                //               className="flex justify-between items-center p-2 border rounded-lg text-sm"
+                //             >
+                //               <span>
+                //                 Condition: <strong>{copy.condition}</strong>
+                //               </span>
+                //               <span>
+                //                 Loan Days: {copy.maxLoanDays}
+                //               </span>
+                //               <span
+                //                 className={`${
+                //                   copy.isAvailable ? 'text-green-600' : 'text-red-600'
+                //                 } font-medium`}
+                //               >
+                //                 {copy.isAvailable ? 'Available' : 'Unavailable'}
+                //               </span>
+                //             </div>
+                //           ))}
+                //         </div>
+                //       </td>
+                //     </tr>
+                //   )}
+                // </React.Fragment>
             ))}
           </tbody>
         </table>
