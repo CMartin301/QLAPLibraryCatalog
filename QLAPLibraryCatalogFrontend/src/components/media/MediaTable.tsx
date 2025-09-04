@@ -126,6 +126,25 @@ export function MediaTable({ media = [], onRefresh, onSaveNewMedia, onSwitchToAd
         );
       }
 
+      if (mode === 'allMedia') {
+        baseColumns.push(
+          columnHelper.display({
+            id: 'actions',
+            header: 'Actions',
+            cell: info => (
+              <button
+                onClick={() => handleRequestItem(info.row.original)}
+                className="px-3 py-1.5 bg-lavender-400 hover:bg-lavender-500 disabled:bg-gray-300
+                           text-white text-xs font-medium rounded-md shadow-sm
+                           transition-colors duration-200 flex items-center gap-1.5"
+              >
+                Request Item
+              </button>
+            ),
+          })
+        );
+      }
+
       return baseColumns;
     },
     [columnHelper, mode, addingToCopyMediaId]
@@ -294,6 +313,12 @@ const handleAddMedia = async (data: MediaFormData) => {
 
   const actionButton = getActionButtonConfig();
 
+// Add this function in MediaTable component:
+  const handleRequestItem = async (mediaItem: Media) => {
+    // Add your request logic here
+    console.log('Requesting item:', mediaItem);
+    // You can show a modal, make an API call, etc.
+  };
   return (
     <div className="bg-[var(--color-card)] rounded-lg shadow-sm border border-[var(--color-border)]">
       <div className="p-4 border-b border-[var(--color-border)]">
