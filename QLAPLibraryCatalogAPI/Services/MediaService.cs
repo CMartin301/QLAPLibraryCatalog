@@ -7,7 +7,7 @@ namespace QLAPLibraryCatalogAPI.Services
 {
     public interface IMediaService
     {
-        Task<IEnumerable<MediaDto>> GetAllMediaAsync(bool includeCopies = false);
+        Task<IEnumerable<MediaDto>> GetAllMediaAsync(bool includeCopies = false, string? search = null);
         Task<MediaDto?> GetMediaByIdAsync(int mediaId, bool includeCopies = false);
         Task<MediaDto> CreateMediaAsync(CreateMediaDto createMediaDto);
         Task<MediaDto?> UpdateMediaAsync(int id, CreateMediaDto updateMediaDto);
@@ -26,11 +26,29 @@ namespace QLAPLibraryCatalogAPI.Services
         {
             _context = context;
         }
-        public async Task<IEnumerable<MediaDto>> GetAllMediaAsync(bool includeCopies = false)
+        public async Task<IEnumerable<MediaDto>> GetAllMediaAsync(bool includeCopies = false, string? search = null)
         {
             var query = _context.Media
                 .Include(m => m.MediaType)
                 .AsQueryable();
+            
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var searchTerm = search.ToLower();
+                query = query.Where(m => 
+                    m.Title.ToLower().Contains(searchTerm) ||
+                    (m.Subtitle != null && m.Subtitle.ToLower().Contains(searchTerm)) ||
+                    m.Creator.ToLower().Contains(searchTerm) ||
+                    (m.Publisher != null && m.Publisher.ToLower().Contains(searchTerm)) ||
+                    (m.Language != null && m.Language.ToLower().Contains(searchTerm)) ||
+                    (m.Genre != null && m.Genre.ToLower().Contains(searchTerm)) ||
+                    (m.Description != null && m.Description.ToLower().Contains(searchTerm)) ||
+                    (m.Isbn10 != null && m.Isbn10.Contains(searchTerm)) ||
+                    (m.Isbn13 != null && m.Isbn13.Contains(searchTerm)) ||
+                    m.MediaType.DisplayName.ToLower().Contains(searchTerm)
+                );
+            }
 
             if (includeCopies)
             {

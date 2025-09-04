@@ -18,11 +18,11 @@ namespace QLAPLibraryCatalogAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetMedia([FromQuery] bool includeCopies = false)
+        public async Task<IActionResult> GetMedia([FromQuery] bool includeCopies = false, [FromQuery] string? search = null)
         {
             try
             {
-                var media = await _mediaService.GetAllMediaAsync(includeCopies);
+                var media = await _mediaService.GetAllMediaAsync(includeCopies, search);
                 return Ok(media);
             }
             catch (Exception ex)
