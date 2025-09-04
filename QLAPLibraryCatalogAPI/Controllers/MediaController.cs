@@ -18,13 +18,12 @@ namespace QLAPLibraryCatalogAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetMedia()
+        public async Task<IActionResult> GetMedia([FromQuery] bool includeCopies = false)
         {
             try
             {
-                var media = await _mediaService.GetAllMediaAsync();
-                // return Ok(media);
-                return Ok(new { data = media });
+                var media = await _mediaService.GetAllMediaAsync(includeCopies);
+                return Ok(media);
             }
             catch (Exception ex)
             {
@@ -34,11 +33,11 @@ namespace QLAPLibraryCatalogAPI.Controllers
 
 
         [HttpGet("{mediaId}")]
-        public async Task<IActionResult> GetMediaById(int mediaId)
+        public async Task<IActionResult> GetMediaById(int mediaId, [FromQuery] bool includeCopies = false)
         {
             try
             {
-                var media = await _mediaService.GetMediaByIdAsync(mediaId);
+                var media = await _mediaService.GetMediaByIdAsync(mediaId, includeCopies);
                 if (media == null) return NotFound();
                 
                 return Ok(media);

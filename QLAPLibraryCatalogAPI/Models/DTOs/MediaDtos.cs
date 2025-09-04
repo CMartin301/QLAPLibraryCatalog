@@ -1,5 +1,20 @@
 namespace QLAPLibraryCatalogAPI.Models.DTOs
 {
+    // Media Types
+    public class MediaTypeDto
+    {
+        public int MediaTypeId { get; set; }
+        public string Name { get; set; } = null!;
+        public string? DisplayName { get; set; }
+        public string? Description { get; set; }
+    }
+    public class CreateMediaTypeDto
+    {
+        public string Name { get; set; } = null!;
+        public string? DisplayName { get; set; }
+        public string? Description { get; set; }
+    }
+    // Media
     public class MediaDto
     {
         public int MediaId { get; set; }
@@ -19,6 +34,7 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
         public string? IssueNumber { get; set; }
         public string? Volume { get; set; }
         public MediaTypeDto? MediaType { get; set; }
+        public List<MediaCopyDto> Copies { get; set; } = new();
     }
 
     public class CreateMediaDto
@@ -40,18 +56,34 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
         public string? Volume { get; set; }
     }
 
-
-    public class MediaTypeDto
-    {
-        public int MediaTypeId { get; set; }
-        public string Name { get; set; } = null!;
-        public string? DisplayName { get; set; }
-        public string? Description { get; set; }
+    // Media Copies
+    public class MediaWithCopies : Media {
+        public bool isOwned { get; set; }
+        public List<MediaCopy>? userCopies { get; set; }
     }
-    public class CreateMediaTypeDto
+
+    public class MediaCopyDto
     {
-        public string Name { get; set; } = null!;
-        public string? DisplayName { get; set; }
-        public string? Description { get; set; }
+        public int CopyId { get; set; }
+        public int UserId { get; set; }
+        public int MediaId { get; set; }
+        public string? Condition { get; set; }
+        public string? Notes { get; set; }
+        public bool? IsAvailable { get; set; }
+        public int? MaxLoanDays { get; set; }
+        public bool? RequiresApproval { get; set; }
+        public MediaDto Media { get; set; } = null!;
+    }
+
+    public class CreateMediaCopyDto
+    {
+        public int UserId { get; set; }
+        public int MediaId { get; set; }
+        public string? Condition { get; set; }
+        public string? Notes { get; set; }
+        public bool? IsAvailable { get; set; }
+        public int? MaxLoanDays { get; set; }
+        public bool? RequiresApproval { get; set; }
+        
     }
 }

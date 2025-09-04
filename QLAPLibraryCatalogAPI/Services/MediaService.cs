@@ -7,8 +7,8 @@ namespace QLAPLibraryCatalogAPI.Services
 {
     public interface IMediaService
     {
-        Task<IEnumerable<MediaDto>> GetAllMediaAsync();
-        Task<MediaDto?> GetMediaByIdAsync(int mediaId);
+        Task<IEnumerable<MediaDto>> GetAllMediaAsync(bool includeCopies = false);
+        Task<MediaDto?> GetMediaByIdAsync(int mediaId, bool includeCopies = false);
         Task<MediaDto> CreateMediaAsync(CreateMediaDto createMediaDto);
         Task<MediaDto?> UpdateMediaAsync(int id, CreateMediaDto updateMediaDto);
         Task<bool> DeleteMediaAsync(int id);
@@ -22,11 +22,18 @@ namespace QLAPLibraryCatalogAPI.Services
         {
             _context = context;
         }
-        public async Task<IEnumerable<MediaDto>> GetAllMediaAsync()
+        public async Task<IEnumerable<MediaDto>> GetAllMediaAsync(bool includeCopies = false)
         {
-            return await _context.Media
+            var query = _context.Media
                 .Include(m => m.MediaType)
-                .Select(m => new MediaDto
+                .AsQueryable();
+
+            if (includeCopies)
+            {
+                query = query.Include(m => m.MediaCopies);
+            }
+
+            return await query.Select(m => new MediaDto
                 {
                     MediaId = m.MediaId,
                     MediaTypeId = m.MediaTypeId,
@@ -50,15 +57,34 @@ namespace QLAPLibraryCatalogAPI.Services
                         Name = m.MediaType.Name,
                         DisplayName = m.MediaType.DisplayName,
                         Description = m.MediaType.Description
-                    }
+                    },
+                    Copies = includeCopies
+                        ? m.MediaCopies.Select(c => new MediaCopyDto
+                        {
+                            CopyId = c.CopyId,
+                            UserId = c.UserId,
+                            MediaId = c.MediaId,
+                            Condition = c.Condition,
+                            MaxLoanDays = c.MaxLoanDays,
+                            RequiresApproval = c.RequiresApproval,
+                            IsAvailable = c.IsAvailable,
+                            Notes = c.Notes
+                        }).ToList()
+                        : new List<MediaCopyDto>()
                 })
                 .ToListAsync();
         }
         
-        public async Task<MediaDto?> GetMediaByIdAsync(int mediaId)
+        public async Task<MediaDto?> GetMediaByIdAsync(int mediaId, bool includeCopies = false)
         {
-            return await _context.Media
+            var query = _context.Media
                 .Include(m => m.MediaType)
+                .AsQueryable();
+
+            if (includeCopies)
+                query = query.Include(m => m.MediaCopies);
+
+            return await query
                 .Where(m => m.MediaId == mediaId)
                 .Select(m => new MediaDto
                 {
@@ -84,7 +110,20 @@ namespace QLAPLibraryCatalogAPI.Services
                         Name = m.MediaType.Name,
                         DisplayName = m.MediaType.DisplayName,
                         Description = m.MediaType.Description
-                    }
+                    },
+                    Copies = includeCopies
+                        ? m.MediaCopies.Select(c => new MediaCopyDto
+                        {
+                            CopyId = c.CopyId,
+                            UserId = c.UserId,
+                            MediaId = c.MediaId,
+                            Condition = c.Condition,
+                            MaxLoanDays = c.MaxLoanDays,
+                            RequiresApproval = c.RequiresApproval,
+                            IsAvailable = c.IsAvailable,
+                            Notes = c.Notes
+                        }).ToList()
+                        : new List<MediaCopyDto>()
                 })
                 .FirstOrDefaultAsync();
         }
