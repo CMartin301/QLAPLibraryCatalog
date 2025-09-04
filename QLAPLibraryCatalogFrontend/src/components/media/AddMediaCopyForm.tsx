@@ -1,105 +1,141 @@
-// AddMediaCopyForm.tsx
-import React, { useState } from 'react';
-import AsyncSelect from 'react-select/async';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { CreateMediaCopyRequest, Media } from '../../types/media';
-import { mediaService } from '../../services/mediaService';
 import useAuth from '../../hooks/useAuth';
 
 interface AddMediaCopyFormProps {
   onSubmit: (data: CreateMediaCopyRequest) => void;
   isSubmitting: boolean;
   submitError: string | null;
+  preselectedMedia?: Media;
 }
 
 export function AddMediaCopyForm({
   onSubmit,
   isSubmitting,
   submitError,
+  preselectedMedia,
 }: AddMediaCopyFormProps) {
-  const { register, handleSubmit, reset } = useForm<CreateMediaCopyRequest>();
-  const [selectedMedia, setSelectedMedia] = useState<Media | null>(null);
-  const { username, userID } = useAuth();
-
-  // Load options from backend as user types
-  const loadMediaOptions = async (inputValue: string) => {
-    if (!inputValue) return [];
-    const result = await mediaService.getMedia();
-    return result.map((m: Media) => ({
-      value: m.mediaId,
-      label: `${m.title} (${m.creator ?? 'Unknown'})`,
-      media: m,
-    }));
-  };
+  const { register, handleSubmit, reset } = useForm<CreateMediaCopyRequest>({
+    defaultValues: {
+      condition: 'Good',
+      maxLoanDays: 14,
+      requiresApproval: false,
+    }
+  });
+  const { userID } = useAuth();
 
   const handleFormSubmit = (data: CreateMediaCopyRequest) => {
-    if (!selectedMedia) return;
-    if (!userID) return;
+    if (!preselectedMedia || !userID) return;
 
-    data.mediaId = selectedMedia.mediaId;
-    data.userId = userID;
+    const submitData = {
+      ...data,
+      mediaId: preselectedMedia.mediaId,
+      userId: userID,
+    };
 
-    onSubmit(data);
+    onSubmit(submitData);
     reset();
-    setSelectedMedia(null);
   };
 
+  if (!preselectedMedia) {
+    return <div className="text-red-600">No media selected</div>;
+  }
+
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium mb-1">Select Media</label>
-        <AsyncSelect
-          cacheOptions
-          defaultOptions
-          loadOptions={loadMediaOptions}
-          onChange={(option) => setSelectedMedia(option ? (option as any).media : null)}
-          placeholder="Search media..."
-        />
+    <div className="space-y-6">
+      {/* Media Info Display */}
+      <div className="bg-gray-50 rounded-lg p-4 border">
+        <h3 className="font-semibold text-lg text-gray-900 mb-2">
+          {preselectedMedia.title}
+        </h3>
+        <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
+          <div><span className="font-medium">Author:</span> {preselectedMedia.creator || 'Unknown'}</div>
+          <div><span className="font-medium">Genre:</span> {preselectedMedia.genre || 'N/A'}</div>
+          {preselectedMedia.publisher && (
+            <div><span className="font-medium">Publisher:</span> {preselectedMedia.publisher}</div>
+          )}
+          {preselectedMedia.publicationDate && (
+            <div><span className="font-medium">Published:</span> {preselectedMedia.publicationDate}</div>
+          )}
+        </div>
       </div>
 
-      {selectedMedia && (
-        <>
-          <div>
-            <label className="block text-sm font-medium mb-1">Condition</label>
-            <input
-              {...register('condition', { required: true })}
-              className="w-full border rounded px-3 py-2"
-            />
+      {/* Copy Details Form */}
+      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Condition <span className="text-red-500">*</span>
+          </label>
+          <select
+            {...register('condition', { required: 'Condition is required' })}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-lavender-500 focus:border-lavender-500"
+          >
+            <option value="Excellent">Excellent</option>
+            <option value="Very Good">Very Good</option>
+            <option value="Good">Good</option>
+            <option value="Fair">Fair</option>
+            <option value="Poor">Poor</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Maximum Loan Days <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="number"
+            min="1"
+            max="365"
+            {...register('maxLoanDays', { 
+              required: 'Max loan days is required',
+              min: { value: 1, message: 'Must be at least 1 day' },
+              max: { value: 365, message: 'Cannot exceed 365 days' }
+            })}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-lavender-500 focus:border-lavender-500"
+          />
+        </div>
+
+        <div className="flex items-center gap-3">
+          <input 
+            type="checkbox" 
+            id="requiresApproval"
+            {...register('requiresApproval')}
+            className="rounded border-gray-300 text-lavender-500 focus:ring-lavender-500"
+          />
+          <label htmlFor="requiresApproval" className="text-sm font-medium text-gray-700">
+            Requires approval before lending
+          </label>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Notes (Optional)
+          </label>
+          <textarea
+            {...register('notes')}
+            rows={3}
+            placeholder="Any additional notes about this copy..."
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-lavender-500 focus:border-lavender-500 resize-none"
+          />
+        </div>
+
+        {submitError && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+            {submitError}
           </div>
+        )}
 
-          <div>
-            <label className="block text-sm font-medium mb-1">Max Loan Days</label>
-            <input
-              type="number"
-              {...register('maxLoanDays', { required: true })}
-              className="w-full border rounded px-3 py-2"
-            />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <input type="checkbox" {...register('requiresApproval')} />
-            <span className="text-sm">Requires Approval</span>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Notes</label>
-            <textarea
-              {...register('notes')}
-              className="w-full border rounded px-3 py-2"
-            />
-          </div>
-        </>
-      )}
-
-      {submitError && <p className="text-red-600 text-sm">{submitError}</p>}
-
-      <button
-        type="submit"
-        disabled={isSubmitting || !selectedMedia}
-        className="w-full py-2 px-4 bg-lavender-500 text-white rounded-lg hover:bg-lavender-600 disabled:opacity-50"
-      >
-        {isSubmitting ? 'Adding...' : 'Add Copy'}
-      </button>
-    </form>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full py-3 px-4 bg-lavender-500 hover:bg-lavender-600 disabled:bg-gray-400 disabled:cursor-not-allowed
+                   text-white font-medium rounded-lg shadow-sm transition-colors duration-200
+                   focus:ring-2 focus:ring-lavender-500 focus:ring-offset-2"
+        >
+          {isSubmitting ? 'Adding to Collection...' : 'Add to My Collection'}
+        </button>
+      </form>
+    </div>
   );
 }

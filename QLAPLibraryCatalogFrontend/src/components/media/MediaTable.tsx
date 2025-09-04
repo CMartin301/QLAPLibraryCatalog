@@ -19,22 +19,23 @@ import { Modal } from '../shared/Modal';
 import { mediaService } from '../../services/mediaService';
 import { useModalScrollLock } from '../../hooks/useModalScrollLock';
 import { AddMediaCopyForm } from './AddMediaCopyForm';
+import useAuth from '../../hooks/useAuth';
 
 interface MediaTableProps {
   media?: Media[];
   onRefresh?: () => void; 
   onSaveNewMedia?: (message: string) => void; 
-  mode?: 'allMedia' | 'myLibrary';
+  onSwitchToAddTab?: () => void;
+  mode?: 'allMedia' | 'myLibrary' | 'addToCollection';
 }
 
-export function MediaTable({ media = [], onRefresh, onSaveNewMedia: onSaveNewMedia, mode = 'allMedia'}: MediaTableProps) {
+export function MediaTable({ media = [], onRefresh, onSaveNewMedia, onSwitchToAddTab, mode = 'allMedia'}: MediaTableProps) {
+  const { userID } = useAuth();
   const [sorting, setSorting] = React.useState<SortingState>([]);
-
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = React.useState('');
   const [showGenreFilter, setShowGenreFilter] = useState(false);
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
-
   const [pagination, setPagination] = React.useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
@@ -43,61 +44,91 @@ export function MediaTable({ media = [], onRefresh, onSaveNewMedia: onSaveNewMed
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [submitError, setSubmitError] = React.useState<string | null>(null);
-
   const [isCopyModalOpen, setIsCopyModalOpen] = React.useState(false);
+  const [selectedMediaForCopy, setSelectedMediaForCopy] = React.useState<Media | null>(null);
+  const [addingToCopyMediaId, setAddingToCopyMediaId] = React.useState<number | null>(null);
 
-
-  // Lock the background scroll when the modal is open
-  useModalScrollLock(isModalOpen);
+  useModalScrollLock(isModalOpen || isCopyModalOpen);
 
   const columnHelper = createColumnHelper<Media>();
 
   const columns = useMemo(
-    () => [
-      columnHelper.accessor('title', {
-        header: 'Title',
-        cell: info => (
-          <div className="font-Media text-[var(--color-text)]">
-            {info.getValue()}
-          </div>
-        ),
-      }),
-      columnHelper.accessor('creator', {
-        header: 'Author',
-        cell: info => (
-          <div className="text-[var(--color-text)]">
-            {info.getValue()}
-          </div>
-        ),
-      }),
-      columnHelper.accessor('genre', {
-        header: 'Genre',
-        cell: info => (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-Media bg-lavender-100 bg-opacity-40 text-lavender-500">
-            {info.getValue()}
-          </span>
-        ),
-      }),
-      columnHelper.display({
-        id: 'copies',
-        header: 'Copies',
-        cell: info => {
-          const copies = info.row.original.copies ?? [];
-          if (copies.length === 0) {
-            return <span className="text-gray-400 text-sm">—</span>;
-          }
-
-          const availableCount = copies.filter(c => c.isAvailable).length;
-          return (
-            <div className="text-sm text-[var(--color-text)]">
-              {copies.length} total{" "}
-              <span className="text-green-600">({availableCount} available)</span>
+    () => {
+      const baseColumns = [
+        columnHelper.accessor('title', {
+          header: 'Title',
+          cell: info => (
+            <div className="font-medium text-[var(--color-text)]">
+              {info.getValue()}
             </div>
-          );
-        },
-      }),
-    ],
-    [columnHelper]
+          ),
+        }),
+        columnHelper.accessor('creator', {
+          header: 'Author',
+          cell: info => (
+            <div className="text-[var(--color-text)]">
+              {info.getValue()}
+            </div>
+          ),
+        }),
+        columnHelper.accessor('genre', {
+          header: 'Genre',
+          cell: info => (
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-lavender-100 bg-opacity-40 text-lavender-500">
+              {info.getValue()}
+            </span>
+          ),
+        }),
+        columnHelper.display({
+          id: 'copies',
+          header: 'Copies',
+          cell: info => {
+            const copies = info.row.original.copies ?? [];
+            if (copies.length === 0) {
+              return <span className="text-gray-400 text-sm">—</span>;
+            }
+
+            const availableCount = copies.filter(c => c.isAvailable).length;
+            return (
+              <div className="text-sm text-[var(--color-text)]">
+                {copies.length} total{" "}
+                <span className="text-green-600">({availableCount} available)</span>
+              </div>
+            );
+          },
+        }),
+      ];
+
+      // Add action column for 'addToCollection' mode
+      if (mode === 'addToCollection') {
+        baseColumns.push(
+          columnHelper.display({
+            id: 'actions',
+            header: 'Actions',
+            cell: info => {
+              const mediaItem = info.row.original;
+              const isAdding = addingToCopyMediaId === mediaItem.mediaId;
+              
+              return (
+                <button
+                  onClick={() => handleAddToCollection(mediaItem)}
+                  disabled={isAdding}
+                  className="px-3 py-1.5 bg-lavender-400 hover:bg-lavender-500 disabled:bg-gray-300
+                           text-white text-xs font-medium rounded-md shadow-sm
+                           transition-colors duration-200 flex items-center gap-1.5"
+                >
+                  <Plus size={14} />
+                  {isAdding ? 'Adding...' : 'Add to Collection'}
+                </button>
+              );
+            },
+          })
+        );
+      }
+
+      return baseColumns;
+    },
+    [columnHelper, mode, addingToCopyMediaId]
   );
 
   const table = useReactTable({
@@ -119,6 +150,13 @@ export function MediaTable({ media = [], onRefresh, onSaveNewMedia: onSaveNewMed
     getPaginationRowModel: getPaginationRowModel(),
   });
 
+  const handleAddToCollection = async (mediaItem: Media) => {
+    if (!userID) return;
+    
+    setAddingToCopyMediaId(mediaItem.mediaId);
+    setSelectedMediaForCopy(mediaItem);
+    setIsCopyModalOpen(true);
+  };
 const handleAddMedia = async (data: MediaFormData) => {
   setIsSubmitting(true);
   setSubmitError(null);
@@ -144,10 +182,14 @@ const handleAddMedia = async (data: MediaFormData) => {
   try {
     await mediaService.createNewMedia(apiPayload);
     setIsModalOpen(false);
+    
+    setGlobalFilter('');
+    clearGenreFilter();
+
     if (onRefresh) {
       onRefresh();
-    }
-    // Add this success callback
+    }    
+
     if (onSaveNewMedia) {
       onSaveNewMedia('Media added successfully!');
     }
@@ -158,173 +200,176 @@ const handleAddMedia = async (data: MediaFormData) => {
     setIsSubmitting(false);
   }
 };
+  const handleAddMediaCopy = async (data: CreateMediaCopyRequest) => {
+    setIsSubmitting(true);
+    setSubmitError(null);
 
-const handleAddMediaCopy = async (data: CreateMediaCopyRequest) => {
-  setIsSubmitting(true);
-  setSubmitError(null);
+    try {
+      // If we have a selected media for copy, use its mediaId
+      const copyData = selectedMediaForCopy 
+        ? { ...data, mediaId: selectedMediaForCopy.mediaId }
+        : data;
 
-  try {
-    await mediaService.createNewMediaCopy(data);
-    setIsCopyModalOpen(false);
-    if (onRefresh) {
-      onRefresh();
-    }
-    if (onSaveNewMedia) {
-      onSaveNewMedia('Media copy added successfully!');
-    }
-  } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Failed to add media copy';
-    setSubmitError(errorMessage);
-  } finally {
-    setIsSubmitting(false);
-  }
-};
-
-
-//TODO: API Call instead
-const availableGenres = useMemo(() => {
-  const genres = media
-    .map(item => item.genre)
-    .filter((genre, index, arr) => genre && arr.indexOf(genre) === index)
-    .sort();
-  return genres;
-}, [media]);
-
-const handleGenreFilter = (genre: string) => {
-  const newGenres = selectedGenres.includes(genre)
-    ? selectedGenres.filter(g => g !== genre)
-    : [...selectedGenres, genre];
-  
-  setSelectedGenres(newGenres);
-  
-  // Apply filter to table
-  table.getColumn('genre')?.setFilterValue(newGenres.length > 0 ? newGenres : undefined);
-};
-
-const clearGenreFilter = () => {
-  setSelectedGenres([]);
-  table.getColumn('genre')?.setFilterValue(undefined);
-};
-
-useEffect(() => {
-  const handleClickOutside = (event: MouseEvent) => {
-    const target = event.target as Element;
-    if (!target.closest('.relative')) {
-      setShowGenreFilter(false);
+      await mediaService.createNewMediaCopy(copyData);
+      setIsCopyModalOpen(false);
+      setSelectedMediaForCopy(null);
+      setAddingToCopyMediaId(null);
+      
+      if (onRefresh) {
+        onRefresh();
+      }
+      if (onSaveNewMedia) {
+        const title = selectedMediaForCopy?.title || 'Media';
+        onSaveNewMedia(`"${title}" added to your collection!`);
+      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to add media copy';
+      setSubmitError(errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  if (showGenreFilter) {
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }
-}, [showGenreFilter]);
+  const handleCloseCopyModal = () => {
+    setIsCopyModalOpen(false);
+    setSelectedMediaForCopy(null);
+    setAddingToCopyMediaId(null);
+  };
+
+  const availableGenres = useMemo(() => {
+    const genres = media
+      .map(item => item.genre)
+      .filter((genre, index, arr) => genre && arr.indexOf(genre) === index)
+      .sort();
+    return genres;
+  }, [media]);
+
+  const handleGenreFilter = (genre: string) => {
+    const newGenres = selectedGenres.includes(genre)
+      ? selectedGenres.filter(g => g !== genre)
+      : [...selectedGenres, genre];
+    
+    setSelectedGenres(newGenres);
+    table.getColumn('genre')?.setFilterValue(newGenres.length > 0 ? newGenres : undefined);
+  };
+
+  const clearGenreFilter = () => {
+    setSelectedGenres([]);
+    table.getColumn('genre')?.setFilterValue(undefined);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (!target.closest('.relative')) {
+        setShowGenreFilter(false);
+      }
+    };
+
+    if (showGenreFilter) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showGenreFilter]);
+
+  const getActionButtonConfig = () => {
+    switch (mode) {
+      case 'allMedia':
+        return {
+          text: 'Add Book',
+          onClick: () => setIsModalOpen(true)
+        };
+      case 'myLibrary':
+        return {
+          text: 'Add to My Collection',
+          onClick: () => onSwitchToAddTab?.()
+        };
+      case 'addToCollection':
+        return null;
+      default:
+        return null;
+    }
+  };
+
+  const actionButton = getActionButtonConfig();
 
   return (
     <div className="bg-[var(--color-card)] rounded-lg shadow-sm border border-[var(--color-border)]">
-
       <div className="p-4 border-b border-[var(--color-border)]">
-<div className="flex items-center justify-between gap-4 flex-wrap">
-  <div className="flex items-center gap-3 flex-1 min-w-0">
-    {/* Search Input */}
-    <div className="relative flex-1 max-w-md">
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" size={18} />
-      <input
-        type="text"
-        placeholder="Search books..."
-        value={globalFilter ?? ''}
-        onChange={e => setGlobalFilter(e.target.value)}
-        className="w-full pl-10 pr-3 py-2 border border-[var(--color-border)] rounded-lg text-sm
-                   focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
-      />
-    </div>
-    
-    {/* Genre Filter Dropdown */}
-    <div className="relative">
-      <button
-        onClick={() => setShowGenreFilter(!showGenreFilter)}
-        className={`flex items-center gap-2 px-3 py-2 border rounded-lg text-sm transition-colors ${
-          selectedGenres.length > 0
-            ? 'bg-lavender-50 border-lavender-200 text-lavender-700'
-            : 'border-[var(--color-border)] text-[var(--color-text)]'
-        }`}
-      >
-        <Filter size={16} />
-        Genre {selectedGenres.length > 0 && `(${selectedGenres.length})`}
-      </button>
-      
-      {showGenreFilter && (
-        <div className="absolute top-full mt-1 left-0 z-10 bg-white border border-[var(--color-border)] rounded-lg shadow-lg min-w-48">
-          <div className="p-2">
-            {selectedGenres.length > 0 && (
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            {/* Search Input */}
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" size={18} />
+              <input
+                type="text"
+                placeholder="Search books..."
+                value={globalFilter ?? ''}
+                onChange={e => setGlobalFilter(e.target.value)}
+                className="w-full pl-10 pr-3 py-2 border border-[var(--color-border)] rounded-lg text-sm
+                           focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
+              />
+            </div>
+            
+            {/* Genre Filter Dropdown */}
+            <div className="relative">
               <button
-                onClick={clearGenreFilter}
-                className="flex items-center gap-2 w-full px-2 py-1 text-sm text-red-600 hover:bg-red-50 rounded"
+                onClick={() => setShowGenreFilter(!showGenreFilter)}
+                className={`flex items-center gap-2 px-3 py-2 border rounded-lg text-sm transition-colors ${
+                  selectedGenres.length > 0
+                    ? 'bg-lavender-50 border-lavender-200 text-lavender-700'
+                    : 'border-[var(--color-border)] text-[var(--color-text)]'
+                }`}
               >
-                <X size={14} />
-                Clear filters
+                <Filter size={16} />
+                Genre {selectedGenres.length > 0 && `(${selectedGenres.length})`}
               </button>
-            )}
-            {availableGenres.map(genre => (
-              <label key={genre} className="flex items-center gap-2 px-2 py-1 hover:bg-gray-50 rounded cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={selectedGenres.includes(genre)}
-                  onChange={() => handleGenreFilter(genre)}
-                  className="rounded border-gray-300 text-lavender-500 focus:ring-lavender-500"
-                />
-                <span className="text-sm">{genre}</span>
-              </label>
-            ))}
+              
+              {showGenreFilter && (
+                <div className="absolute top-full mt-1 left-0 z-10 bg-white border border-[var(--color-border)] rounded-lg shadow-lg min-w-48">
+                  <div className="p-2">
+                    {selectedGenres.length > 0 && (
+                      <button
+                        onClick={clearGenreFilter}
+                        className="flex items-center gap-2 w-full px-2 py-1 text-sm text-red-600 hover:bg-red-50 rounded"
+                      >
+                        <X size={14} />
+                        Clear filters
+                      </button>
+                    )}
+                    {availableGenres.map(genre => (
+                      <label key={genre} className="flex items-center gap-2 px-2 py-1 hover:bg-gray-50 rounded cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedGenres.includes(genre)}
+                          onChange={() => handleGenreFilter(genre)}
+                          className="rounded border-gray-300 text-lavender-500 focus:ring-lavender-500"
+                        />
+                        <span className="text-sm">{genre}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
+
+          {/* Action Button (if applicable) */}
+          {actionButton && (
+            <button
+              type="button"
+              onClick={actionButton.onClick}
+              className="py-2 pl-4 pr-5 bg-lavender-400 hover:bg-lavender-500
+                        text-white text-sm font-medium rounded-lg shadow
+                        transition-all duration-200 transform hover:scale-[1.01]
+                        flex items-center gap-2 justify-center whitespace-nowrap"
+            >
+              <Plus size={16} className="text-white" />
+              {actionButton.text}
+            </button>
+          )}
         </div>
-      )}
-    </div>
-  </div>
-
-  {/* Action Button */}
-  {mode === 'allMedia' ? (
-    <button
-      type="button"
-      onClick={() => setIsModalOpen(true)}
-      className="py-2 pl-4 pr-5 bg-lavender-400 hover:bg-lavender-500
-                text-white text-sm font-medium rounded-lg shadow
-                transition-all duration-200 transform hover:scale-[1.01]
-                flex items-center gap-2 justify-center whitespace-nowrap"
-    >
-      <Plus size={16} className="text-white" />
-      Add Book
-    </button>
-  ) : (
-    <button
-      type="button"
-      onClick={() => setIsCopyModalOpen(true)}
-      className="py-2 pl-4 pr-5 bg-lavender-400 hover:bg-lavender-500
-                text-white text-sm font-medium rounded-lg shadow
-                transition-all duration-200 transform hover:scale-[1.01]
-                flex items-center gap-2 justify-center whitespace-nowrap"
-    >
-      <Plus size={16} className="text-white" />
-      Add to My Collection
-    </button>
-  )}
-
-  
-  {/* Add Book Button */}
-  {/* <button
-    type="button"
-    onClick={() => setIsModalOpen(true)}
-    className="py-2 pl-4 pr-5 bg-lavender-400 hover:bg-lavender-500
-               text-white text-sm font-Media rounded-lg shadow
-               transition-all duration-200 transform hover:scale-[1.01]
-               flex items-center gap-2 justify-center whitespace-nowrap"
-  >
-    <Plus size={16} className="text-white" />
-    Add Book
-  </button> */}
-</div>
-
       </div>
 
       <div className="overflow-x-auto">
@@ -335,7 +380,7 @@ useEffect(() => {
                 {headerGroup.headers.map(header => (
                   <th
                     key={header.id}
-                    className="px-6 py-3 text-left text-xs font-Media text-[var(--color-muted)] uppercase tracking-wider"
+                    className="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase tracking-wider"
                   >
                     {header.isPlaceholder ? null : (
                       <div
@@ -386,135 +431,105 @@ useEffect(() => {
                   </td>
                 ))}
               </tr>
-
-              // For expanded Media Copies rows:
-
-                //           <React.Fragment key={row.id}>
-                //   <tr className="hover:bg-[var(--color-bg)] transition-colors">
-                //     {row.getVisibleCells().map(cell => (
-                //       <td key={cell.id} className="px-6 py-4 whitespace-nowrap">
-                //         {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                //       </td>
-                //     ))}
-                //   </tr>
-
-                //   {row.original.copies && row.original.copies.length > 0 && (
-                //     <tr className="bg-[var(--color-bg)]">
-                //       <td colSpan={columns.length} className="px-6 py-3">
-                //         <div className="space-y-2">
-                //           {row.original.copies.map(copy => (
-                //             <div
-                //               key={copy.copyId}
-                //               className="flex justify-between items-center p-2 border rounded-lg text-sm"
-                //             >
-                //               <span>
-                //                 Condition: <strong>{copy.condition}</strong>
-                //               </span>
-                //               <span>
-                //                 Loan Days: {copy.maxLoanDays}
-                //               </span>
-                //               <span
-                //                 className={`${
-                //                   copy.isAvailable ? 'text-green-600' : 'text-red-600'
-                //                 } font-medium`}
-                //               >
-                //                 {copy.isAvailable ? 'Available' : 'Unavailable'}
-                //               </span>
-                //             </div>
-                //           ))}
-                //         </div>
-                //       </td>
-                //     </tr>
-                //   )}
-                // </React.Fragment>
             ))}
           </tbody>
         </table>
       </div>
 
-      {table.getRowModel().rows.length === 0 && (
-        <div className="text-center py-8">
-          <p className="text-[var(--color-muted)]">No books found</p>
-        </div>
-      )}
-
-<div className="px-4 py-3 border-t border-[var(--color-border)] flex items-center justify-between">
-  <div className="flex items-center gap-2 text-sm text-[var(--color-muted)]">
-    <span>Show</span>
-    <select
-      value={table.getState().pagination.pageSize}
-      onChange={e => table.setPageSize(Number(e.target.value))}
-      className="border border-[var(--color-border)] rounded px-2 py-1"
-    >
-      {[10, 20, 30, 50].map(pageSize => (
-        <option key={pageSize} value={pageSize}>
-          {pageSize}
-        </option>
-      ))}
-    </select>
-    <span>of {table.getFilteredRowModel().rows.length} entries</span>
+{table.getRowModel().rows.length === 0 && (
+  <div className="text-center py-12">
+    <p className="text-[var(--color-muted)] mb-4">No books found matching your search</p>
+    {mode === 'addToCollection' && (globalFilter || selectedGenres.length > 0) && (
+      <button
+        onClick={() => setIsModalOpen(true)}
+        className="inline-flex items-center gap-2 px-4 py-2 bg-lavender-500 hover:bg-lavender-600 
+                   text-white font-medium rounded-lg shadow-sm transition-colors duration-200"
+      >
+        <Plus size={16} />
+        Add "{globalFilter || 'New Media'}" to Catalog
+      </button>
+    )}
   </div>
-  
-  <div className="flex items-center gap-2">
-    <button
-      onClick={() => table.previousPage()}
-      disabled={!table.getCanPreviousPage()}
-      className="p-2 border border-[var(--color-border)] rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--color-bg)]"
-    >
-      <ChevronLeft size={16} />
-    </button>
-      
-    <div className="flex items-center gap-1">
-      {/* Page numbers */}
-      {Array.from({ length: Math.min(5, table.getPageCount()) }, (_, i) => {
-        const currentPage = table.getState().pagination.pageIndex;
-        const totalPages = table.getPageCount();
-        
-        // Calculate which page to show for this button
-        let pageIndex;
-        if (totalPages <= 5) {
-          pageIndex = i;
-        } else if (currentPage <= 2) {
-          pageIndex = i;
-        } else if (currentPage >= totalPages - 3) {
-          pageIndex = totalPages - 5 + i;
-        } else {
-          pageIndex = currentPage - 2 + i;
-        }
-        
-        if (pageIndex >= totalPages || pageIndex < 0) return null;
-        
-        return (
-          <button
-            key={pageIndex}
-            onClick={() => table.setPageIndex(pageIndex)}
-            className={`px-3 py-1 text-sm border rounded ${
-              pageIndex === currentPage
-                ? 'bg-lavender-500 text-white border-lavender-500'
-                : 'border-[var(--color-border)] hover:bg-[var(--color-bg)]'
-            }`}
+)}
+      {/* Pagination */}
+      <div className="px-4 py-3 border-t border-[var(--color-border)] flex items-center justify-between">
+        <div className="flex items-center gap-2 text-sm text-[var(--color-muted)]">
+          <span>Show</span>
+          <select
+            value={table.getState().pagination.pageSize}
+            onChange={e => table.setPageSize(Number(e.target.value))}
+            className="border border-[var(--color-border)] rounded px-2 py-1"
           >
-            {pageIndex + 1}
+            {[10, 20, 30, 50].map(pageSize => (
+              <option key={pageSize} value={pageSize}>
+                {pageSize}
+              </option>
+            ))}
+          </select>
+          <span>of {table.getFilteredRowModel().rows.length} entries</span>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+            className="p-2 border border-[var(--color-border)] rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--color-bg)]"
+          >
+            <ChevronLeft size={16} />
           </button>
-        );
-      })}
-    </div>
-    
-    <button
-      onClick={() => table.nextPage()}
-      disabled={!table.getCanNextPage()}
-      className="p-2 border border-[var(--color-border)] rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--color-bg)]"
-    >
-      <ChevronRight size={16} />
-    </button>
-  </div>
-</div>
+            
+          <div className="flex items-center gap-1">
+            {Array.from({ length: Math.min(5, table.getPageCount()) }, (_, i) => {
+              const currentPage = table.getState().pagination.pageIndex;
+              const totalPages = table.getPageCount();
+              
+              let pageIndex;
+              if (totalPages <= 5) {
+                pageIndex = i;
+              } else if (currentPage <= 2) {
+                pageIndex = i;
+              } else if (currentPage >= totalPages - 3) {
+                pageIndex = totalPages - 5 + i;
+              } else {
+                pageIndex = currentPage - 2 + i;
+              }
+              
+              if (pageIndex >= totalPages || pageIndex < 0) return null;
+              
+              return (
+                <button
+                  key={pageIndex}
+                  onClick={() => table.setPageIndex(pageIndex)}
+                  className={`px-3 py-1 text-sm border rounded ${
+                    pageIndex === currentPage
+                      ? 'bg-lavender-500 text-white border-lavender-500'
+                      : 'border-[var(--color-border)] hover:bg-[var(--color-bg)]'
+                  }`}
+                >
+                  {pageIndex + 1}
+                </button>
+              );
+            })}
+          </div>
+          
+          <button
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            className="p-2 border border-[var(--color-border)] rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--color-bg)]"
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      </div>
+
+      {/* Modals */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title="Add New Media"
       >
-        <AddMediaForm onSubmit={handleAddMedia}
+        <AddMediaForm 
+          onSubmit={handleAddMedia}
           isSubmitting={isSubmitting}
           submitError={submitError}
         />
@@ -522,16 +537,23 @@ useEffect(() => {
 
       <Modal
         isOpen={isCopyModalOpen}
-        onClose={() => setIsCopyModalOpen(false)}
-        title="Add to my Collection"
+        onClose={handleCloseCopyModal}
+        title={selectedMediaForCopy ? `Add "${selectedMediaForCopy.title}" to Collection` : 'Add to Collection'}
       >
-        <AddMediaCopyForm
-          onSubmit={(formData) => handleAddMediaCopy(formData)}
+        {/* <AddMediaCopyForm
+          onSubmit={handleAddMediaCopy}
           isSubmitting={isSubmitting}
           submitError={submitError}
+          preselectedMediaId={selectedMediaForCopy?.mediaId}
+          hideMediaSelection={!!selectedMediaForCopy}
+        /> */}
+        <AddMediaCopyForm
+          onSubmit={handleAddMediaCopy}
+          isSubmitting={isSubmitting}
+          submitError={submitError}
+          preselectedMedia={selectedMediaForCopy || undefined}
         />
       </Modal>
-
     </div>
   );
 }
