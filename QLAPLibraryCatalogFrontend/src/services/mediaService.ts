@@ -18,20 +18,15 @@ export const mediaService = {
     const response = await api.post<Media>('/api/Media', newMedia);
     return response.data;
   },
+  
+  async getUserMedia(userId: number, includeCopies: boolean = false): Promise<Media[]> {    
+    const response = await api.get<Media[]>(`/api/Media/User/${userId}?includeCopies=${includeCopies}`);
+    console.log(response.data);
+    return response.data;
+  },
 
   async getMediaTypes(): Promise<MediaType[]> {    
     const response = await api.get<MediaType[]>('/api/MediaTypes');
     return response.data;
   },
-//   // Get media by genre
-//   async getMediaByGenre(genre: string): Promise<Media[]> {
-//     const response = await this.getMedia({ genre });
-//     return response.data;
-//   },
-
-//   // Search media by title/creator
-//   async searchMedia(searchTerm: string): Promise<Media[]> {
-//     const response = await this.getMedia({ search: searchTerm });
-//     return response.data;
-//   }
 };

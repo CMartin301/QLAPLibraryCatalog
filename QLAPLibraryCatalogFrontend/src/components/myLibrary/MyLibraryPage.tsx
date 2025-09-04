@@ -17,7 +17,7 @@ import { mediaService } from '../../services/mediaService';
 // import { useAuth } from '../hooks/useAuth';
 
 const MyLibraryPage: React.FC = () => {
-    const { username } = useAuth();
+    const { username, userID } = useAuth();
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [media, setMedia] = useState<Media[]>([]);
@@ -33,7 +33,9 @@ const MyLibraryPage: React.FC = () => {
       setError(null);
       
       try {
-        const response = await mediaService.getMedia(true);
+        if (!userID) return;
+        
+        const response = await mediaService.getUserMedia(userID, true);
         // console.log(response);
         setMedia(response);
       } catch (err: any) {
