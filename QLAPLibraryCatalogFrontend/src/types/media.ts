@@ -69,9 +69,9 @@ export interface MediaFormData {
 //   page: number;
 //   pageSize: number;
 // }
-export interface GetMediaResponse {
-  data: Media[];
-}
+// export interface GetMediaResponse {
+//   data: Media[];
+// }
 
 export interface MediaSearchParams {
   search?: string;
