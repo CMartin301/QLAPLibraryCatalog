@@ -8,7 +8,7 @@ using QLAPLibraryCatalogAPI.Services;
 namespace QLAPLibraryCatalogAPI.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/MediaCopy")]
     public class MediaCopiesController : ControllerBase
     {
         private readonly IMediaCopiesService _mediaCopiesService;

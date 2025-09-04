@@ -24,6 +24,7 @@ export interface Media {
   issueNumber: number | null;
   volume: number | null;
   mediaType: MediaType;
+  copies?: MediaCopy[];
 }
 
 export interface CreateMediaRequest {
@@ -62,21 +63,22 @@ export interface MediaFormData {
   volume?: number | null;
 }
 
-// API request/response types
-// export interface GetMediaResponse {
-//   data: Media[];
-//   total: number;
-//   page: number;
-//   pageSize: number;
-// }
-export interface GetMediaResponse {
-  data: Media[];
+// Media Copies
+export interface MediaCopy {
+  copyId: number;
+  mediaId: number;
+  condition: string;
+  maxLoanDays: number;
+  requiresApproval: boolean;
+  isAvailable: boolean;
+  notes?: string;
 }
 
-export interface MediaSearchParams {
-  search?: string;
-  genre?: string;
-  mediaTypeId?: number;
-  page?: number;
-  pageSize?: number;
+export interface CreateMediaCopyRequest {
+  userId: number;
+  mediaId: number;
+  condition: string;
+  maxLoanDays: number;
+  requiresApproval: boolean;
+  notes?: string;
 }

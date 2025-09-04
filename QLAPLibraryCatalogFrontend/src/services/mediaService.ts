@@ -1,32 +1,16 @@
-import { Media, GetMediaResponse, MediaSearchParams, CreateMediaRequest, MediaType } from '../types/media';
+import { Media, CreateMediaRequest, MediaType, CreateMediaCopyRequest, MediaCopy } from '../types/media';
 import api from './apiService';
 
 export const mediaService = {
-//   // Get all media with optional filtering/pagination
-//   async getMedia(params: MediaSearchParams = {}): Promise<GetMediaResponse> {
-//     // Build query string from parameters
-//     const queryParams = new URLSearchParams();
-    
-//     if (params.search) queryParams.append('search', params.search);
-//     if (params.genre) queryParams.append('genre', params.genre);
-//     if (params.mediaTypeId) queryParams.append('mediaTypeId', params.mediaTypeId.toString());
-//     if (params.page) queryParams.append('page', params.page.toString());
-//     if (params.pageSize) queryParams.append('pageSize', params.pageSize.toString());
-
-//     const queryString = queryParams.toString();
-//     const url = queryString ? `/api/Media?${queryString}` : '/api/Media';
-    
-//     const response = await api.get<GetMediaResponse>(url);
-//     return response.data;
-//   },
-  async getMedia(): Promise<GetMediaResponse> {    
-    const response = await api.get<GetMediaResponse>('/api/Media');
+  async getMedia(includeCopies: boolean = false): Promise<Media[]> {    
+    const response = await api.get<Media[]>(`/api/Media?includeCopies=${includeCopies}`);
+    console.log(response.data);
     return response.data;
   },
 
   // Get a single media item by ID
-  async getMediaById(mediaId: number): Promise<Media> {
-    const response = await api.get<Media>(`/api/Media/${mediaId}`);
+  async getMediaById(mediaId: number, includeCopies: boolean = false): Promise<Media> {
+    const response = await api.get<Media>(`/api/Media/${mediaId}?includeCopies=${includeCopies}`);
     return response.data;
   },
   
@@ -34,20 +18,19 @@ export const mediaService = {
     const response = await api.post<Media>('/api/Media', newMedia);
     return response.data;
   },
+  
+  async getUserMedia(userId: number, includeCopies: boolean = false): Promise<Media[]> {    
+    const response = await api.get<Media[]>(`/api/Media/User/${userId}?includeCopies=${includeCopies}`);
+    console.log(response.data);
+    return response.data;
+  },
+  async createNewMediaCopy(newMediaCopy: CreateMediaCopyRequest): Promise<MediaCopy> {
+    const response = await api.post<MediaCopy>('/api/MediaCopy', newMediaCopy);
+    return response.data;
+  },
 
   async getMediaTypes(): Promise<MediaType[]> {    
     const response = await api.get<MediaType[]>('/api/MediaTypes');
     return response.data;
   },
-//   // Get media by genre
-//   async getMediaByGenre(genre: string): Promise<Media[]> {
-//     const response = await this.getMedia({ genre });
-//     return response.data;
-//   },
-
-//   // Search media by title/creator
-//   async searchMedia(searchTerm: string): Promise<Media[]> {
-//     const response = await this.getMedia({ search: searchTerm });
-//     return response.data;
-//   }
 };

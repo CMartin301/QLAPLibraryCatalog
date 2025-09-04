@@ -22,9 +22,9 @@ const NetworkCatalogPage: React.FC = () => {
     setError(null);
     
     try {
-      const response = await mediaService.getMedia();
-      console.log(response.data);
-      setMedia(response.data);
+      const response = await mediaService.getMedia(true);
+      // console.log(response.data);
+      setMedia(response);
     } catch (err: any) {
       setError('Failed to load media');
     } finally {
