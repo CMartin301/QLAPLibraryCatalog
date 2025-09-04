@@ -2,15 +2,15 @@ import { Media, CreateMediaRequest, MediaType } from '../types/media';
 import api from './apiService';
 
 export const mediaService = {
-  async getMedia(): Promise<Media[]> {    
-    const response = await api.get<Media[]>('/api/Media');
+  async getMedia(includeCopies: boolean = false): Promise<Media[]> {    
+    const response = await api.get<Media[]>(`/api/Media?includeCopies=${includeCopies}`);
     console.log(response.data);
     return response.data;
   },
 
   // Get a single media item by ID
-  async getMediaById(mediaId: number): Promise<Media> {
-    const response = await api.get<Media>(`/api/Media/${mediaId}`);
+  async getMediaById(mediaId: number, includeCopies: boolean = false): Promise<Media> {
+    const response = await api.get<Media>(`/api/Media/${mediaId}?includeCopies=${includeCopies}`);
     return response.data;
   },
   

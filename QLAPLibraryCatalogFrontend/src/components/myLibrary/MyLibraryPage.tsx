@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 import MediaTable from '../media/MediaTable';
+import { Media } from '../../types/media';
+import { mediaService } from '../../services/mediaService';
 // import BooksSearchFilters from '../components/books/BooksSearchFilters';
 // import BooksSortControl, { type SortField, SortDirection } from '../components/books/BooksSortControl';
 // import BookCard from '../components/books/BookCard';
@@ -15,83 +17,31 @@ import MediaTable from '../media/MediaTable';
 // import { useAuth } from '../hooks/useAuth';
 
 const MyLibraryPage: React.FC = () => {
-  const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-    const { username, logout } = useAuth();
+    const { username } = useAuth();
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [media, setMedia] = useState<Media[]>([]);
   
-  // Data state
-//   const [allUserBooks, setAllUserBooks] = useState<UserBook[]>([]);
-//   const [genres, setGenres] = useState<Genre[]>([]);
-//   const [authors, setAuthors] = useState<Author[]>([]);
-//   const [currentUser, setCurrentUser] = useState<UserDto | null>(null);
+      const [saveMessage, setSaveMessage] = useState<string | null>(null);
+    
+    useEffect(() => {
+      loadMedia();
+    }, []);
   
-
-  // Add Book Modal
-//   const { isModalOpen, openModal, closeModal, handleBookAdded } = useAddBookModal({
-//     onBookAdded: (newBook) => {
-//       // Add the new book to the list and show success message
-//       setAllUserBooks(prev => [newBook, ...prev]);
-//       setError(null);
-//       // Show success message
-//       setTimeout(() => {
-//         setError('✅ Book added successfully to your collection!');
-//         setTimeout(() => setError(null), 3000);
-//       }, 100);
-//     }
-//   });
-
-//   // Load initial data
-//   useEffect(() => {
-//     const loadData = async () => {
-//       try {
-//         setIsLoading(true);
-//         setError(null);
-
-//         const [userBooksData, genresData, authorsData, currentUserData] = await Promise.all([
-//           apiService.getAvailableBooks(), // This should return all user books, not just available ones
-//           apiService.getGenres(),
-//           apiService.getAuthors(),
-//           apiService.getCurrentUser()
-//         ]);
-
-//         setAllUserBooks(userBooksData.data || []);
-//         setGenres(genresData);
-//         setAuthors(authorsData);
-//         setCurrentUser(currentUserData);
-//       } catch (err) {
-//         console.error('Failed to load books data:', err);
-//         setError('Failed to load books. Please try again.');
-//       } finally {
-//         setIsLoading(false);
-//       }
-//     };
-
-//     loadData();
-//   }, []);
-
-//   // Reset pagination when filters change
-//   useEffect(() => {
-//     setCurrentPage(1);
-//   }, [searchTerm, selectedGenre, selectedAuthor, availableOnly, showMyBooks]);
-
-//   const handleManageBorrowRequests = () => {
-//     navigate(`/requests`);
-//   };
-
-
-//   if (isLoading) {
-//     return (
-//       <div className="container-fluid py-4">
-//         <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
-//           <div className="spinner-border spinner-custom" role="status">
-//             <span className="visually-hidden">Loading...</span>
-//           </div>
-//         </div>
-//       </div>
-//     );
-//   }
-
+    const loadMedia = async () => {
+      setIsLoading(true);
+      setError(null);
+      
+      try {
+        const response = await mediaService.getMedia(true);
+        console.log(response);
+        setMedia(response);
+      } catch (err: any) {
+        setError('Failed to load media');
+      } finally {
+        setIsLoading(false);
+      }
+    };
   return (
     <div className="container-fluid py-4 bg-pattern">
       {/* Page Header */}
@@ -111,7 +61,10 @@ const MyLibraryPage: React.FC = () => {
           </button>
         </div> */}
       </div>
-      <MediaTable />
+      <MediaTable 
+                media={media} 
+                onRefresh={loadMedia}
+              />
 {/* 
       <div className="mb-4">
         <BooksTable />    

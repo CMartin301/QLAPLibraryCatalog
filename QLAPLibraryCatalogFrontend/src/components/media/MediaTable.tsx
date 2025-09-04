@@ -73,6 +73,24 @@ export function MediaTable({ media = [], onRefresh, onSaveNewMedia: onSaveNewMed
           </span>
         ),
       }),
+      columnHelper.display({
+        id: 'copies',
+        header: 'Copies',
+        cell: info => {
+          const copies = info.row.original.copies ?? [];
+          if (copies.length === 0) {
+            return <span className="text-gray-400 text-sm">—</span>;
+          }
+
+          const availableCount = copies.filter(c => c.isAvailable).length;
+          return (
+            <div className="text-sm text-[var(--color-text)]">
+              {copies.length} total{" "}
+              <span className="text-green-600">({availableCount} available)</span>
+            </div>
+          );
+        },
+      }),
     ],
     [columnHelper]
   );

@@ -22,7 +22,7 @@ const NetworkCatalogPage: React.FC = () => {
     setError(null);
     
     try {
-      const response = await mediaService.getMedia();
+      const response = await mediaService.getMedia(true);
       // console.log(response.data);
       setMedia(response);
     } catch (err: any) {
