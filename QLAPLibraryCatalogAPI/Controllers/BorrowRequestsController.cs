@@ -4,11 +4,17 @@ using QLAPLibraryCatalogAPI.Services;
 
 namespace QLAPLibraryCatalogAPI.Controllers
 {
+    /// <summary>
+    /// Controller for all borrow request functions
+    /// </summary>
     [ApiController]
     [Route("api/BorrowRequest")]
     public class BorrowRequestsController : ControllerBase
     {
         private readonly IBorrowRequestService _borrowRequestsService;
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public BorrowRequestsController(IBorrowRequestService borrowRequestsService)
         {
            _borrowRequestsService = borrowRequestsService; 

@@ -7,16 +7,25 @@ using QLAPLibraryCatalogAPI.Services;
 
 namespace QLAPLibraryCatalogAPI.Controllers
 {
+    /// <summary>
+    /// Controller for media copy functions
+    /// </summary>
     [ApiController]
     [Route("api/MediaCopy")]
     public class MediaCopiesController : ControllerBase
     {
         private readonly IMediaCopiesService _mediaCopiesService;
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public MediaCopiesController(IMediaCopiesService mediaCopiesService)
         {
             _mediaCopiesService = mediaCopiesService;
         }
-
+        /// <summary>
+        /// Gets all media copies
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> GetMediaCopies()
         {
@@ -32,7 +41,11 @@ namespace QLAPLibraryCatalogAPI.Controllers
             }
         }
 
-
+        /// <summary>
+        /// Gets media copy by ID
+        /// </summary>
+        /// <param name="mediaCopyId"></param>
+        /// <returns></returns>
         [HttpGet("{mediaCopyId}")]
         public async Task<IActionResult> GetMediaCopyById(int mediaCopyId)
         {
@@ -49,6 +62,11 @@ namespace QLAPLibraryCatalogAPI.Controllers
             }
         }
         
+        /// <summary>
+        /// Creates new media copy
+        /// </summary>
+        /// <param name="createMediaCopyDto"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> CreateMediaCopy([FromBody] CreateMediaCopyDto createMediaCopyDto)
         {

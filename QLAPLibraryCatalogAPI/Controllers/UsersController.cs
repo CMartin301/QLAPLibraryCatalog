@@ -9,24 +9,28 @@ using System.Security.Claims;
 
 namespace QLAPLibraryCatalogAPI.Controllers
 {
+    /// <summary>
+    /// Controller for all user functions
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
         private readonly IUsersService _usersService;
         private readonly IAuthService _authService;
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public UsersController(IUsersService usersService, IAuthService authService)
         {
             _usersService = usersService;
             _authService = authService;
         }
 
-        [HttpGet("test")]
-        [Authorize]
-        public async Task<IActionResult> TestJWT()
-        {
-            return Ok("Success");
-        }
+        /// <summary>
+        /// Gets all users
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> GetUsers()
         {
@@ -41,7 +45,11 @@ namespace QLAPLibraryCatalogAPI.Controllers
             }
         }
 
-
+        /// <summary>
+        /// Gets user by ID
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         [HttpGet("{userId}")]
         public async Task<IActionResult> GetUserById(int userId)
         {
@@ -58,7 +66,11 @@ namespace QLAPLibraryCatalogAPI.Controllers
             }
         }
 
-
+        /// <summary>
+        /// Creates new user
+        /// </summary>
+        /// <param name="createUserDto"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromBody] CreateUserDto createUserDto)
         {
@@ -75,6 +87,12 @@ namespace QLAPLibraryCatalogAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Updates existing user preferences
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="preferencesDto"></param>
+        /// <returns></returns>
         [HttpPut("{userId}/preferences")]
         public async Task<IActionResult> UpdateUserPreferences(int userId, [FromBody] UserPreferencesDto preferencesDto)
         {
@@ -107,7 +125,11 @@ namespace QLAPLibraryCatalogAPI.Controllers
             }
         }
 
-
+        /// <summary>
+        /// Returns JWT for user
+        /// </summary>
+        /// <param name="loginDto"></param>
+        /// <returns></returns>
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
@@ -126,6 +148,11 @@ namespace QLAPLibraryCatalogAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Deactivates existing user
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         [HttpDelete("{userId}/Deactivate")]
         public async Task<IActionResult> DeactivateUser(int userId)
         {
@@ -141,6 +168,11 @@ namespace QLAPLibraryCatalogAPI.Controllers
                 return StatusCode(500, new { error = ex.Message });
             }
         }
+        /// <summary>
+        /// Reactivates existing user
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         [HttpPatch("{userId}/Reactivate")]
         public async Task<IActionResult> ReactivateUser(int userId)
         {
