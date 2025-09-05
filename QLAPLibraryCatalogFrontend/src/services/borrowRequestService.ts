@@ -7,6 +7,14 @@ export const borrowRequestService = {
     const response = await api.get<BorrowRequestDto[]>('/api/BorrowRequest');
     return response.data;
   },
+  async getBorrowRequestsForBorrower(borrowerId: number): Promise<BorrowRequestDto[]> {
+    const response = await api.get<BorrowRequestDto[]>(`/api/BorrowRequest/Borrower/${borrowerId}`);
+    return response.data;
+  },
+  async getBorrowRequestsForLender(lenderId: number): Promise<BorrowRequestDto[]> {
+    const response = await api.get<BorrowRequestDto[]>(`/api/BorrowRequest/Lender/${lenderId}`);
+    return response.data;
+  },
 
   async getBorrowRequestById(requestId: number): Promise<BorrowRequestDto> {
     const response = await api.get<BorrowRequestDto>(`/api/BorrowRequest/${requestId}`);

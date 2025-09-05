@@ -4,7 +4,7 @@ import api from './apiService';
 export const mediaService = {
   async getMedia(includeCopies: boolean = false): Promise<Media[]> {    
     const response = await api.get<Media[]>(`/api/Media?includeCopies=${includeCopies}`);
-    console.log(response.data);
+    // console.log(response.data);
     return response.data;
   },
 

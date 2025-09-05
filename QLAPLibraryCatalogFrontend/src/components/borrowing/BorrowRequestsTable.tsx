@@ -151,7 +151,7 @@ export function BorrowRequestsTable() {
     setIsLoading(true);
     try {
     //   const data = await borrowRequestService.getBorrowRequests(userID);
-      const data = await borrowRequestService.getBorrowRequests();
+      const data = await borrowRequestService.getBorrowRequestsForLender(userID);
       setRequests(data);
     } finally {
       setIsLoading(false);
