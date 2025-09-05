@@ -113,10 +113,9 @@ namespace QLAPLibraryCatalogAPI.Controllers
         }
 
         /// <summary>
-        /// Denies an existing borrow request
+        /// Approves an existing borrow request
         /// </summary>
         /// <param name="requestId"></param>
-        /// <param name="approveBorrowRequestDto"></param>
         /// <returns></returns>
         // POST api/borrowrequests/{id}/deny
         [HttpPost("{requestId}/Approve")]

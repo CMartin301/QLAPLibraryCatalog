@@ -17,6 +17,7 @@ builder.Services.AddScoped<IMediaCopiesService, MediaCopiesService>();
 builder.Services.AddScoped<IMediaTypesService, MediaTypesService>();
 builder.Services.AddScoped<IUsersService, UsersService>();
 builder.Services.AddScoped<IBorrowRequestService, BorrowRequestService>();
+builder.Services.AddScoped<ILoansService, LoansService>();
 
 
 // Add Swagger
