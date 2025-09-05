@@ -15,7 +15,6 @@ namespace QLAPLibraryCatalogAPI.Services
         Task<BorrowRequestDto?> ApproveBorrowRequestAsync(int requestId, ApproveBorrowRequestDto dto);
         Task<BorrowRequestDto?> DenyBorrowRequestAsync(int requestId, DenyBorrowRequestDto dto);
         Task<bool> CancelBorrowRequestAsync(int requestId, int actorUserId);
-        Task<LoanDto?> MarkReturnedAsync(int requestId, ReturnLoanDto dto);
     }
 
     public class BorrowRequestService : IBorrowRequestService
@@ -147,6 +146,7 @@ namespace QLAPLibraryCatalogAPI.Services
         {
             var request = await _context.BorrowRequests
                 .Include(r => r.Copy)
+                .Include(r => r.Borrower)
                 .FirstOrDefaultAsync(r => r.RequestId == requestId);
 
             if (request == null) return null;
@@ -162,11 +162,11 @@ namespace QLAPLibraryCatalogAPI.Services
                 await _context.SaveChangesAsync();
 
                 await CreateLoanForApprovedRequest_Internal(
-                    request,
-                    borrowerDefaultDays: request.Borrower.UserPreferences?.DefaultLoanDays,
-                    copyMaxDays: request.Copy.MaxLoanDays,
-                    overrideStartDate: dto.StartDate,
-                    overrideDueDate: dto.DueDate
+                    request
+                    // borrowerDefaultDays: request.Borrower.UserPreferences?.DefaultLoanDays,
+                    // copyMaxDays: request.Copy.MaxLoanDays,
+                    // overrideStartDate: dto.StartDate,
+                    // overrideDueDate: dto.DueDate
                 );
 
                 request.Copy.IsAvailable = false;
@@ -211,77 +211,78 @@ namespace QLAPLibraryCatalogAPI.Services
             return true;
         }
 
-        public async Task<LoanDto?> MarkReturnedAsync(int requestId, ReturnLoanDto dto)
-        {
-            var loan = await _context.Loans
-                .Include(l => l.Request)
-                    .ThenInclude(r => r.Copy)
-                .FirstOrDefaultAsync(l => l.RequestId == requestId);
+        // public async Task<LoanDto?> MarkReturnedAsync(int requestId, ReturnLoanDto dto)
+        // {
+        //     var loan = await _context.Loans
+        //         .Include(l => l.Request)
+        //             .ThenInclude(r => r.Copy)
+        //         .FirstOrDefaultAsync(l => l.RequestId == requestId);
 
-            if (loan == null) return null;
-            if (loan.Status != "active") throw new InvalidOperationException("Only active loans can be returned.");
+        //     if (loan == null) return null;
+        //     if (loan.Status != "active") throw new InvalidOperationException("Only active loans can be returned.");
 
-            var returnedDate = dto.ReturnedDate ?? DateOnly.FromDateTime(DateTime.UtcNow);
-            loan.ReturnedDate = returnedDate;
-            loan.Status = "returned";
-            loan.ReturnNotes = dto.ReturnNotes;
-            loan.UpdatedAt = DateTime.UtcNow;
+        //     var returnedDate = dto.ReturnedDate ?? DateOnly.FromDateTime(DateTime.UtcNow);
+        //     loan.ReturnedDate = returnedDate;
+        //     loan.Status = "returned";
+        //     loan.ReturnNotes = dto.ReturnNotes;
+        //     loan.UpdatedAt = DateTime.UtcNow;
 
-            // mark copy available
-            loan.Request.Copy.IsAvailable = true;
+        //     // mark copy available
+        //     loan.Request.Copy.IsAvailable = true;
 
-            await _context.SaveChangesAsync();
+        //     await _context.SaveChangesAsync();
 
-            return new LoanDto
-            {
-                LoanId = loan.LoanId,
-                RequestId = loan.RequestId,
-                StartDate = loan.StartDate,
-                DueDate = loan.DueDate,
-                ReturnedDate = loan.ReturnedDate,
-                Status = loan.Status,
-                ReturnNotes = loan.ReturnNotes,
-                LateFeeAmount = loan.LateFeeAmount,
-                LateFeePaid = loan.LateFeePaid
-            };
-        }
+        //     return new LoanDto
+        //     {
+        //         LoanId = loan.LoanId,
+        //         RequestId = loan.RequestId,
+        //         StartDate = loan.StartDate,
+        //         DueDate = loan.DueDate,
+        //         ReturnedDate = loan.ReturnedDate,
+        //         Status = loan.Status,
+        //         ReturnNotes = loan.ReturnNotes,
+        //         LateFeeAmount = loan.LateFeeAmount,
+        //         LateFeePaid = loan.LateFeePaid
+        //     };
+        // }
 
         // ---------------- Helper ----------------
         private async Task CreateLoanForApprovedRequest_Internal(
-            BorrowRequest request,
-            int? borrowerDefaultDays,
-            int? copyMaxDays,
-            DateOnly? overrideStartDate = null,
-            DateOnly? overrideDueDate = null)
+            BorrowRequest request
+            // int? borrowerDefaultDays,
+            // int? copyMaxDays,
+            // DateOnly? overrideStartDate = null,
+            // DateOnly? overrideDueDate = null
+            )
         {
-            // start date resolution
-            var start = overrideStartDate
-                        ?? request.RequestedStartDate
-                        ?? DateOnly.FromDateTime(DateTime.UtcNow);
+            // // start date resolution
+            // var start = overrideStartDate
+            //             ?? request.RequestedStartDate
+            //             ?? DateOnly.FromDateTime(DateTime.UtcNow);
 
-            // duration resolution
-            int? requestedSpan = null;
-            if (request.RequestedStartDate.HasValue && request.RequestedEndDate.HasValue)
-            {
-                requestedSpan = (request.RequestedEndDate.Value.ToDateTime(TimeOnly.MinValue) - request.RequestedStartDate.Value.ToDateTime(TimeOnly.MinValue)).Days;
-                if (requestedSpan < 0) requestedSpan = null;
-            }
+            // // duration resolution
+            // int? requestedSpan = null;
+            // if (request.RequestedStartDate.HasValue && request.RequestedEndDate.HasValue)
+            // {
+            //     requestedSpan = (request.RequestedEndDate.Value.ToDateTime(TimeOnly.MinValue) - request.RequestedStartDate.Value.ToDateTime(TimeOnly.MinValue)).Days;
+            //     if (requestedSpan < 0) requestedSpan = null;
+            // }
 
-            int durationDays;
-            if (overrideDueDate.HasValue)
-                durationDays = (overrideDueDate.Value.ToDateTime(TimeOnly.MinValue) - start.ToDateTime(TimeOnly.MinValue)).Days;
-            else if (requestedSpan.HasValue)
-                durationDays = requestedSpan.Value;
-            else if (borrowerDefaultDays.HasValue)
-                durationDays = borrowerDefaultDays.Value;
-            else if (copyMaxDays.HasValue && copyMaxDays.Value > 0)
-                durationDays = copyMaxDays.Value;
-            else
-                durationDays = 14;
+            // int durationDays;
+            // if (overrideDueDate.HasValue)
+            //     durationDays = (overrideDueDate.Value.ToDateTime(TimeOnly.MinValue) - start.ToDateTime(TimeOnly.MinValue)).Days;
+            // else if (requestedSpan.HasValue)
+            //     durationDays = requestedSpan.Value;
+            // else if (borrowerDefaultDays.HasValue)
+            //     durationDays = borrowerDefaultDays.Value;
+            // else if (copyMaxDays.HasValue && copyMaxDays.Value > 0)
+            //     durationDays = copyMaxDays.Value;
+            // else
+            //     durationDays = 14;
 
-            if (durationDays <= 0) durationDays = 7;
+            // if (durationDays <= 0) durationDays = 7;
 
-            var due = start.AddDays(durationDays);
+            // var due = start.AddDays(durationDays);
 
             // already exists check (db unique also enforced)
             var exists = await _context.Loans.AnyAsync(l => l.RequestId == request.RequestId);
@@ -290,8 +291,8 @@ namespace QLAPLibraryCatalogAPI.Services
             var loan = new Loan
             {
                 RequestId = request.RequestId,
-                StartDate = start,
-                DueDate = due,
+                StartDate = (DateOnly)request.RequestedStartDate,
+                DueDate = (DateOnly)request.RequestedEndDate,
                 Status = "active",
                 LateFeeAmount = 0m,
                 LateFeePaid = false,

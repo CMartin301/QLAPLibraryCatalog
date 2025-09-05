@@ -13,7 +13,10 @@ namespace QLAPLibraryCatalogAPI.Controllers
         {
            _borrowRequestsService = borrowRequestsService; 
         }
-
+        /// <summary>
+        ///  Gets all borrow requests
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> GetBorrowRequests()
         {
@@ -27,6 +30,11 @@ namespace QLAPLibraryCatalogAPI.Controllers
                 return StatusCode(500, new { error = ex.Message });
             }
         }
+        /// <summary>
+        /// Gets all borrow requests where the given userId is the borrower
+        /// </summary>
+        /// <param name="borrowerId"></param>
+        /// <returns></returns>
         [HttpGet("Borrower/{borrowerId}")]
         public async Task<IActionResult> GetBorrowRequestsForBorrower(int borrowerId)
         {
@@ -40,6 +48,11 @@ namespace QLAPLibraryCatalogAPI.Controllers
                 return StatusCode(500, new { error = ex.Message });
             }
         }
+        /// <summary>
+        /// Gets all borrow requests where the given ID is the lender
+        /// </summary>
+        /// <param name="lenderId"></param>
+        /// <returns></returns>
         [HttpGet("Lender/{lenderId}")]
         public async Task<IActionResult> GetBorrowRequestsForLender(int lenderId)
         {
@@ -53,7 +66,11 @@ namespace QLAPLibraryCatalogAPI.Controllers
                 return StatusCode(500, new { error = ex.Message });
             }
         }
-
+        /// <summary>
+        /// Gets a specific borrow request by ID
+        /// </summary>
+        /// <param name="requestId"></param>
+        /// <returns></returns>
         [HttpGet("{requestId}")]
         public async Task<IActionResult> GetBorrowRequestById(int requestId)
         {
@@ -69,7 +86,11 @@ namespace QLAPLibraryCatalogAPI.Controllers
                 return StatusCode(500, new { error = ex.Message });
             }
         }
-
+        /// <summary>
+        /// Creates a new borrow request
+        /// </summary>
+        /// <param name="createBorrowRequestDto"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> CreateBorrowRequest([FromBody] CreateBorrowRequestDto createBorrowRequestDto)
         {
@@ -85,6 +106,38 @@ namespace QLAPLibraryCatalogAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Denies an existing borrow request
+        /// </summary>
+        /// <param name="requestId"></param>
+        /// <param name="approveBorrowRequestDto"></param>
+        /// <returns></returns>
+        // POST api/borrowrequests/{id}/deny
+        [HttpPost("{requestId}/Approve")]
+        public async Task<IActionResult> ApproveBorrowRequest(int requestId, [FromBody] ApproveBorrowRequestDto approveBorrowRequestDto)
+        {
+            try
+            {
+                var approvedRequest = await _borrowRequestsService.ApproveBorrowRequestAsync(requestId, approveBorrowRequestDto);
+                if (approvedRequest == null) return NotFound();
+                
+                return Ok(approvedRequest);
+            }
+            catch (InvalidOperationException ioe)
+            {
+                return BadRequest(new { error = ioe.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+        /// <summary>
+        /// Denies an existing borrow request
+        /// </summary>
+        /// <param name="requestId"></param>
+        /// <param name="denyBorrowRequestDto"></param>
+        /// <returns></returns>
         // POST api/borrowrequests/{id}/deny
         [HttpPost("{requestId}/Deny")]
         public async Task<IActionResult> DenyBorrowRequest(int requestId, [FromBody] DenyBorrowRequestDto denyBorrowRequestDto)
@@ -106,6 +159,12 @@ namespace QLAPLibraryCatalogAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Cancels an existing borrow request
+        /// </summary>
+        /// <param name="requestId"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         // POST api/borrowrequests/{id}/cancel?actorUserId=...
         [HttpPost("{requestId}/Cancel")]
         public async Task<IActionResult> CancelBorrowRequest(int requestId, [FromQuery] int userId)
@@ -125,23 +184,5 @@ namespace QLAPLibraryCatalogAPI.Controllers
             }
         }
 
-        // // POST api/borrowrequests/{id}/return
-        // [HttpPost("{requestId}/return")]
-        // public async Task<IActionResult> ReturnLoan(int requestId, [FromBody] ReturnLoanDto dto)
-        // {
-        //     try
-        //     {
-        //         var loan = await _borrowRequestsService.MarkReturnedAsync(requestId, dto);
-        //         return loan == null ? NotFound() : Ok(loan);
-        //     }
-        //     catch (InvalidOperationException ioe)
-        //     {
-        //         return BadRequest(new { error = ioe.Message });
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         return StatusCode(500, new { error = ex.Message });
-        //     }
-        // }
     }
 }
