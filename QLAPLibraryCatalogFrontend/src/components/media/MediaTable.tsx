@@ -20,6 +20,7 @@ import { mediaService } from '../../services/mediaService';
 import { useModalScrollLock } from '../../hooks/useModalScrollLock';
 import { AddMediaCopyForm } from './AddMediaCopyForm';
 import useAuth from '../../hooks/useAuth';
+import { AddBorrowRequestForm } from '../borrowing/AddBorrowRequestForm';
 
 interface MediaTableProps {
   media?: Media[];
@@ -31,24 +32,28 @@ interface MediaTableProps {
 
 export function MediaTable({ media = [], onRefresh, onSaveNewMedia, onSwitchToAddTab, mode = 'allMedia'}: MediaTableProps) {
   const { userID } = useAuth();
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-  const [globalFilter, setGlobalFilter] = React.useState('');
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [globalFilter, setGlobalFilter] = useState('');
   const [showGenreFilter, setShowGenreFilter] = useState(false);
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
-  const [pagination, setPagination] = React.useState<PaginationState>({
+  const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
   });
 
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [submitError, setSubmitError] = React.useState<string | null>(null);
-  const [isCopyModalOpen, setIsCopyModalOpen] = React.useState(false);
-  const [selectedMediaForCopy, setSelectedMediaForCopy] = React.useState<Media | null>(null);
-  const [addingToCopyMediaId, setAddingToCopyMediaId] = React.useState<number | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
+  const [selectedMediaForCopy, setSelectedMediaForCopy] = useState<Media | null>(null);
+  const [addingToCopyMediaId, setAddingToCopyMediaId] = useState<number | null>(null);
 
-  useModalScrollLock(isModalOpen || isCopyModalOpen);
+  const [isBorrowModalOpen, setIsBorrowModalOpen] = useState(false);
+const [selectedMediaForBorrow, setSelectedMediaForBorrow] = useState<Media | null>(null);
+const [selectedCopyForBorrow, setSelectedCopyForBorrow] = useState<number | null>(null);
+
+useModalScrollLock(isModalOpen || isCopyModalOpen || isBorrowModalOpen);
 
   const columnHelper = createColumnHelper<Media>();
 
@@ -312,13 +317,59 @@ const handleAddMedia = async (data: MediaFormData) => {
   };
 
   const actionButton = getActionButtonConfig();
+// Replace your handleRequestItem function with this:
+const handleRequestItem = (mediaItem: Media) => {
+  // Find available copies
+  const availableCopies = mediaItem.copies?.filter(copy => copy.isAvailable) || [];
+  
+  if (availableCopies.length === 0) {
+    // Show error message - no available copies
+    if (onSaveNewMedia) {
+      onSaveNewMedia('No available copies for this item.');
+    }
+    return;
+  }
+  
+  // For now, select the first available copy
+  // You could enhance this to show a copy selection modal if multiple copies
+  setSelectedMediaForBorrow(mediaItem);
+  setSelectedCopyForBorrow(availableCopies[0].copyId);
+  setIsBorrowModalOpen(true);
+};
 
-// Add this function in MediaTable component:
-  const handleRequestItem = async (mediaItem: Media) => {
-    // Add your request logic here
-    console.log('Requesting item:', mediaItem);
-    // You can show a modal, make an API call, etc.
-  };
+// Add this function to handle borrow request submission:
+const handleBorrowRequestSubmit = async (data: any) => {
+  setIsSubmitting(true);
+  setSubmitError(null);
+
+  try {
+    // The AddBorrowRequestForm will handle the API call
+    // This is just for any additional logic you need
+    setIsBorrowModalOpen(false);
+    setSelectedMediaForBorrow(null);
+    setSelectedCopyForBorrow(null);
+    
+    if (onSaveNewMedia) {
+      onSaveNewMedia('Borrow request submitted successfully!');
+    }
+    
+    if (onRefresh) {
+      onRefresh();
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to submit borrow request';
+    setSubmitError(errorMessage);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+const handleCloseBorrowModal = () => {
+  setIsBorrowModalOpen(false);
+  setSelectedMediaForBorrow(null);
+  setSelectedCopyForBorrow(null);
+};
+
   return (
     <div className="bg-[var(--color-card)] rounded-lg shadow-sm border border-[var(--color-border)]">
       <div className="p-4 border-b border-[var(--color-border)]">
@@ -579,6 +630,21 @@ const handleAddMedia = async (data: MediaFormData) => {
           preselectedMedia={selectedMediaForCopy || undefined}
         />
       </Modal>
+      <Modal
+  isOpen={isBorrowModalOpen}
+  onClose={handleCloseBorrowModal}
+  title={selectedMediaForBorrow ? `Request "${selectedMediaForBorrow.title}"` : 'Request Item'}
+>
+  {selectedCopyForBorrow && userID && (
+    <AddBorrowRequestForm
+      copyId={selectedCopyForBorrow}
+      borrowerId={userID}
+      onSubmit={handleBorrowRequestSubmit}
+      isSubmitting={isSubmitting}
+      submitError={submitError}
+    />
+  )}
+</Modal>
     </div>
   );
 }

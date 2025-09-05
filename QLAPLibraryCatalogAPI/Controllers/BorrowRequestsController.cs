@@ -81,7 +81,7 @@ namespace QLAPLibraryCatalogAPI.Controllers
         }
 
         // POST api/borrowrequests/{id}/cancel?actorUserId=...
-        [HttpPost("{requestId}/cancel")]
+        [HttpPost("{requestId}/Cancel")]
         public async Task<IActionResult> CancelBorrowRequest(int requestId, [FromQuery] int userId)
         {
             try
