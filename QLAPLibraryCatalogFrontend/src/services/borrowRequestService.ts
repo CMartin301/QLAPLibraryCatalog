@@ -26,6 +26,11 @@ export const borrowRequestService = {
     return response.data;
   },
 
+  async approveBorrowRequest(requestId: number): Promise<BorrowRequestDto> {
+    const response = await api.post<BorrowRequestDto>(`/api/BorrowRequest/${requestId}/Approve`);
+    return response.data;
+  },
+
   async denyBorrowRequest(requestId: number, reason?: string): Promise<BorrowRequestDto> {
     const response = await api.post<BorrowRequestDto>(`/api/BorrowRequest/${requestId}/Deny`, {
       reason

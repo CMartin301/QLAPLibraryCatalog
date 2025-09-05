@@ -12,7 +12,7 @@ namespace QLAPLibraryCatalogAPI.Services
         Task<IEnumerable<BorrowRequestDto>> GetBorrowRequestsForLenderAsync(int lenderId);
         Task<BorrowRequestDto?> GetBorrowRequestByIdAsync(int requestId);
         Task<BorrowRequestDto> CreateBorrowRequestAsync(CreateBorrowRequestDto dto);
-        Task<BorrowRequestDto?> ApproveBorrowRequestAsync(int requestId, ApproveBorrowRequestDto dto);
+        Task<BorrowRequestDto?> ApproveBorrowRequestAsync(int requestId);
         Task<BorrowRequestDto?> DenyBorrowRequestAsync(int requestId, DenyBorrowRequestDto dto);
         Task<bool> CancelBorrowRequestAsync(int requestId, int actorUserId);
     }
@@ -142,7 +142,7 @@ namespace QLAPLibraryCatalogAPI.Services
             return await GetBorrowRequestByIdAsync(request.RequestId) ?? throw new InvalidOperationException("Failed to fetch created request");
         }
 
-        public async Task<BorrowRequestDto?> ApproveBorrowRequestAsync(int requestId, ApproveBorrowRequestDto dto)
+        public async Task<BorrowRequestDto?> ApproveBorrowRequestAsync(int requestId)
         {
             var request = await _context.BorrowRequests
                 .Include(r => r.Copy)
@@ -291,8 +291,8 @@ namespace QLAPLibraryCatalogAPI.Services
             var loan = new Loan
             {
                 RequestId = request.RequestId,
-                StartDate = (DateOnly)request.RequestedStartDate,
-                DueDate = (DateOnly)request.RequestedEndDate,
+                StartDate = request.RequestedStartDate,
+                DueDate = request.RequestedEndDate,
                 Status = "active",
                 LateFeeAmount = 0m,
                 LateFeePaid = false,

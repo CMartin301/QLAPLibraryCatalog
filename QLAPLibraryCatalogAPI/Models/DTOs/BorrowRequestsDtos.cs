@@ -34,12 +34,6 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
         public DateOnly? RequestedEndDate { get; set; }
     }
 
-    public class ApproveBorrowRequestDto
-    {
-        public DateOnly? StartDate { get; set; }
-        public DateOnly? DueDate { get; set; }
-    }
-
     public class DenyBorrowRequestDto
     {
         public string? Reason { get; set; }

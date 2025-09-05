@@ -120,11 +120,11 @@ namespace QLAPLibraryCatalogAPI.Controllers
         /// <returns></returns>
         // POST api/borrowrequests/{id}/deny
         [HttpPost("{requestId}/Approve")]
-        public async Task<IActionResult> ApproveBorrowRequest(int requestId, [FromBody] ApproveBorrowRequestDto approveBorrowRequestDto)
+        public async Task<IActionResult> ApproveBorrowRequest(int requestId)
         {
             try
             {
-                var approvedRequest = await _borrowRequestsService.ApproveBorrowRequestAsync(requestId, approveBorrowRequestDto);
+                var approvedRequest = await _borrowRequestsService.ApproveBorrowRequestAsync(requestId);
                 if (approvedRequest == null) return NotFound();
                 
                 return Ok(approvedRequest);

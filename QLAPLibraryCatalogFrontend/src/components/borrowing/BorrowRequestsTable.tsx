@@ -131,18 +131,18 @@ export function BorrowRequestsTable() {
   });
 
   // Handlers for approve/deny/cancel
-  const handleApprove = async (id: number) => {
-    // await borrowRequestService.approve(id);
+  const handleApprove = async (requestId: number) => {
+    await borrowRequestService.approveBorrowRequest(requestId);
     loadRequests();
   };
 
-  const handleDeny = async (id: number) => {
-    // await borrowRequestService.deny(id, 'Not available');
+  const handleDeny = async (requestId: number) => {
+    await borrowRequestService.denyBorrowRequest(requestId, 'Not available');
     loadRequests();
   };
 
   const handleCancel = async (id: number) => {
-    // await borrowRequestService.cancel(id);
+    // await borrowRequestService.cancelBorrowRequest(id);
     loadRequests();
   };
 

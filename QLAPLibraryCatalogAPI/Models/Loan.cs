@@ -9,9 +9,9 @@ public partial class Loan
 
     public int RequestId { get; set; }
 
-    public DateOnly StartDate { get; set; }
+    public DateOnly? StartDate { get; set; }
 
-    public DateOnly DueDate { get; set; }
+    public DateOnly? DueDate { get; set; }
 
     public DateOnly? ReturnedDate { get; set; }
 
