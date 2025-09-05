@@ -27,6 +27,32 @@ namespace QLAPLibraryCatalogAPI.Controllers
                 return StatusCode(500, new { error = ex.Message });
             }
         }
+        [HttpGet("Borrower/{borrowerId}")]
+        public async Task<IActionResult> GetBorrowRequestsForBorrower(int borrowerId)
+        {
+            try
+            {
+                var items = await _borrowRequestsService.GetBorrowRequestsForBorrowerAsync(borrowerId);
+                return Ok(items);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+        [HttpGet("Lender/{lenderId}")]
+        public async Task<IActionResult> GetBorrowRequestsForLender(int lenderId)
+        {
+            try
+            {
+                var items = await _borrowRequestsService.GetBorrowRequestsForLenderAsync(lenderId);
+                return Ok(items);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
 
         [HttpGet("{requestId}")]
         public async Task<IActionResult> GetBorrowRequestById(int requestId)

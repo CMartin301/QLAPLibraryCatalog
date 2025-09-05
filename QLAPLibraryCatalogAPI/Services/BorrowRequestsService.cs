@@ -8,6 +8,8 @@ namespace QLAPLibraryCatalogAPI.Services
     public interface IBorrowRequestService
     {
         Task<IEnumerable<BorrowRequestDto>> GetBorrowRequestsAsync();
+        Task<IEnumerable<BorrowRequestDto>> GetBorrowRequestsForBorrowerAsync(int borrowerId);
+        Task<IEnumerable<BorrowRequestDto>> GetBorrowRequestsForLenderAsync(int lenderId);
         Task<BorrowRequestDto?> GetBorrowRequestByIdAsync(int requestId);
         Task<BorrowRequestDto> CreateBorrowRequestAsync(CreateBorrowRequestDto dto);
         Task<BorrowRequestDto?> ApproveBorrowRequestAsync(int requestId, ApproveBorrowRequestDto dto);
@@ -29,6 +31,28 @@ namespace QLAPLibraryCatalogAPI.Services
                 .AsQueryable();
 
             return await q.Select(r => MapBorrowRequest(r)).ToListAsync();
+        }
+        public async Task<IEnumerable<BorrowRequestDto>> GetBorrowRequestsForBorrowerAsync(int borrowerId)
+        {
+            var query = _context.BorrowRequests
+                .Include(r => r.Copy)
+                .ThenInclude(c => c.Media)
+                .AsQueryable();
+
+            return await query
+                .Where(r => r.BorrowerId == borrowerId)
+                .Select(r => MapBorrowRequest(r)).ToListAsync();
+        }
+        public async Task<IEnumerable<BorrowRequestDto>> GetBorrowRequestsForLenderAsync(int lenderId)
+        {
+            var query = _context.BorrowRequests
+                .Include(r => r.Copy)
+                .ThenInclude(c => c.Media)
+                .AsQueryable();
+
+            return await query
+                .Where(r => r.Copy.UserId == lenderId)
+                .Select(r => MapBorrowRequest(r)).ToListAsync();
         }
 
         public async Task<BorrowRequestDto?> GetBorrowRequestByIdAsync(int requestId)
