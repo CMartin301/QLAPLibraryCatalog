@@ -21,7 +21,7 @@ export const mediaService = {
   
   async getUserMedia(userId: number, includeCopies: boolean = false): Promise<Media[]> {    
     const response = await api.get<Media[]>(`/api/Media/User/${userId}?includeCopies=${includeCopies}`);
-    console.log(response.data);
+    // console.log(response.data);
     return response.data;
   },
   async createNewMediaCopy(newMediaCopy: CreateMediaCopyRequest): Promise<MediaCopy> {

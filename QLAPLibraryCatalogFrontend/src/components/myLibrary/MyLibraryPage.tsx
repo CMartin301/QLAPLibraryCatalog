@@ -6,6 +6,8 @@ import MediaTable from '../media/MediaTable';
 import { Media } from '../../types/media';
 import { mediaService } from '../../services/mediaService';
 import { BorrowRequestsTable } from '../borrowing/BorrowRequestsTable';
+import { BorrowRequestDto } from '../../types/borrowRequests';
+import { borrowRequestService } from '../../services/borrowRequestService';
 
 
 const MyLibraryPage: React.FC = () => {
@@ -16,10 +18,35 @@ const MyLibraryPage: React.FC = () => {
   const [allMedia, setAllMedia] = useState<Media[]>([]);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'myCollection' | 'addToCollection' | 'borrowRequests' >('myCollection');
+    const [borrowRequests, setBorrowRequests] = useState<BorrowRequestDto[]>([]);
 
   useEffect(() => {
     loadData();
+    loadBorrowRequests();
   }, []);
+
+const loadBorrowRequests = async () => {
+    if (!userID) return;
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      let requests: BorrowRequestDto[];
+      
+        // Requests sent to this user (as lender)
+        requests = await borrowRequestService.getBorrowRequestsForLender(userID);
+      
+      
+      setBorrowRequests(requests);
+    } catch (err: any) {
+      setError('Failed to load borrow requests');
+      console.error('Error loading borrow requests:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
 
   const loadData = async () => {
     setIsLoading(true);
@@ -160,7 +187,11 @@ const MyLibraryPage: React.FC = () => {
                         mode='addToCollection'
                       />
           ) : (
-            <BorrowRequestsTable />
+            <BorrowRequestsTable 
+                        requests={borrowRequests}
+                        userRole={'lender'}
+                        onRefresh={loadBorrowRequests}
+                      />
           )}
 
         </div>
