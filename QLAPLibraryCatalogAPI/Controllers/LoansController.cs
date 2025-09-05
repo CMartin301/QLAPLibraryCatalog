@@ -37,6 +37,57 @@ namespace QLAPLibraryCatalogAPI.Controllers
             }
         }
         /// <summary>
+        /// Gets all loans where the user is the borrower
+        /// </summary>
+        [HttpGet("User/Borrowed")]
+        public async Task<IActionResult> GetLoansBorrowedByUser(int userId)
+        {
+            try
+            {
+                var items = await _LoansService.GetLoansBorrowedByUserAsync(userId);
+                return Ok(items);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Gets all loans where the user owns the media (lender)
+        /// </summary>
+        [HttpGet("User/Lent")]
+        public async Task<IActionResult> GetLoansOfUserMedia(int userId)
+        {
+            try
+            {
+                var items = await _LoansService.GetLoansOfUserMediaAsync(userId);
+                return Ok(items);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        // /// <summary>
+        // ///  Gets all loans for some user
+        // /// </summary>
+        // /// <returns></returns>
+        // [HttpGet("User")]
+        // public async Task<IActionResult> GetUserLoans(int userId)
+        // {
+        //     try
+        //     {
+        //         var items = await _LoansService.GetUserLoansAsync(userId);
+        //         return Ok(items);
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         return StatusCode(500, new { error = ex.Message });
+        //     }
+        // }
+        /// <summary>
         /// Gets a specific loan by ID
         /// </summary>
         /// <param name="loanId"></param>

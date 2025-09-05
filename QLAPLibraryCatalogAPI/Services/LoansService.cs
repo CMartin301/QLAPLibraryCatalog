@@ -8,6 +8,9 @@ namespace QLAPLibraryCatalogAPI.Services
     public interface ILoansService
     {
         Task<IEnumerable<LoanDto>> GetLoansAsync();
+        // Task<IEnumerable<LoanDto>> GetUserLoansAsync(int userId);
+        Task<IEnumerable<LoanDto>> GetLoansBorrowedByUserAsync(int userId);
+        Task<IEnumerable<LoanDto>> GetLoansOfUserMediaAsync(int userId);
         Task<LoanDto?> GetLoanByIdAsync(int loanId);
         // Task<LoanDto?> ApproveBorrowRequestAsync(int requestId);
         // Task<LoanDto?> DenyBorrowRequestAsync(int requestId, DenyBorrowRequestDto dto);
@@ -26,6 +29,40 @@ namespace QLAPLibraryCatalogAPI.Services
 
             return await query.Select(loan => MapLoan(loan)).ToListAsync();
         }
+
+        // Loans where the user is the borrower
+        public async Task<IEnumerable<LoanDto>> GetLoansBorrowedByUserAsync(int userId)
+        {
+            return await _context.Loans
+                .Include(l => l.Request)
+                .ThenInclude(r => r.Copy)
+                .Where(l => l.Request.BorrowerId == userId)
+                .Select(loan => MapLoan(loan))
+                .ToListAsync();
+        }
+
+        // Loans where the user is the lender (owns the copy)
+        public async Task<IEnumerable<LoanDto>> GetLoansOfUserMediaAsync(int userId)
+        {
+            return await _context.Loans
+                .Include(l => l.Request)
+                .ThenInclude(r => r.Copy)
+                .Where(l => l.Request.Copy.UserId == userId)
+                .Select(loan => MapLoan(loan))
+                .ToListAsync();
+        }
+
+        // public async Task<IEnumerable<LoanDto>> GetUserLoansAsync(int userId)
+        // {
+        //     var query = _context.Loans
+        //         .Include(l => l.Request)
+        //         .ThenInclude(r => r.Copy)
+        //         .Where(l => l.Request.Copy.UserId == userId)
+        //         .AsQueryable();
+
+
+        //     return await query.Select(loan => MapLoan(loan)).ToListAsync();
+        // }
 
         public async Task<LoanDto?> GetLoanByIdAsync(int loanId)
         {
