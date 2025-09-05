@@ -10,12 +10,7 @@ interface AddMediaCopyFormProps {
   preselectedMedia?: Media;
 }
 
-export function AddMediaCopyForm({
-  onSubmit,
-  isSubmitting,
-  submitError,
-  preselectedMedia,
-}: AddMediaCopyFormProps) {
+export function AddMediaCopyForm({ onSubmit, isSubmitting, submitError, preselectedMedia }: AddMediaCopyFormProps) {
   const { register, handleSubmit, reset } = useForm<CreateMediaCopyRequest>({
     defaultValues: {
       condition: 'Good',

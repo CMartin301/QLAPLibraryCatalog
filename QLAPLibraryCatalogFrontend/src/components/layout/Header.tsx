@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
-import { BookOpen, Home, Book, FolderOpen, LogIn, UserPlus } from "lucide-react";
+import { BookOpen, Home, Book, FolderOpen, LogIn, UserPlus, Handshake } from "lucide-react";
 import { UserMenu } from "./UserMenu";
 
 /**
@@ -59,6 +59,17 @@ export function Header() {
               >
                 <FolderOpen size={18} className="mr-2" />
                 My Library
+              </Link>
+              <Link
+                to="/borrowing"
+                className={`flex items-center px-3 py-2 rounded-md text-sm font-Media transition-colors ${
+                  location.pathname === '/borrowing' 
+                    ? 'bg-lavender-500 text-white' 
+                    : 'text-gray-300 hover:text-white hover:bg-charcoal-light'
+                }`}
+              >
+                <Handshake size={18} className="mr-2" />
+                Borrowing
               </Link>
             </nav>
           )}

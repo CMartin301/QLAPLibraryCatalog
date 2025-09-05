@@ -12,6 +12,7 @@ import Header from './components/layout/Header';
 import MyLibraryPage from './components/myLibrary/MyLibraryPage';
 import NetworkCatalogPage from './components/networkCatalog/NetworkCatalogPage';
 import UserPreferencesContainer from './components/preferences/UserPreferencesContainer';
+import BorrowingDashboard from './components/borrowing/BorrowingDashboard';
 
 /**
  * App Layout Component
@@ -71,6 +72,16 @@ function AppRoutes() {
           <ProtectedRoute>
             <AppLayout>
               <MyLibraryPage />
+            </AppLayout>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/borrowing" 
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <BorrowingDashboard />
             </AppLayout>
           </ProtectedRoute>
         } 
