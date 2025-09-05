@@ -5,6 +5,8 @@ import useAuth from '../../hooks/useAuth';
 import MediaTable from '../media/MediaTable';
 import { Media } from '../../types/media';
 import { mediaService } from '../../services/mediaService';
+import { BorrowRequestsTable } from '../borrowing/BorrowRequestsTable';
+
 
 const MyLibraryPage: React.FC = () => {
   const { username, userID } = useAuth();
@@ -13,7 +15,7 @@ const MyLibraryPage: React.FC = () => {
   const [userMedia, setUserMedia] = useState<Media[]>([]);
   const [allMedia, setAllMedia] = useState<Media[]>([]);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'myCollection' | 'addToCollection'>('myCollection');
+  const [activeTab, setActiveTab] = useState<'myCollection' | 'addToCollection' | 'borrowRequests' >('myCollection');
 
   useEffect(() => {
     loadData();
@@ -122,6 +124,19 @@ const MyLibraryPage: React.FC = () => {
             >
               Add to Collection
             </button>
+            <button
+              className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === 'borrowRequests'
+                  ? 'border-lavender-500 text-lavender-600 bg-lavender-50'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'borrowRequests'}
+              onClick={() => setActiveTab('borrowRequests')}
+            >
+              Borrow Requests
+            </button>
           </div>
         </div>
       </div>
@@ -131,20 +146,23 @@ const MyLibraryPage: React.FC = () => {
         <div className="col">
           {activeTab === 'myCollection' ? (
             <MediaTable 
-              media={userMedia} 
-              onRefresh={loadData}
-              onSaveNewMedia={handleSaveMessage}
-              onSwitchToAddTab={handleSwitchToAddTab}
-              mode='myLibrary'
-            />
-          ) : (
+                        media={userMedia} 
+                        onRefresh={loadData}
+                        onSaveNewMedia={handleSaveMessage}
+                        onSwitchToAddTab={handleSwitchToAddTab}
+                        mode='myLibrary'
+                      />
+          ) : activeTab === 'addToCollection' ? (
             <MediaTable 
-              media={allMedia} 
-              onRefresh={loadData}
-              onSaveNewMedia={handleSaveMessage}
-              mode='addToCollection'
-            />
+                        media={allMedia} 
+                        onRefresh={loadData}
+                        onSaveNewMedia={handleSaveMessage}
+                        mode='addToCollection'
+                      />
+          ) : (
+            <BorrowRequestsTable />
           )}
+
         </div>
       </div>
     </div>
