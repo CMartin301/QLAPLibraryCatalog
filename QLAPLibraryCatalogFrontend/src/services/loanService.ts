@@ -9,6 +9,17 @@ export const loanService = {
     return response.data;
   },
 
+  async getLoansBorrowedByUser(userId: number): Promise<Loan[]> {
+    const response = await api.get<Loan[]>(`/api/Loan/User/Borrowed?userId=${userId}`);
+    return response.data;
+  },
+
+    async getLoansOfUserMedia(userId: number): Promise<Loan[]> {
+    const response = await api.get<Loan[]>(`/api/Loan/User/Lent?userId=${userId}`);
+    return response.data;
+  },
+
+
   // Get a single loan by ID
   async getLoanById(loanId: number): Promise<Loan> {
     const response = await api.get<Loan>(`/api/Loan/${loanId}`);
