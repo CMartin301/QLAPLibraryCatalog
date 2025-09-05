@@ -15,6 +15,8 @@ builder.Services.AddScoped<IMediaService, MediaService>();
 builder.Services.AddScoped<IMediaCopiesService, MediaCopiesService>();
 builder.Services.AddScoped<IMediaTypesService, MediaTypesService>();
 builder.Services.AddScoped<IUsersService, UsersService>();
+builder.Services.AddScoped<IBorrowRequestService, BorrowRequestService>();
+
 
 // Add Swagger
 builder.Services.AddEndpointsApiExplorer();
