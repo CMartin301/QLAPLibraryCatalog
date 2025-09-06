@@ -38,32 +38,38 @@ export function BorrowRequestsTable({ requests, userRole, onRefresh, error, load
   const columns = useMemo(
     () => [
       // Media Title & Author
-      columnHelper.accessor(row => row.media?.title ?? '—', {
-        id: 'media',
-        header: 'Book',
-        cell: info => {
-          const media = info.row.original.media;
-          return (
-            <div className="flex items-start space-x-3">
-              {/* <div className="flex-shrink-0">
-                <Book className="w-8 h-8 text-lavender-500" />
-              </div> */}
-              <div className="min-w-0 flex-1">
-                <p className="font-medium text-gray-900 truncate">
-                  {media?.title || '—'}
-                </p>
-                <p className="text-sm text-gray-500 truncate">
-                  {media?.creator || 'Unknown author'}
-                </p>
-              </div>
-            </div>
-          );
-        },
-        enableSorting: true,
-      enableResizing: true,
-  size: 200,     // starting width
+      columnHelper.accessor(row => row.mediaTitle ?? '—', {
+  id: 'media',
+  header: 'Book',
+  cell: info => {
+    const row = info.row.original;
+    return (
+      <div className="flex items-start space-x-3">
+        <div className="min-w-0 flex-1">
+          <p className="font-medium text-gray-900 truncate">
+            {row.mediaTitle || '—'}
+          </p>
+          <p className="text-sm text-gray-500 truncate">
+            {row.mediaCreator || 'Unknown author'}
+          </p>
+        </div>
+      </div>
+    );
+  },
+  enableSorting: true,
+  enableResizing: true,
+  size: 200,
   meta: { grow: 1 },
-      }),
+}),
+columnHelper.accessor('borrowerUsername', {
+  header: 'Borrower',
+  cell: info => (
+    <div className="flex items-center space-x-2">
+      <span className="font-medium text-gray-900">{info.getValue()}</span>
+    </div>
+  ),
+  enableSorting: true,
+}),
 
       // User (shows opposite role)
     //   columnHelper.accessor(

@@ -230,7 +230,7 @@ namespace QLAPLibraryCatalogAPI.Services
                 Status = status,
                 BorrowerReturnedAt = loan.BorrowerReturnedAt,
                 BorrowerReturnNotes = loan.BorrowerReturnNotes,
-                LenderConfirmedAt = loan.LenderConfirmedReturnAt,
+                LenderConfirmedReturnAt = loan.LenderConfirmedReturnAt,
                 LenderReturnNotes = loan.LenderReturnNotes
             };
         }
@@ -259,7 +259,7 @@ namespace QLAPLibraryCatalogAPI.Services
                 Status = status,
                 BorrowerReturnedAt = loan.BorrowerReturnedAt,
                 BorrowerReturnNotes = loan.BorrowerReturnNotes,
-                LenderConfirmedAt = loan.LenderConfirmedReturnAt,
+                LenderConfirmedReturnAt = loan.LenderConfirmedReturnAt,
                 LenderReturnNotes = loan.LenderReturnNotes,
 
                 // Media info
