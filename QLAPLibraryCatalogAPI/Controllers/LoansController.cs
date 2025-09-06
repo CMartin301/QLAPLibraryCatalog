@@ -160,7 +160,7 @@ namespace QLAPLibraryCatalogAPI.Controllers
         /// <param name="newDueDate"></param>
         /// <returns></returns>
         [HttpPut("{loanId}")]
-        public async Task<IActionResult> ExtendLoanDueDate(int loanId, [FromBody] DateOnly newDueDate)
+        public async Task<IActionResult> ExtendLoanDueDate(int loanId, [FromBody] DateOnly? newDueDate)
         {
             try
             {
@@ -174,6 +174,34 @@ namespace QLAPLibraryCatalogAPI.Controllers
             catch (InvalidOperationException ex)
             {
                 // Business rule violation: due date cannot be reduced
+                return BadRequest(new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+        /// <summary>
+        /// Adds loan return confirmation for either borrower or lender
+        /// </summary>
+        /// <param name="loanId"></param>
+        /// <param name="isBorrower"></param>
+        /// <param name="comment"></param>
+        /// <returns></returns>
+        [HttpPut("{loanId}/Return")]
+        public async Task<IActionResult> ReturnLoan(int loanId, [FromQuery]bool isBorrower, [FromBody] string? comment)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+
+                var updatedLoan = await _loansService.ReturnLoan(loanId, isBorrower, comment);
+                if (updatedLoan == null) return NotFound();
+                
+                return Ok(updatedLoan);
+            }
+            catch (InvalidOperationException ex)
+            {
                 return BadRequest(new { error = ex.Message });
             }
             catch (Exception ex)
