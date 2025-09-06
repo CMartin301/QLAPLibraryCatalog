@@ -44,6 +44,7 @@ export function LoansTable({ loans, onRefresh, error, loading }: LoansTableProps
           </div>
         ),
         enableSorting: true,
+      enableResizing: true,
       }),
 
       // Borrower Username (new)
@@ -53,6 +54,7 @@ export function LoansTable({ loans, onRefresh, error, loading }: LoansTableProps
           <span className="text-sm text-gray-900">{info.getValue()}</span>
         ),
         enableSorting: true,
+      enableResizing: true,
       }),
 
       // Owner Username (new)
@@ -62,6 +64,7 @@ export function LoansTable({ loans, onRefresh, error, loading }: LoansTableProps
           <span className="text-sm text-gray-900">{info.getValue()}</span>
         ),
         enableSorting: true,
+      enableResizing: true,
       }),
 
       // Loan Period (updated to use calculated field)
@@ -74,11 +77,16 @@ export function LoansTable({ loans, onRefresh, error, loading }: LoansTableProps
           </div>
         ),
         enableSorting: false,
+      enableResizing: true,
       }),
 
       // Status (updated with overdue logic)
       columnHelper.accessor("status", {
         header: "Status",
+      //   enableSorting: false,
+      // enableResizing: true,
+  size: 200,     // starting width
+  meta: { grow: 1 },
         cell: (info) => {
           const loan = info.row.original;
           const status = info.getValue() as LoanStatus;
@@ -114,7 +122,6 @@ export function LoansTable({ loans, onRefresh, error, loading }: LoansTableProps
             </span>
           );
         },
-        enableSorting: true,
       }),
 
 

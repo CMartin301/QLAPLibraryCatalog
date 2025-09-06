@@ -72,6 +72,9 @@ useModalScrollLock(isModalOpen || isCopyModalOpen || isBorrowModalOpen);
               {info.getValue()}
             </div>
           ),
+      enableResizing: true,
+  size: 200,     // starting width
+  meta: { grow: 1 },
         }),
         columnHelper.accessor('creator', {
           header: 'Author',
@@ -80,6 +83,7 @@ useModalScrollLock(isModalOpen || isCopyModalOpen || isBorrowModalOpen);
               {info.getValue()}
             </div>
           ),
+      enableResizing: true,
         }),
         columnHelper.accessor('genre', {
           header: 'Genre',
@@ -88,6 +92,7 @@ useModalScrollLock(isModalOpen || isCopyModalOpen || isBorrowModalOpen);
               {info.getValue()}
             </span>
           ),
+      enableResizing: true,
         }),
         columnHelper.display({
           id: 'copies',
@@ -106,6 +111,7 @@ useModalScrollLock(isModalOpen || isCopyModalOpen || isBorrowModalOpen);
               </div>
             );
           },
+      enableResizing: true,
         }),
       ];
 

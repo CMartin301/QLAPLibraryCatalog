@@ -69,6 +69,9 @@ export function BorrowRequestsTable({ requests, userRole, onRefresh, error, load
           );
         },
         enableSorting: true,
+      enableResizing: true,
+  size: 200,     // starting width
+  meta: { grow: 1 },
       }),
 
       // User (shows opposite role)
@@ -126,6 +129,7 @@ export function BorrowRequestsTable({ requests, userRole, onRefresh, error, load
           );
         },
         enableSorting: true,
+      enableResizing: true,
       }),
 
       // Requested Dates
@@ -148,6 +152,7 @@ export function BorrowRequestsTable({ requests, userRole, onRefresh, error, load
             </div>
           ),
           enableSorting: false,
+      enableResizing: true,
         }
       ),
 
@@ -170,6 +175,7 @@ export function BorrowRequestsTable({ requests, userRole, onRefresh, error, load
           </div>
         ),
         enableSorting: false,
+      enableResizing: true,
       }),
 
       // Actions
