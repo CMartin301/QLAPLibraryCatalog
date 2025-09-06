@@ -96,7 +96,6 @@ public partial class LibraryCatalogContext : DbContext
                 .HasColumnName("created_at");
             entity.Property(e => e.DueDate).HasColumnName("due_date");
             entity.Property(e => e.RequestId).HasColumnName("request_id");
-            entity.Property(e => e.ReturnNotes).HasColumnName("return_notes");
             entity.Property(e => e.ReturnedDate).HasColumnName("returned_date");
             entity.Property(e => e.StartDate).HasColumnName("start_date");
             entity.Property(e => e.Status)
@@ -106,6 +105,10 @@ public partial class LibraryCatalogContext : DbContext
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("updated_at");
+    entity.Property(e => e.BorrowerReturnedAt).HasColumnName("borrower_returned_at");
+    entity.Property(e => e.LenderConfirmedReturnAt).HasColumnName("lender_confirmed_return_at");
+    entity.Property(e => e.BorrowerReturnNotes).HasColumnName("borrower_return_notes");
+    entity.Property(e => e.LenderReturnNotes).HasColumnName("lender_return_notes");
 
             entity.HasOne(d => d.Request).WithOne(p => p.Loan)
                 .HasForeignKey<Loan>(d => d.RequestId)

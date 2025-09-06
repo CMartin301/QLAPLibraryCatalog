@@ -216,7 +216,10 @@ namespace QLAPLibraryCatalogAPI.Services
                 DueDate = loan.DueDate,
                 ReturnedDate = loan.ReturnedDate,
                 Status = loan.Status,
-                ReturnNotes = loan.ReturnNotes,
+                BorrowerReturnedAt = loan.BorrowerReturnedAt,
+                BorrowerReturnNotes = loan.BorrowerReturnNotes,
+                LenderConfirmedAt = loan.LenderConfirmedReturnAt,
+                LenderReturnNotes = loan.LenderReturnNotes
             };
         }
         /// <summary>
@@ -239,7 +242,10 @@ namespace QLAPLibraryCatalogAPI.Services
                 DueDate = loan.DueDate,
                 ReturnedDate = loan.ReturnedDate,
                 Status = loan.Status ?? "active",
-                ReturnNotes = loan.ReturnNotes,
+                BorrowerReturnedAt = loan.BorrowerReturnedAt,
+                BorrowerReturnNotes = loan.BorrowerReturnNotes,
+                LenderConfirmedAt = loan.LenderConfirmedReturnAt,
+                LenderReturnNotes = loan.LenderReturnNotes,
                 
                 // Media info
                 MediaTitle = loan.Request?.Copy?.Media?.Title ?? "Unknown Title",

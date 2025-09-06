@@ -16,8 +16,10 @@ public partial class Loan
     public DateOnly? ReturnedDate { get; set; }
 
     public string? Status { get; set; }
-
-    public string? ReturnNotes { get; set; }
+    public DateTime? BorrowerReturnedAt { get; set; }
+    public DateTime? LenderConfirmedReturnAt { get; set; }
+    public string? BorrowerReturnNotes { get; set; }
+    public string? LenderReturnNotes { get; set; }
 
     public DateTime? CreatedAt { get; set; }
 
