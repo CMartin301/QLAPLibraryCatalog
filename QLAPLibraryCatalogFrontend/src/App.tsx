@@ -12,7 +12,7 @@ import Header from './components/layout/Header';
 import MyLibraryPage from './components/myLibrary/MyLibraryPage';
 import NetworkCatalogPage from './components/networkCatalog/NetworkCatalogPage';
 import UserPreferencesContainer from './components/preferences/UserPreferencesContainer';
-import BorrowingDashboard from './components/borrowing/BorrowingDashboard';
+import BorrowingDashboard from './components/borrowing/BorrowingPage';
 
 /**
  * App Layout Component
