@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { DataTable } from "../shared/DataTable";
 import { LoanWithDetails } from "../../types/loans";
+import { loanService } from "../../services/loanService";
 
 interface LoansTableProps {
   loans: LoanWithDetails[];
@@ -130,29 +131,31 @@ export function LoansTable({ loans, onRefresh, error, loading }: LoansTableProps
       }),
 
 
-      // // Actions (keep existing but update loan ID reference)
-      // columnHelper.display({
-      //   id: "actions",
-      //   header: "Actions",
-      //   cell: (info) => {
-      //     const loan = info.row.original;
+      // Actions (keep existing but update loan ID reference)
+      columnHelper.display({
+        id: "actions",
+        header: "Actions",
+        cell: (info) => {
+          const loan = info.row.original;
 
-      //     if (loan.status === "active" && !loan.isOverdue) {
-      //       return (
-      //       <button
-      //         onClick={() => handleReturn(loan.loanId)}
-      //         disabled={isLoading}
-      //         aria-label={`Mark loan ${loan.loanId} as returned`}
-      //         className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded text-white bg-lavender-600 hover:bg-lavender-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lavender-500 disabled:opacity-50 disabled:cursor-not-allowed"
-      //       >
-      //         {isLoading ? 'Processing...' : 'Mark Returned'}
-      //       </button>
-      //       );
-      //     }
+          // if (loan.status === "active" && !loan.isOverdue) {
+            return (
+            <button
+              onClick={() => handleReturn(loan.loanId)}
+              disabled={isLoading}
+              aria-label={`Mark loan ${loan.loanId} as returned`}
+                  className="px-3 py-1.5 bg-lavender-400 hover:bg-lavender-500 disabled:bg-gray-300
+                           text-white text-xs font-medium rounded-md shadow-sm
+                           transition-colors duration-200 flex items-center gap-1.5"
+                >
+              {isLoading ? 'Processing...' : 'Mark Returned'}
+            </button>
+            );
+          // }
 
-      //     return <span className="text-xs text-gray-400">No actions</span>;
-      //   },
-      // }),
+          // return <span className="text-xs text-gray-400">No actions</span>;
+        },
+      }),
     ],
     [isLoading]
   );
@@ -178,19 +181,19 @@ export function LoansTable({ loans, onRefresh, error, loading }: LoansTableProps
   });
 
   // Action handler
-  // const handleReturn = async (loanId: number) => {
-  //   setIsLoading(true);
-  //   try {
-  //   //   await loanService.returnLoan(loanId, {
-  //   //     returnedDate: new Date().toISOString(),
-  //   //   });
-  //     onRefresh();
-  //   } catch (error) {
-  //     console.error("Failed to mark loan returned:", error);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
+  const handleReturn = async (loanId: number) => {
+    setIsLoading(true);
+    try {
+      await loanService.returnLoan(loanId, {
+        isBorrower: true
+      });
+      onRefresh();
+    } catch (error) {
+      console.error("Failed to mark loan returned:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="bg-[var(--color-card)] rounded-lg shadow-sm border border-[var(--color-border)]">

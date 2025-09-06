@@ -45,6 +45,6 @@ export interface LoanWithDetails {
 }
 // Update a loan when returning an item
 export interface ReturnLoanRequest {
-  returnedDate: string;
+  isBorrower: boolean;
   returnNotes?: string | null;
 }

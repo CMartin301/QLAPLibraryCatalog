@@ -1,5 +1,5 @@
 
-import { Loan, LoanWithDetails } from "../types/loans";
+import { Loan, LoanWithDetails, ReturnLoanRequest } from "../types/loans";
 import api from "./apiService";
 
 export const loanService = {
@@ -51,15 +51,10 @@ export const loanService = {
 //     return response.data;
 //   },
 
-//   // Mark loan as returned
-//   async returnLoan(loanId: number, returnRequest: ReturnLoanRequest): Promise<Loan> {
-//     const response = await api.put<Loan>(`/api/Loan/${loanId}/Return`, returnRequest);
-//     return response.data;
-//   },
+  // Mark loan as returned
+  async returnLoan(loanId: number, returnRequest: ReturnLoanRequest): Promise<Loan> {
+    const response = await api.put<Loan>(`/api/Loan/${loanId}/Return?isBorrower${returnRequest.isBorrower}`, returnRequest.returnNotes);
+    return response.data;
+  },
 
-//   // Optional: get all loans for a given user by requestId → backend may support this
-//   async getLoansByUser(userId: number): Promise<Loan[]> {
-//     const response = await api.get<Loan[]>(`/api/Loan/User/${userId}`);
-//     return response.data;
-//   },
 };
