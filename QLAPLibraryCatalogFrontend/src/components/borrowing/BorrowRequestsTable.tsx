@@ -30,11 +30,13 @@ interface BorrowRequestsTableProps {
   requests: BorrowRequestDto[];
   userRole: 'borrower' | 'lender';
   onRefresh: () => void;
+  error?: string | null;
+  loading?: boolean;
 }
 
 type BorrowStatus = 'pending' | 'approved' | 'denied' | 'cancelled';
 
-export function BorrowRequestsTable({ requests, userRole, onRefresh }: BorrowRequestsTableProps) {
+export function BorrowRequestsTable({ requests, userRole, onRefresh, error, loading }: BorrowRequestsTableProps) {
   const { userID } = useAuth();
   const [globalFilter, setGlobalFilter] = useState('');
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -184,14 +186,16 @@ export function BorrowRequestsTable({ requests, userRole, onRefresh }: BorrowReq
                 <button
                   onClick={() => handleApprove(request.requestId)}
                   disabled={isLoading}
-                  className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
+                  aria-label={`Approve borrow request ${request.requestId}`}
+                  className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Approve
+                  {isLoading ? 'Processing...' : 'Approve'}
                 </button>
                 <button
                   onClick={() => handleDeny(request.requestId)}
                   disabled={isLoading}
-                  className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
+                  aria-label={`Deny borrow request ${request.requestId}`}
+                  className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Deny
                 </button>
@@ -295,6 +299,7 @@ export function BorrowRequestsTable({ requests, userRole, onRefresh }: BorrowReq
               placeholder="Search requests..."
               value={globalFilter}
               onChange={e => setGlobalFilter(e.target.value)}
+              aria-label="Search borrow requests"
               className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:border-lavender-500"
             />
           </div>
@@ -304,13 +309,30 @@ export function BorrowRequestsTable({ requests, userRole, onRefresh }: BorrowReq
         </div>
       </div>
 
-      {/* Table */}
-      <DataTable
-        data={requests}
-        columns={columns}
-        emptyMessage="No borrow requests found"
-      />
+      {error && (
+        <div className="p-4 bg-red-50 border-l-4 border-red-400">
+          <p className="text-red-700">Error: {error}</p>
+          <button 
+            onClick={onRefresh}
+            className="mt-2 text-red-600 underline"
+          >
+            Try again
+          </button>
+        </div>
+      )}
 
+      {/* Table */}
+      {loading ? (
+        <div className="p-8 text-center text-gray-500">
+          Loading requests...
+        </div>
+      ) : (
+        <DataTable
+          data={requests}
+          columns={columns}
+          emptyMessage="No borrow requests found"
+        />
+      )}
     </div>
   );
 }

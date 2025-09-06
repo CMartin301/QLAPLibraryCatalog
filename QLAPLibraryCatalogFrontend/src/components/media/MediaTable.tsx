@@ -24,15 +24,18 @@ import { AddBorrowRequestForm } from '../borrowing/AddBorrowRequestForm';
 import { DataTable } from '../shared/DataTable';
 
 
+
 interface MediaTableProps {
   media?: Media[];
   onRefresh?: () => void; 
   onSaveNewMedia?: (message: string) => void; 
   onSwitchToAddTab?: () => void;
   mode?: 'allMedia' | 'myLibrary' | 'addToCollection';
+  loading?: boolean;
+  error?: string | null;
 }
 
-export function MediaTable({ media = [], onRefresh, onSaveNewMedia, onSwitchToAddTab, mode = 'allMedia'}: MediaTableProps) {
+export function MediaTable({ media = [], onRefresh, onSaveNewMedia, onSwitchToAddTab, mode = 'allMedia', loading, error}: MediaTableProps) {
   const { userID } = useAuth();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -450,11 +453,30 @@ const handleCloseBorrowModal = () => {
         </div>
       </div>
 
-      <DataTable
-        data={media}
-        columns={columns}
-        emptyMessage="No books found matching your search"
-      />
+      {error && (
+        <div className="p-4 bg-red-50 border-l-4 border-red-400">
+          <p className="text-red-700">Error: {error}</p>
+          <button 
+            onClick={onRefresh}
+            className="mt-2 text-red-600 underline"
+          >
+            Try again
+          </button>
+        </div>
+      )}
+
+      {/* Table */}
+      {loading ? (
+        <div className="p-8 text-center text-gray-500">
+          Loading media...
+        </div>
+      ) : (
+        <DataTable
+          data={media}
+          columns={columns}
+          emptyMessage="No books found matching your search"
+        />
+      )}
 
      
       {/* Modals */}

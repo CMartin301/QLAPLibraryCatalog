@@ -9,6 +9,7 @@ import { loanService } from '../../services/loanService';
 import { BorrowRequestsTable } from './BorrowRequestsTable';
 import LoansTable from './LoansTable';
 import { useLoans } from '../../hooks/useLoans';
+import { useBorrowRequests } from '../../hooks/useBorrowRequests';
 
 type MainTab = 'requests' | 'loans';
 type RequestTab = 'sent' | 'received';
@@ -21,8 +22,7 @@ const BorrowingDashboard: React.FC = () => {
 
   // --- Borrow Requests ---
   const [requestTab, setRequestTab] = useState<RequestTab>('sent');
-  const [borrowRequests, setBorrowRequests] = useState<BorrowRequestDto[]>([]);
-  const [requestsLoading, setRequestsLoading] = useState(true);
+  const { requests: borrowRequests, loading: requestsLoading, error: requestsError, refetch: refetchRequests } = useBorrowRequests(userID, requestTab);
 
   // --- Loans ---
   const [loanTab, setLoanTab] = useState<LoanTab>('borrowed');
@@ -32,50 +32,8 @@ const BorrowingDashboard: React.FC = () => {
 
   useEffect(() => {
     if (!userID) return;
-    if (mainTab === 'requests') {
-      loadBorrowRequests();
-    } 
   }, [mainTab, requestTab, loanTab, userID]);
 
-  // ---- Load Borrow Requests ----
-  const loadBorrowRequests = async () => {
-    if (!userID) return;
-    setRequestsLoading(true);
-
-    try {
-      let requests: BorrowRequestDto[] = [];
-      if (requestTab === 'sent') {
-        requests = await borrowRequestService.getBorrowRequestsForBorrower(userID);
-      } else {
-        requests = await borrowRequestService.getBorrowRequestsForLender(userID);
-      }
-      setBorrowRequests(requests);
-    } catch (err) {
-      console.error('Error loading borrow requests', err);
-    } finally {
-      setRequestsLoading(false);
-    }
-  };
-
-  // // ---- Load Loans ----
-  // const loadLoans = async () => {
-  //   if (!userID) return;
-  //   setLoansLoading(true);
-
-  //   try {
-  //     let items: Loan[] = [];
-  //     if (loanTab === 'borrowed') {
-  //       items = await loanService.getLoansBorrowedByUser(userID);
-  //     } else {
-  //       items = await loanService.getLoansOfUserMedia(userID);
-  //     }
-  //     setLoans(items);
-  //   } catch (err) {
-  //     console.error('Error loading loans', err);
-  //   } finally {
-  //     setLoansLoading(false);
-  //   }
-  // };
 
   return (
     <div className="container-fluid py-4 bg-pattern min-h-screen">
@@ -170,8 +128,10 @@ const BorrowingDashboard: React.FC = () => {
             <div className="bg-white rounded-lg shadow-sm">
               <BorrowRequestsTable
                 requests={borrowRequests}
-                userRole={requestTab === 'sent' ? 'borrower' : 'lender'}
-                onRefresh={loadBorrowRequests}
+                userRole={requestTab === 'sent' ? 'borrower' : 'lender'}  
+                onRefresh={refetchRequests}
+                loading={requestsLoading}
+                error={requestsError}
               />
             </div>
           </div>
