@@ -24,6 +24,7 @@ import {
 import useAuth from '../../hooks/useAuth';
 import { borrowRequestService } from '../../services/borrowRequestService';
 import { BorrowRequestDto } from '../../types/borrowRequests';
+import { DataTable } from '../shared/DataTable';
 
 interface BorrowRequestsTableProps {
   requests: BorrowRequestDto[];
@@ -283,7 +284,7 @@ export function BorrowRequestsTable({ requests, userRole, onRefresh }: BorrowReq
   };
 
   return (
-    <div className="bg-white">
+    <div className="bg-[var(--color-card)] rounded-lg shadow-sm border border-[var(--color-border)]">
       {/* Search Header */}
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center justify-between">
@@ -304,144 +305,12 @@ export function BorrowRequestsTable({ requests, userRole, onRefresh }: BorrowReq
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden">
-        <div className="overflow-x-auto">
-            <table className="w-full table-fixed divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              {table.getHeaderGroups().map(headerGroup => (
-                <tr key={headerGroup.id}>
-                  {headerGroup.headers.map(header => (
-                    <th
-                      key={header.id}
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
-                      {header.isPlaceholder ? null : (
-                        <div
-                          className={`flex items-center space-x-1 ${
-                            header.column.getCanSort() ? 'cursor-pointer select-none hover:text-gray-700' : ''
-                          }`}
-                          onClick={header.column.getToggleSortingHandler()}
-                        >
-                          <span>
-                            {flexRender(header.column.columnDef.header, header.getContext())}
-                          </span>
-                          {header.column.getCanSort() && (
-                            <span className="flex flex-col">
-                              <ChevronUp
-                                size={12}
-                                className={`${
-                                  header.column.getIsSorted() === 'asc'
-                                    ? 'text-lavender-600'
-                                    : 'text-gray-300'
-                                }`}
-                              />
-                              <ChevronDown
-                                size={12}
-                                className={`-mt-1 ${
-                                  header.column.getIsSorted() === 'desc'
-                                    ? 'text-lavender-600'
-                                    : 'text-gray-300'
-                                }`}
-                              />
-                            </span>
-                          )}
-                        </div>
-                      )}
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
+      <DataTable
+        data={requests}
+        columns={columns}
+        emptyMessage="No borrow requests found"
+      />
 
-            <tbody className="bg-white divide-y divide-gray-200">
-              {table.getRowModel().rows.map(row => (
-                <tr key={row.id} className="hover:bg-gray-50 transition-colors">
-                  {row.getVisibleCells().map(cell => (
-                    <td key={cell.id} className="px-6 py-4">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Pagination */}
-      {table.getRowModel().rows.length > 0 && (
-        <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <span>Show</span>
-            <select
-              value={table.getState().pagination.pageSize}
-              onChange={e => table.setPageSize(Number(e.target.value))}
-              className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-lavender-500"
-            >
-              {[5, 10, 20, 50].map(pageSize => (
-                <option key={pageSize} value={pageSize}>
-                  {pageSize}
-                </option>
-              ))}
-            </select>
-            <span>
-              of {table.getFilteredRowModel().rows.length} entries
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-              className="p-2 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-lavender-500"
-            >
-              <ChevronLeft size={16} />
-            </button>
-
-            <div className="flex items-center gap-1">
-              {Array.from({ length: Math.min(5, table.getPageCount()) }, (_, i) => {
-                const currentPage = table.getState().pagination.pageIndex;
-                const totalPages = table.getPageCount();
-
-                let pageIndex;
-                if (totalPages <= 5) {
-                  pageIndex = i;
-                } else if (currentPage <= 2) {
-                  pageIndex = i;
-                } else if (currentPage >= totalPages - 3) {
-                  pageIndex = totalPages - 5 + i;
-                } else {
-                  pageIndex = currentPage - 2 + i;
-                }
-
-                if (pageIndex >= totalPages || pageIndex < 0) return null;
-
-                return (
-                  <button
-                    key={pageIndex}
-                    onClick={() => table.setPageIndex(pageIndex)}
-                    className={`px-3 py-1 text-sm border rounded focus:outline-none focus:ring-2 focus:ring-lavender-500 ${
-                      pageIndex === currentPage
-                        ? 'bg-lavender-500 text-white border-lavender-500'
-                        : 'border-gray-300 hover:bg-gray-50'
-                    }`}
-                  >
-                    {pageIndex + 1}
-                  </button>
-                );
-              })}
-            </div>
-
-            <button
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-              className="p-2 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-lavender-500"
-            >
-              <ChevronRight size={16} />
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
