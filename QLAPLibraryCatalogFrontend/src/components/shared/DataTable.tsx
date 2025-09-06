@@ -1,5 +1,5 @@
 // src/components/shared/DataTable.tsx
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -20,13 +20,6 @@ import {
   Plus,
 } from "lucide-react";
 
-// --- Extend ColumnMeta so we can use `meta.grow`
-declare module "@tanstack/react-table" {
-  interface ColumnMeta<TData extends unknown, TValue> {
-    grow?: number; // allows one or more columns to flex-grow
-  }
-}
-
 interface DataTableProps<T> {
   data: T[];
   columns: ColumnDef<T, any>[];
@@ -36,10 +29,12 @@ interface DataTableProps<T> {
   showSearch?: boolean;
   error?: string | null;
   onRefresh?: () => void;
-  actionButton?: {  
-    text: string;
-    onClick: () => void;
-  } | null;
+  actionButton?:
+    | {
+        text: string;
+        onClick: () => void;
+      }
+    | null;
 }
 
 export function DataTable<T>({
@@ -51,7 +46,7 @@ export function DataTable<T>({
   showSearch = true,
   error,
   onRefresh,
-  actionButton, 
+  actionButton,
 }: DataTableProps<T>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -59,26 +54,18 @@ export function DataTable<T>({
     pageIndex: 0,
     pageSize: 10,
   });
-  const [columnSizing, setColumnSizing] = useState({}); // persist widths across pagination
 
   const table = useReactTable({
     data,
     columns,
-    state: { sorting, globalFilter, pagination, columnSizing },
+    state: { sorting, globalFilter, pagination },
     onSortingChange: setSorting,
     onGlobalFilterChange: setGlobalFilter,
     onPaginationChange: setPagination,
-    onColumnSizingChange: setColumnSizing,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    columnResizeMode: "onChange", // live resizing
-    defaultColumn: {
-      minSize: 80,
-      maxSize: 500,
-      size: 150,
-    },
   });
 
   return (
@@ -102,22 +89,22 @@ export function DataTable<T>({
               />
             </div>
 
-            {/* action button */}
-        {actionButton && (
-          <button
-            type="button"
-            onClick={actionButton.onClick}
-            className="py-2 pl-4 pr-5 bg-lavender-400 hover:bg-lavender-500
+            {/* Action button */}
+            {actionButton && (
+              <button
+                type="button"
+                onClick={actionButton.onClick}
+                className="py-2 pl-4 pr-5 bg-lavender-400 hover:bg-lavender-500
                       text-white text-sm font-medium rounded-lg shadow
                       transition-all duration-200 transform hover:scale-[1.01]
                       flex items-center gap-2 justify-center whitespace-nowrap"
-          >
-            <Plus size={16} className="text-white" />
-            {actionButton.text}
-          </button>
-        )}
-      </div>
+              >
+                <Plus size={16} className="text-white" />
+                {actionButton.text}
+              </button>
+            )}
           </div>
+        </div>
       )}
 
       {/* Error Display */}
@@ -138,16 +125,21 @@ export function DataTable<T>({
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full table-fixed divide-y divide-[var(--color-border)]">
-          {/* --- colgroup ensures widths apply consistently */}
+          {/* Apply column widths from column definitions */}
           <colgroup>
             {table.getAllLeafColumns().map((column) => (
               <col
                 key={column.id}
                 style={{
-                  width: column.getSize(),
-                  minWidth: column.columnDef.minSize,
-                  maxWidth: column.columnDef.maxSize,
-                  flexGrow: column.columnDef.meta?.grow ?? 0,
+                  width: column.columnDef.size
+                    ? `${column.columnDef.size}px`
+                    : "auto",
+                  minWidth: column.columnDef.minSize
+                    ? `${column.columnDef.minSize}px`
+                    : undefined,
+                  maxWidth: column.columnDef.maxSize
+                    ? `${column.columnDef.maxSize}px`
+                    : undefined,
                 }}
               />
             ))}
@@ -160,7 +152,7 @@ export function DataTable<T>({
                   <th
                     key={header.id}
                     colSpan={header.colSpan}
-                    className="relative group px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase tracking-wider"
+                    className="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase tracking-wider"
                   >
                     {header.isPlaceholder ? null : (
                       <div
@@ -196,21 +188,6 @@ export function DataTable<T>({
                           </span>
                         )}
                       </div>
-                    )}
-
-                    {/* Hover-only resize handle */}
-                    {header.column.getCanResize() && (
-                      <div
-                        onMouseDown={header.getResizeHandler()}
-                        onTouchStart={header.getResizeHandler()}
-                        className="
-                          absolute right-0 top-0 h-full w-1
-                          cursor-col-resize select-none touch-none
-                          opacity-0 group-hover:opacity-100
-                          bg-[var(--color-primary)]
-                          transition-opacity
-                        "
-                      />
                     )}
                   </th>
                 ))}

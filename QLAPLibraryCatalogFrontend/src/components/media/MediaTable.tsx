@@ -10,9 +10,10 @@ import {
   ColumnFiltersState,
   getPaginationRowModel,
   PaginationState,
+  ColumnDef,
 } from '@tanstack/react-table';
 import { Search, Plus, Filter, X } from 'lucide-react';
-import { Media, MediaFormData, CreateMediaRequest, CreateMediaCopyRequest } from '../../types/media';
+import { Media, MediaFormData, CreateMediaRequest, CreateMediaCopyRequest, MediaCopy } from '../../types/media';
 import { AddMediaForm } from './AddMediaForm';
 import { Modal } from '../shared/Modal';
 import { mediaService } from '../../services/mediaService';
@@ -61,109 +62,110 @@ useModalScrollLock(isModalOpen || isCopyModalOpen || isBorrowModalOpen);
 
   const columnHelper = createColumnHelper<Media>();
 
-  const columns = useMemo(
-    () => {
-      const baseColumns = [
-        columnHelper.accessor('title', {
-          header: 'Title',
-          cell: info => (
-            <div className="font-medium text-[var(--color-text)]">
-              {info.getValue()}
-            </div>
-          ),
-      enableResizing: true,
-  size: 200,     // starting width
-  meta: { grow: 1 },
-        }),
-        columnHelper.accessor('creator', {
-          header: 'Author',
-          cell: info => (
-            <div className="text-[var(--color-text)]">
-              {info.getValue()}
-            </div>
-          ),
-      enableResizing: true,
-        }),
-        columnHelper.accessor('genre', {
-          header: 'Genre',
-          cell: info => (
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-lavender-100 bg-opacity-40 text-lavender-500">
-              {info.getValue()}
-            </span>
-          ),
-      enableResizing: true,
-        }),
-        columnHelper.display({
-          id: 'copies',
-          header: 'Copies',
-          cell: info => {
-            const copies = info.row.original.copies ?? [];
-            if (copies.length === 0) {
-              return <span className="text-gray-400 text-sm">—</span>;
-            }
-
-            const availableCount = copies.filter(c => c.isAvailable).length;
-            return (
-              <div className="text-sm text-[var(--color-text)]">
-                {copies.length} total{" "}
-                <span className="text-green-600">({availableCount} available)</span>
-              </div>
-            );
-          },
-      enableResizing: true,
-        }),
-      ];
-
-      // Add action column for 'addToCollection' mode
-      if (mode === 'addToCollection') {
-        baseColumns.push(
-          columnHelper.display({
-            id: 'actions',
-            header: 'Actions',
-            cell: info => {
-              const mediaItem = info.row.original;
-              const isAdding = addingToCopyMediaId === mediaItem.mediaId;
-              
-              return (
-                <button
-                  onClick={() => handleAddToCollection(mediaItem)}
-                  disabled={isAdding}
-                  className="px-3 py-1.5 bg-lavender-400 hover:bg-lavender-500 disabled:bg-gray-300
-                           text-white text-xs font-medium rounded-md shadow-sm
-                           transition-colors duration-200 flex items-center gap-1.5"
-                >
-                  <Plus size={14} />
-                  {isAdding ? 'Adding...' : 'Add to Collection'}
-                </button>
-              );
-            },
-          })
+  const columns = useMemo<ColumnDef<Media, any>[]>(() => {
+  const baseColumns: ColumnDef<Media, any>[] = [
+    // Title & Author
+    columnHelper.accessor(row => row.title ?? "—", {
+      id: "title",
+      header: "Title",
+      cell: info => {
+        const row = info.row.original;
+        return (
+          <div className="flex flex-col min-w-0">
+            <p className="font-medium text-gray-900 truncate">{row.title}</p>
+            <p className="text-sm text-gray-500 truncate">{row.creator || "Unknown author"}</p>
+          </div>
         );
-      }
+      },
+      enableSorting: true,
+      size: 260,
+      minSize: 200,
+      maxSize: 400,
+    }),
 
-      if (mode === 'allMedia') {
-        baseColumns.push(
-          columnHelper.display({
-            id: 'actions',
-            header: 'Actions',
-            cell: info => (
-              <button
-                onClick={() => handleRequestItem(info.row.original)}
-                className="px-3 py-1.5 bg-lavender-400 hover:bg-lavender-500 disabled:bg-gray-300
-                           text-white text-xs font-medium rounded-md shadow-sm
-                           transition-colors duration-200 flex items-center gap-1.5"
-              >
-                Request Item
-              </button>
-            ),
-          })
+    // Genre (badge)
+    columnHelper.accessor(row => row.genre ?? "Unknown", {
+      id: "genre",
+      header: "Genre",
+      cell: info => (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-lavender-100 text-lavender-500">
+          {info.getValue()}
+        </span>
+      ),
+      enableSorting: true,
+      size: 140,
+    }),
+
+    // Copies
+    columnHelper.accessor(row => row.copies ?? [], {
+      id: "copies",
+      header: "Copies",
+      cell: info => {
+        const copies = info.getValue();
+        if (!copies || copies.length === 0) {
+          return <span className="text-gray-400 text-sm">—</span>;
+        }
+
+        const availableCount = copies.filter((c: MediaCopy) => c.isAvailable).length;
+        return (
+          <div className="text-sm text-gray-900">
+            {copies.length} total <span className="text-green-600">({availableCount} available)</span>
+          </div>
         );
-      }
+      },
+      enableSorting: false,
+      size: 160,
+    }),
+  ];
 
-      return baseColumns;
-    },
-    [columnHelper, mode, addingToCopyMediaId]
-  );
+  // Action column for addToCollection
+  if (mode === "addToCollection") {
+    baseColumns.push(
+      columnHelper.display({
+        id: "actions",
+        header: "Actions",
+        size: 180,
+        cell: info => {
+          const mediaItem = info.row.original;
+          const isAdding = addingToCopyMediaId === mediaItem.mediaId;
+
+          return (
+            <button
+              onClick={() => handleAddToCollection(mediaItem)}
+              disabled={isAdding}
+              className="inline-flex items-center px-3 py-1 text-xs font-medium rounded bg-lavender-400 text-white hover:bg-lavender-500 disabled:bg-gray-300 transition-colors gap-1"
+            >
+              <Plus size={14} />
+              {isAdding ? "Adding..." : "Add to Collection"}
+            </button>
+          );
+        },
+      }) as ColumnDef<Media, any> // cast to avoid TS error
+    );
+  }
+
+  // Action column for allMedia
+  if (mode === "allMedia") {
+    baseColumns.push(
+      columnHelper.display({
+        id: "actions",
+        header: "Actions",
+        size: 180,
+        cell: info => (
+          <button
+            onClick={() => handleRequestItem(info.row.original)}
+            className="inline-flex items-center px-3 py-1 text-xs font-medium rounded bg-lavender-400 text-white hover:bg-lavender-500 disabled:bg-gray-300 transition-colors gap-1"
+          >
+            Request Item
+          </button>
+        ),
+      }) as ColumnDef<Media, any> // cast to avoid TS error
+    );
+  }
+
+  return baseColumns;
+}, [columnHelper, mode, addingToCopyMediaId]);
+
 
   const table = useReactTable({
     data: media,
