@@ -474,7 +474,11 @@ const handleCloseBorrowModal = () => {
         <DataTable
           data={media}
           columns={columns}
-          emptyMessage="No books found matching your search"
+          emptyMessage="No books found"
+          isLoading={loading}
+          searchPlaceholder="Search books..."
+          error={error}
+          onRefresh={onRefresh}
         />
       )}
 
