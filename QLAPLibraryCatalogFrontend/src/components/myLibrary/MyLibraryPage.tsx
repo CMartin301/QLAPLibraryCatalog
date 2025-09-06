@@ -8,67 +8,45 @@ import { mediaService } from '../../services/mediaService';
 import { BorrowRequestsTable } from '../borrowing/BorrowRequestsTable';
 import { BorrowRequestDto } from '../../types/borrowRequests';
 import { borrowRequestService } from '../../services/borrowRequestService';
+import { useBorrowRequests } from '../../hooks/useBorrowRequests';
+import { useMedia } from '../../hooks/useMedia';
 
 
 const MyLibraryPage: React.FC = () => {
   const { username, userID } = useAuth();
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [userMedia, setUserMedia] = useState<Media[]>([]);
-  const [allMedia, setAllMedia] = useState<Media[]>([]);
+  // const [isLoading, setIsLoading] = useState(true);
+  // const [error, setError] = useState<string | null>(null);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'myCollection' | 'addToCollection' | 'borrowRequests' >('myCollection');
-    const [borrowRequests, setBorrowRequests] = useState<BorrowRequestDto[]>([]);
+   const { 
+    media: userMedia, 
+    loading: userMediaLoading, 
+    error: userMediaError, 
+    refetch: refetchUserMedia 
+  } = useMedia(userID, true);
+
+  const { 
+    media: allMedia, 
+    loading: allMediaLoading, 
+    error: allMediaError, 
+    refetch: refetchAllMedia 
+  } = useMedia(null, true);
+  const { 
+    requests: borrowRequests, 
+    loading: requestsLoading, 
+    error: requestsError, 
+    refetch: refetchBorrowRequests 
+  } = useBorrowRequests(userID, 'received');
+const isLoading = userMediaLoading || allMediaLoading;
+const error = userMediaError || allMediaError;
+
+const handleRefresh = () => {
+  refetchUserMedia();
+  refetchAllMedia();
+};
 
   useEffect(() => {
-    loadData();
-    loadBorrowRequests();
   }, []);
-
-const loadBorrowRequests = async () => {
-    if (!userID) return;
-    
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      let requests: BorrowRequestDto[];
-      
-        // Requests sent to this user (as lender)
-        requests = await borrowRequestService.getBorrowRequestsForLender(userID);
-      
-      
-      setBorrowRequests(requests);
-    } catch (err: any) {
-      setError('Failed to load borrow requests');
-      console.error('Error loading borrow requests:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-
-  const loadData = async () => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      if (!userID) return;
-      
-      // Load both user's media and all available media
-      const [userMediaResponse, allMediaResponse] = await Promise.all([
-        mediaService.getUserMedia(userID, true),
-        mediaService.getMedia(true)
-      ]);
-      
-      setUserMedia(userMediaResponse);
-      setAllMedia(allMediaResponse);
-    } catch (err: any) {
-      setError('Failed to load media');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleSaveMessage = (message: string) => {
     setSaveMessage(message);
@@ -173,25 +151,31 @@ const loadBorrowRequests = async () => {
         <div className="col">
           {activeTab === 'myCollection' ? (
             <MediaTable 
-                        media={userMedia} 
-                        onRefresh={loadData}
-                        onSaveNewMedia={handleSaveMessage}
-                        onSwitchToAddTab={handleSwitchToAddTab}
-                        mode='myLibrary'
-                      />
+              media={userMedia} 
+              onRefresh={refetchUserMedia}
+              onSaveNewMedia={handleSaveMessage}
+              onSwitchToAddTab={handleSwitchToAddTab}
+              mode='myLibrary'
+              loading={userMediaLoading}
+              error={userMediaError}
+            />
           ) : activeTab === 'addToCollection' ? (
             <MediaTable 
-                        media={allMedia} 
-                        onRefresh={loadData}
-                        onSaveNewMedia={handleSaveMessage}
-                        mode='addToCollection'
-                      />
+              media={allMedia} 
+              onRefresh={refetchAllMedia}
+              onSaveNewMedia={handleSaveMessage}
+              mode='addToCollection'
+              loading={allMediaLoading}
+              error={allMediaError}
+            />
           ) : (
             <BorrowRequestsTable 
-                        requests={borrowRequests}
-                        userRole={'lender'}
-                        onRefresh={loadBorrowRequests}
-                      />
+              requests={borrowRequests}
+              userRole={'lender'}
+              onRefresh={refetchBorrowRequests}
+              error={requestsError}
+              loading={requestsLoading}
+            />
           )}
 
         </div>

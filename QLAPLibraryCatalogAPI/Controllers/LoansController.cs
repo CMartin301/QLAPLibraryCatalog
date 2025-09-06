@@ -11,16 +11,17 @@ namespace QLAPLibraryCatalogAPI.Controllers
     [Route("api/Loan")]
     public class LoansController : ControllerBase
     {
-        private readonly ILoansService _LoansService;
+        private readonly ILoansService _loansService;
         /// <summary>
         /// Constructor
         /// </summary>
         public LoansController(ILoansService LoansService)
         {
-           _LoansService = LoansService; 
+           _loansService = LoansService; 
         }
+        #region Get Loans without Details
         /// <summary>
-        ///  Gets all loans
+        ///  Gets all loans without details
         /// </summary>
         /// <returns></returns>
         [HttpGet]
@@ -28,7 +29,7 @@ namespace QLAPLibraryCatalogAPI.Controllers
         {
             try
             {
-                var items = await _LoansService.GetLoansAsync();
+                var items = await _loansService.GetLoansAsync();
                 return Ok(items);
             }
             catch (Exception ex)
@@ -37,14 +38,14 @@ namespace QLAPLibraryCatalogAPI.Controllers
             }
         }
         /// <summary>
-        /// Gets all loans where the user is the borrower
+        /// Gets all loans where the user is the borrower without details
         /// </summary>
         [HttpGet("User/Borrowed")]
         public async Task<IActionResult> GetLoansBorrowedByUser(int userId)
         {
             try
             {
-                var items = await _LoansService.GetLoansBorrowedByUserAsync(userId);
+                var items = await _loansService.GetLoansBorrowedByUserAsync(userId);
                 return Ok(items);
             }
             catch (Exception ex)
@@ -54,14 +55,14 @@ namespace QLAPLibraryCatalogAPI.Controllers
         }
 
         /// <summary>
-        /// Gets all loans where the user owns the media (lender)
+        /// Gets all loans where the user owns the media (lender) without details
         /// </summary>
         [HttpGet("User/Lent")]
         public async Task<IActionResult> GetLoansOfUserMedia(int userId)
         {
             try
             {
-                var items = await _LoansService.GetLoansOfUserMediaAsync(userId);
+                var items = await _loansService.GetLoansOfUserMediaAsync(userId);
                 return Ok(items);
             }
             catch (Exception ex)
@@ -70,25 +71,8 @@ namespace QLAPLibraryCatalogAPI.Controllers
             }
         }
 
-        // /// <summary>
-        // ///  Gets all loans for some user
-        // /// </summary>
-        // /// <returns></returns>
-        // [HttpGet("User")]
-        // public async Task<IActionResult> GetUserLoans(int userId)
-        // {
-        //     try
-        //     {
-        //         var items = await _LoansService.GetUserLoansAsync(userId);
-        //         return Ok(items);
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         return StatusCode(500, new { error = ex.Message });
-        //     }
-        // }
         /// <summary>
-        /// Gets a specific loan by ID
+        /// Gets a specific loan by ID without details
         /// </summary>
         /// <param name="loanId"></param>
         /// <returns></returns>
@@ -97,7 +81,7 @@ namespace QLAPLibraryCatalogAPI.Controllers
         {
             try
             {
-                var Loans = await _LoansService.GetLoanByIdAsync(loanId);
+                var Loans = await _loansService.GetLoanByIdAsync(loanId);
                 if (Loans == null) return NotFound();
 
                 return Ok(Loans);
@@ -107,7 +91,66 @@ namespace QLAPLibraryCatalogAPI.Controllers
                 return StatusCode(500, new { error = ex.Message });
             }
         }
+        #endregion
 
+        #region Get Loans with Details
+
+        /// <summary>
+        /// Gets all loans where the user is the borrower with full details for display
+        /// </summary>
+        [HttpGet("User/Borrowed/Details")]
+        public async Task<IActionResult> GetLoansBorrowedByUserWithDetails(int userId)
+        {
+            try
+            {
+                var items = await _loansService.GetLoansBorrowedByUserWithDetailsAsync(userId);
+                return Ok(items);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Gets all loans where the user owns the media (lender) with full details for display
+        /// </summary>
+        [HttpGet("User/Lent/Details")]
+        public async Task<IActionResult> GetLoansOfUserMediaWithDetails(int userId)
+        {
+            try
+            {
+                var items = await _loansService.GetLoansOfUserMediaWithDetailsAsync(userId);
+                return Ok(items);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Gets a specific loan by ID with full details for display
+        /// </summary>
+        /// <param name="loanId"></param>
+        /// <returns></returns>
+        [HttpGet("{loanId}/Details")]
+        public async Task<IActionResult> GetLoanByIdWithDetails(int loanId)
+        {
+            try
+            {
+                var loan = await _loansService.GetLoanByIdWithDetailsAsync(loanId);
+                if (loan == null) return NotFound();
+
+                return Ok(loan);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+        
+        #endregion
 
     }
 }

@@ -1,7 +1,7 @@
 
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
-import { GreetingPage } from './components/dashboard/GreetingPage';
+import Dashboard from './components/dashboard/Dashboard';
 import AuthContainer from './components/auth/AuthContainer';
 import { AuthInitializer } from './components/auth/AuthInitializer';
 import { LoadingBoundary } from './components/auth/LoadingBoundary';
@@ -60,7 +60,7 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <AppLayout>
-              <GreetingPage />
+              <Dashboard />
             </AppLayout>
           </ProtectedRoute>
         } 

@@ -1,8 +1,7 @@
 // MediaTable.tsx
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   createColumnHelper,
-  flexRender,
   getCoreRowModel,
   getSortedRowModel,
   getFilteredRowModel,
@@ -12,7 +11,7 @@ import {
   getPaginationRowModel,
   PaginationState,
 } from '@tanstack/react-table';
-import { ChevronUp, ChevronDown, Search, Plus, Filter, X, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Search, Plus, Filter, X } from 'lucide-react';
 import { Media, MediaFormData, CreateMediaRequest, CreateMediaCopyRequest } from '../../types/media';
 import { AddMediaForm } from './AddMediaForm';
 import { Modal } from '../shared/Modal';
@@ -21,6 +20,9 @@ import { useModalScrollLock } from '../../hooks/useModalScrollLock';
 import { AddMediaCopyForm } from './AddMediaCopyForm';
 import useAuth from '../../hooks/useAuth';
 import { AddBorrowRequestForm } from '../borrowing/AddBorrowRequestForm';
+import { DataTable } from '../shared/DataTable';
+
+
 
 interface MediaTableProps {
   media?: Media[];
@@ -28,9 +30,11 @@ interface MediaTableProps {
   onSaveNewMedia?: (message: string) => void; 
   onSwitchToAddTab?: () => void;
   mode?: 'allMedia' | 'myLibrary' | 'addToCollection';
+  loading?: boolean;
+  error?: string | null;
 }
 
-export function MediaTable({ media = [], onRefresh, onSaveNewMedia, onSwitchToAddTab, mode = 'allMedia'}: MediaTableProps) {
+export function MediaTable({ media = [], onRefresh, onSaveNewMedia, onSwitchToAddTab, mode = 'allMedia', loading, error}: MediaTableProps) {
   const { userID } = useAuth();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -67,6 +71,9 @@ useModalScrollLock(isModalOpen || isCopyModalOpen || isBorrowModalOpen);
               {info.getValue()}
             </div>
           ),
+      enableResizing: true,
+  size: 200,     // starting width
+  meta: { grow: 1 },
         }),
         columnHelper.accessor('creator', {
           header: 'Author',
@@ -75,6 +82,7 @@ useModalScrollLock(isModalOpen || isCopyModalOpen || isBorrowModalOpen);
               {info.getValue()}
             </div>
           ),
+      enableResizing: true,
         }),
         columnHelper.accessor('genre', {
           header: 'Genre',
@@ -83,6 +91,7 @@ useModalScrollLock(isModalOpen || isCopyModalOpen || isBorrowModalOpen);
               {info.getValue()}
             </span>
           ),
+      enableResizing: true,
         }),
         columnHelper.display({
           id: 'copies',
@@ -101,6 +110,7 @@ useModalScrollLock(isModalOpen || isCopyModalOpen || isBorrowModalOpen);
               </div>
             );
           },
+      enableResizing: true,
         }),
       ];
 
@@ -448,156 +458,36 @@ const handleCloseBorrowModal = () => {
         </div>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full table-fixed divide-y divide-[var(--color-border)]">
-          <thead className="bg-[var(--color-bg)]">
-            {table.getHeaderGroups().map(headerGroup => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map(header => (
-                  <th
-                    key={header.id}
-                    className="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase tracking-wider"
-                  >
-                    {header.isPlaceholder ? null : (
-                      <div
-                        className={`flex items-center space-x-1 ${
-                          header.column.getCanSort() ? 'cursor-pointer select-none' : ''
-                        }`}
-                        onClick={header.column.getToggleSortingHandler()}
-                      >
-                        <span>
-                          {flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                        </span>
-                        {header.column.getCanSort() && (
-                          <span className="flex flex-col">
-                            <ChevronUp
-                              size={12}
-                              className={`${
-                                header.column.getIsSorted() === 'asc'
-                                  ? 'text-[var(--color-primary)]'
-                                  : 'text-[var(--color-muted)]'
-                              }`}
-                            />
-                            <ChevronDown
-                              size={12}
-                              className={`-mt-1 ${
-                                header.column.getIsSorted() === 'desc'
-                                  ? 'text-[var(--color-primary)]'
-                                  : 'text-[var(--color-muted)]'
-                              }`}
-                            />
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody className="bg-[var(--color-card)] divide-y divide-[var(--color-border)]">
-            {table.getRowModel().rows.map(row => (
-              <tr key={row.id} className="hover:bg-[var(--color-bg)] transition-colors">
-                {row.getVisibleCells().map(cell => (
-                  <td key={cell.id} className="px-6 py-4 whitespace-nowrap">
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-{table.getRowModel().rows.length === 0 && (
-  <div className="text-center py-12">
-    <p className="text-[var(--color-muted)] mb-4">No books found matching your search</p>
-    {mode === 'addToCollection' && (globalFilter || selectedGenres.length > 0) && (
-      <button
-        onClick={() => setIsModalOpen(true)}
-        className="inline-flex items-center gap-2 px-4 py-2 bg-lavender-500 hover:bg-lavender-600 
-                   text-white font-medium rounded-lg shadow-sm transition-colors duration-200"
-      >
-        <Plus size={16} />
-        Add "{globalFilter || 'New Media'}" to Catalog
-      </button>
-    )}
-  </div>
-)}
-      {/* Pagination */}
-      <div className="px-4 py-3 border-t border-[var(--color-border)] flex items-center justify-between">
-        <div className="flex items-center gap-2 text-sm text-[var(--color-muted)]">
-          <span>Show</span>
-          <select
-            value={table.getState().pagination.pageSize}
-            onChange={e => table.setPageSize(Number(e.target.value))}
-            className="border border-[var(--color-border)] rounded px-2 py-1"
+      {error && (
+        <div className="p-4 bg-red-50 border-l-4 border-red-400">
+          <p className="text-red-700">Error: {error}</p>
+          <button 
+            onClick={onRefresh}
+            className="mt-2 text-red-600 underline"
           >
-            {[10, 20, 30, 50].map(pageSize => (
-              <option key={pageSize} value={pageSize}>
-                {pageSize}
-              </option>
-            ))}
-          </select>
-          <span>of {table.getFilteredRowModel().rows.length} entries</span>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-            className="p-2 border border-[var(--color-border)] rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--color-bg)]"
-          >
-            <ChevronLeft size={16} />
-          </button>
-            
-          <div className="flex items-center gap-1">
-            {Array.from({ length: Math.min(5, table.getPageCount()) }, (_, i) => {
-              const currentPage = table.getState().pagination.pageIndex;
-              const totalPages = table.getPageCount();
-              
-              let pageIndex;
-              if (totalPages <= 5) {
-                pageIndex = i;
-              } else if (currentPage <= 2) {
-                pageIndex = i;
-              } else if (currentPage >= totalPages - 3) {
-                pageIndex = totalPages - 5 + i;
-              } else {
-                pageIndex = currentPage - 2 + i;
-              }
-              
-              if (pageIndex >= totalPages || pageIndex < 0) return null;
-              
-              return (
-                <button
-                  key={pageIndex}
-                  onClick={() => table.setPageIndex(pageIndex)}
-                  className={`px-3 py-1 text-sm border rounded ${
-                    pageIndex === currentPage
-                      ? 'bg-lavender-500 text-white border-lavender-500'
-                      : 'border-[var(--color-border)] hover:bg-[var(--color-bg)]'
-                  }`}
-                >
-                  {pageIndex + 1}
-                </button>
-              );
-            })}
-          </div>
-          
-          <button
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-            className="p-2 border border-[var(--color-border)] rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--color-bg)]"
-          >
-            <ChevronRight size={16} />
+            Try again
           </button>
         </div>
-      </div>
+      )}
 
+      {/* Table */}
+      {loading ? (
+        <div className="p-8 text-center text-gray-500">
+          Loading media...
+        </div>
+      ) : (
+        <DataTable
+          data={media}
+          columns={columns}
+          emptyMessage="No books found"
+          isLoading={loading}
+          searchPlaceholder="Search books..."
+          error={error}
+          onRefresh={onRefresh}
+        />
+      )}
+
+     
       {/* Modals */}
       <Modal
         isOpen={isModalOpen}

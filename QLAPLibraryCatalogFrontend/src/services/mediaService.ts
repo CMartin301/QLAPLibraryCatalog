@@ -4,11 +4,9 @@ import api from './apiService';
 export const mediaService = {
   async getMedia(includeCopies: boolean = false): Promise<Media[]> {    
     const response = await api.get<Media[]>(`/api/Media?includeCopies=${includeCopies}`);
-    // console.log(response.data);
     return response.data;
   },
 
-  // Get a single media item by ID
   async getMediaById(mediaId: number, includeCopies: boolean = false): Promise<Media> {
     const response = await api.get<Media>(`/api/Media/${mediaId}?includeCopies=${includeCopies}`);
     return response.data;
@@ -21,7 +19,6 @@ export const mediaService = {
   
   async getUserMedia(userId: number, includeCopies: boolean = false): Promise<Media[]> {    
     const response = await api.get<Media[]>(`/api/Media/User/${userId}?includeCopies=${includeCopies}`);
-    // console.log(response.data);
     return response.data;
   },
   async createNewMediaCopy(newMediaCopy: CreateMediaCopyRequest): Promise<MediaCopy> {
