@@ -18,6 +18,7 @@ namespace QLAPLibraryCatalogAPI.Services
         Task<IEnumerable<LoanWithDetailsDto>> GetLoansBorrowedByUserWithDetailsAsync(int userId);
         Task<IEnumerable<LoanWithDetailsDto>> GetLoansOfUserMediaWithDetailsAsync(int userId);
         Task<LoanWithDetailsDto?> GetLoanByIdWithDetailsAsync(int loanId);
+        Task<LoanDto?> ExtendLoan(int loanId, DateOnly? newDueDate);
 #pragma warning restore 1591
     }
     /// <summary>
@@ -135,7 +136,39 @@ namespace QLAPLibraryCatalogAPI.Services
             return loan == null ? null : MapLoanWithDetails(loan);
         }
 
-        #endregion      
+        #endregion
+        #region Loan Actions
+        /// <summary>
+        /// Extend a loan by changing the due date
+        /// </summary>
+        /// <param name="loanId"></param>
+        /// <param name="newDueDate"></param>
+        /// <returns></returns>
+        public async Task<LoanDto?> ExtendLoan(int loanId, DateOnly? newDueDate)
+        {
+            var existingLoan = await _context.Loans.FindAsync(loanId);
+            if (existingLoan == null) return null;
+
+            if (existingLoan.ReturnedDate != null)
+                throw new InvalidOperationException("Cannot extend a loan that has already been returned.");
+
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            if (newDueDate != null && newDueDate <= today)
+                throw new InvalidOperationException("New due date must be in the future.");
+
+            if (newDueDate != null && newDueDate <= existingLoan.DueDate)
+                throw new InvalidOperationException("New due date must be later than current due date.");
+            
+
+            existingLoan.DueDate = newDueDate;
+            existingLoan.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return await GetLoanByIdAsync(loanId);
+        }
+
+        #endregion
         // public async Task<LoanDto?> MarkReturnedAsync(int requestId, ReturnLoanDto dto)
         // {
         //     var loan = await _context.Loans

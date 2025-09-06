@@ -17,7 +17,7 @@ namespace QLAPLibraryCatalogAPI.Controllers
         /// </summary>
         public LoansController(ILoansService LoansService)
         {
-           _loansService = LoansService; 
+            _loansService = LoansService;
         }
         #region Get Loans without Details
         /// <summary>
@@ -143,6 +143,38 @@ namespace QLAPLibraryCatalogAPI.Controllers
                 if (loan == null) return NotFound();
 
                 return Ok(loan);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        #endregion
+        #region Loan Actions
+
+        /// <summary>
+        /// Extends due date of an existing Loan object
+        /// </summary>
+        /// <param name="loanId"></param>
+        /// <param name="newDueDate"></param>
+        /// <returns></returns>
+        [HttpPut("{loanId}")]
+        public async Task<IActionResult> ExtendLoanDueDate(int loanId, [FromBody] DateOnly newDueDate)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+
+                var updatedLoan = await _loansService.ExtendLoan(loanId, newDueDate);
+                if (updatedLoan == null) return NotFound();
+                
+                return Ok(updatedLoan);
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Business rule violation: due date cannot be reduced
+                return BadRequest(new { error = ex.Message });
             }
             catch (Exception ex)
             {

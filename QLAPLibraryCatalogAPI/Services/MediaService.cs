@@ -179,31 +179,31 @@ namespace QLAPLibraryCatalogAPI.Services
             return await GetMediaByIdAsync(media.MediaId) ?? throw new InvalidOperationException("Failed to retrieve created media");
         }
 
-        public async Task<MediaDto?> UpdateMediaAsync(int id, CreateMediaDto updateMediaDto)
+        public async Task<MediaDto?> UpdateMediaAsync(int mediaId, CreateMediaDto updateMediaDto)
         {
-            var existing = await _context.Media.FindAsync(id);
-            if (existing == null) return null;
+            var existingMedia = await _context.Media.FindAsync(mediaId);
+            if (existingMedia == null) return null;
 
-            existing.MediaTypeId = updateMediaDto.MediaTypeId;
-            existing.Title = updateMediaDto.Title;
-            existing.Subtitle = updateMediaDto.Subtitle;
-            existing.Creator = updateMediaDto.Creator;
-            existing.Publisher = updateMediaDto.Publisher;
-            existing.PublicationDate = updateMediaDto.PublicationDate;
-            existing.Language = updateMediaDto.Language;
-            existing.Genre = updateMediaDto.Genre;
-            existing.Description = updateMediaDto.Description;
-            existing.CoverImageUrl = updateMediaDto.CoverImageUrl;
-            existing.Isbn10 = updateMediaDto.Isbn10;
-            existing.Isbn13 = updateMediaDto.Isbn13;
-            existing.PageCount = updateMediaDto.PageCount;
-            existing.IssueNumber = updateMediaDto.IssueNumber;
-            existing.Volume = updateMediaDto.Volume;
-            existing.UpdatedAt = DateTime.UtcNow;
+            existingMedia.MediaTypeId = updateMediaDto.MediaTypeId;
+            existingMedia.Title = updateMediaDto.Title;
+            existingMedia.Subtitle = updateMediaDto.Subtitle;
+            existingMedia.Creator = updateMediaDto.Creator;
+            existingMedia.Publisher = updateMediaDto.Publisher;
+            existingMedia.PublicationDate = updateMediaDto.PublicationDate;
+            existingMedia.Language = updateMediaDto.Language;
+            existingMedia.Genre = updateMediaDto.Genre;
+            existingMedia.Description = updateMediaDto.Description;
+            existingMedia.CoverImageUrl = updateMediaDto.CoverImageUrl;
+            existingMedia.Isbn10 = updateMediaDto.Isbn10;
+            existingMedia.Isbn13 = updateMediaDto.Isbn13;
+            existingMedia.PageCount = updateMediaDto.PageCount;
+            existingMedia.IssueNumber = updateMediaDto.IssueNumber;
+            existingMedia.Volume = updateMediaDto.Volume;
+            existingMedia.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
 
-            return await GetMediaByIdAsync(id);
+            return await GetMediaByIdAsync(mediaId);
         }
 
         public async Task<bool> DeleteMediaAsync(int id)
