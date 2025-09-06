@@ -5,8 +5,12 @@ using QLAPLibraryCatalogAPI.Models.DTOs;
 
 namespace QLAPLibraryCatalogAPI.Services
 {
+    /// <summary>
+    /// Interface for LoansService
+    /// </summary>
     public interface ILoansService
     {
+#pragma warning disable 1591
         Task<IEnumerable<LoanDto>> GetLoansAsync();
         Task<IEnumerable<LoanDto>> GetLoansBorrowedByUserAsync(int userId);
         Task<IEnumerable<LoanDto>> GetLoansOfUserMediaAsync(int userId);
@@ -14,11 +18,15 @@ namespace QLAPLibraryCatalogAPI.Services
         Task<IEnumerable<LoanWithDetailsDto>> GetLoansBorrowedByUserWithDetailsAsync(int userId);
         Task<IEnumerable<LoanWithDetailsDto>> GetLoansOfUserMediaWithDetailsAsync(int userId);
         Task<LoanWithDetailsDto?> GetLoanByIdWithDetailsAsync(int loanId);
+#pragma warning restore 1591
     }
-
+    /// <summary>
+    /// LoansService - operations on/access to loans
+    /// </summary>
     public class LoansService : ILoansService
     {
         private readonly LibraryCatalogContext _context;
+        /// <summary> Constructor </summary>
         public LoansService(LibraryCatalogContext context) => _context = context;
 
         #region Loans Without Details
@@ -178,8 +186,6 @@ namespace QLAPLibraryCatalogAPI.Services
                 ReturnedDate = loan.ReturnedDate,
                 Status = loan.Status,
                 ReturnNotes = loan.ReturnNotes,
-                LateFeeAmount = loan.LateFeeAmount,
-                LateFeePaid = loan.LateFeePaid,
             };
         }
         /// <summary>
@@ -193,21 +199,6 @@ namespace QLAPLibraryCatalogAPI.Services
                 ? (int?)(today.DayNumber - loan.DueDate.Value.DayNumber)
                 : null;
 
-            // Create display string for loan period
-            var loanPeriodDisplay = "";
-            if (loan.StartDate.HasValue && loan.DueDate.HasValue)
-            {
-                loanPeriodDisplay = $"{loan.StartDate.Value:MM/dd/yyyy} → {loan.DueDate.Value:MM/dd/yyyy}";
-            }
-            else if (loan.StartDate.HasValue)
-            {
-                loanPeriodDisplay = $"Started: {loan.StartDate.Value:MM/dd/yyyy}";
-            }
-            else
-            {
-                loanPeriodDisplay = "Dates TBD";
-            }
-
             return new LoanWithDetailsDto
             {
                 // Basic loan info
@@ -218,13 +209,11 @@ namespace QLAPLibraryCatalogAPI.Services
                 ReturnedDate = loan.ReturnedDate,
                 Status = loan.Status ?? "active",
                 ReturnNotes = loan.ReturnNotes,
-                LateFeeAmount = loan.LateFeeAmount,
-                LateFeePaid = loan.LateFeePaid,
                 
                 // Media info
                 MediaTitle = loan.Request?.Copy?.Media?.Title ?? "Unknown Title",
                 MediaType = loan.Request?.Copy?.Media?.MediaType?.ToString() ?? "Unknown Type",
-                MediaAuthor = loan.Request?.Copy?.Media?.Creator,
+                MediaCreator = loan.Request?.Copy?.Media?.Creator,
                 MediaGenre = loan.Request?.Copy?.Media?.Genre,
                 
                 // User info
@@ -241,7 +230,6 @@ namespace QLAPLibraryCatalogAPI.Services
                 // Calculated fields
                 DaysOverdue = daysOverdue,
                 IsOverdue = isOverdue,
-                LoanPeriodDisplay = loanPeriodDisplay
             };
         #endregion
         }
