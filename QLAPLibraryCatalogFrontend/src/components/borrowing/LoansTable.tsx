@@ -197,29 +197,7 @@ export function LoansTable({ loans, onRefresh, error, loading }: LoansTableProps
 
   return (
     <div className="bg-[var(--color-card)] rounded-lg shadow-sm border border-[var(--color-border)]">
-      {/* Search Header */}
-      <div className="p-6 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <div className="relative flex-1 max-w-md">
-            <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-              size={18}
-            />
-            <input
-              type="text"
-              placeholder="Search loans..."
-              value={globalFilter}
-              onChange={(e) => setGlobalFilter(e.target.value)}
-              aria-label="Search loans"
-              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:border-lavender-500"
-            />
-          </div>
-          <div className="ml-4 text-sm text-gray-500">
-            Showing {table.getFilteredRowModel().rows.length} loan
-            {table.getFilteredRowModel().rows.length !== 1 ? "s" : ""}
-          </div>
-        </div>
-      </div>
+
 
       {error && (
           <div className="p-4 bg-red-50 border-l-4 border-red-400">
