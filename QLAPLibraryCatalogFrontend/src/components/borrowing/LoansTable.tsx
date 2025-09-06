@@ -1,7 +1,6 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   createColumnHelper,
-  flexRender,
   getCoreRowModel,
   getPaginationRowModel,
   getSortedRowModel,
@@ -11,24 +10,19 @@ import {
 } from "@tanstack/react-table";
 import {
   Search,
-  ChevronUp,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
   Calendar,
   DollarSign,
 } from "lucide-react";
-import { loanService } from "../../services/loanService";
 import { Loan } from "../../types/loans";
 import { DataTable } from "../shared/DataTable";
+import { LoanWithDetails } from "../../types/loans";
 
 interface LoansTableProps {
-  loans: Loan[];
+  loans: LoanWithDetails[];
   onRefresh: () => void;
   error?: string | null;
   loading?: boolean;
 }
-
 type LoanStatus = "active" | "returned" | "overdue";
 
 export function LoansTable({ loans, onRefresh, error, loading }: LoansTableProps) {
@@ -36,63 +30,62 @@ export function LoansTable({ loans, onRefresh, error, loading }: LoansTableProps
   const [sorting, setSorting] = useState<SortingState>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const columnHelper = createColumnHelper<Loan>();
+  const columnHelper = createColumnHelper<LoanWithDetails>();
 
   const columns = useMemo(
     () => [
-      // Loan ID
-      columnHelper.accessor("loanId", {
-        header: "Loan ID",
-        cell: (info) => <span className="font-medium">{info.getValue()}</span>,
+      // Media Title (new)
+      columnHelper.accessor("mediaTitle", {
+        header: "Media",
+        cell: (info) => (
+          <div>
+            <div className="font-medium text-gray-900">{info.getValue()}</div>
+            <div className="text-sm text-gray-500">{info.row.original.mediaType}</div>
+          </div>
+        ),
         enableSorting: true,
       }),
 
-      // Request ID
-      columnHelper.accessor("requestId", {
-        header: "Request ID",
+      // Borrower Username (new)
+      columnHelper.accessor("borrowerUsername", {
+        header: "Borrower",
+        cell: (info) => (
+          <span className="text-sm text-gray-900">{info.getValue()}</span>
+        ),
         enableSorting: true,
       }),
 
-      // Loan Dates
-      columnHelper.accessor(
-        (row) => {
-          if (row.startDate && row.dueDate) {
-            const start = new Date(row.startDate).toLocaleDateString();
-            const due = new Date(row.dueDate).toLocaleDateString();
-            return `${start} → ${due}`;
-          }
-          return "—";
-        },
-        {
-          id: "dates",
-          header: "Loan Period",
-          cell: (info) => (
-            <div className="flex items-center space-x-2">
-              <Calendar className="w-4 h-4 text-gray-400" />
-              <span className="text-sm text-gray-900">{info.getValue()}</span>
-            </div>
-          ),
-          enableSorting: false,
-        }
-      ),
-
-      // Returned Date
-      columnHelper.accessor("returnedDate", {
-        header: "Returned",
-        cell: (info) =>
-          info.getValue() ? (
-            <span>{new Date(info.getValue()!).toLocaleDateString()}</span>
-          ) : (
-            <span className="text-gray-400">Not returned</span>
-          ),
+      // Owner Username (new)
+      columnHelper.accessor("ownerUsername", {
+        header: "Owner",
+        cell: (info) => (
+          <span className="text-sm text-gray-900">{info.getValue()}</span>
+        ),
         enableSorting: true,
       }),
 
-      // Status
+      // Loan Period (updated to use calculated field)
+      columnHelper.accessor("loanPeriodDisplay", {
+        header: "Loan Period",
+        cell: (info) => (
+          <div className="flex items-center space-x-2">
+            <Calendar className="w-4 h-4 text-gray-400" />
+            <span className="text-sm text-gray-900">{info.getValue()}</span>
+          </div>
+        ),
+        enableSorting: false,
+      }),
+
+      // Status (updated with overdue logic)
       columnHelper.accessor("status", {
         header: "Status",
         cell: (info) => {
+          const loan = info.row.original;
           const status = info.getValue() as LoanStatus;
+          
+          // Override status if overdue
+          const displayStatus = loan.isOverdue ? "overdue" : status;
+          
           const statusConfig = {
             active: {
               bg: "bg-blue-100",
@@ -107,11 +100,11 @@ export function LoansTable({ loans, onRefresh, error, loading }: LoansTableProps
             overdue: {
               bg: "bg-red-100",
               text: "text-red-800",
-              label: "Overdue",
+              label: `Overdue (${loan.daysOverdue} days)`,
             },
           };
 
-          const config = statusConfig[status] || statusConfig.active;
+          const config = statusConfig[displayStatus] || statusConfig.active;
 
           return (
             <span
@@ -124,72 +117,30 @@ export function LoansTable({ loans, onRefresh, error, loading }: LoansTableProps
         enableSorting: true,
       }),
 
-      // Late Fees
-      columnHelper.accessor("lateFeeAmount", {
-        header: "Late Fee",
-        cell: (info) => {
-          const amount = info.getValue();
-          return amount > 0 ? (
-            <div className="flex items-center space-x-1 text-red-600">
-              <DollarSign className="w-4 h-4" />
-              <span>{amount.toFixed(2)}</span>
-            </div>
-          ) : (
-            <span className="text-gray-400">—</span>
-          );
-        },
-        enableSorting: true,
-      }),
 
-      // Late Fee Paid
-      columnHelper.accessor("lateFeePaid", {
-        header: "Fee Paid",
-        cell: (info) =>
-          info.getValue() ? (
-            <span className="text-green-600 font-medium">Yes</span>
-          ) : (
-            <span className="text-gray-400">No</span>
-          ),
-        enableSorting: true,
-      }),
+      // // Actions (keep existing but update loan ID reference)
+      // columnHelper.display({
+      //   id: "actions",
+      //   header: "Actions",
+      //   cell: (info) => {
+      //     const loan = info.row.original;
 
-      // Return Notes
-      columnHelper.accessor("returnNotes", {
-        header: "Notes",
-        cell: (info) =>
-          info.getValue() ? (
-            <span className="text-sm text-gray-600 truncate max-w-xs">
-              {info.getValue()}
-            </span>
-          ) : (
-            <span className="text-sm text-gray-400">—</span>
-          ),
-        enableSorting: false,
-      }),
+      //     if (loan.status === "active" && !loan.isOverdue) {
+      //       return (
+      //       <button
+      //         onClick={() => handleReturn(loan.loanId)}
+      //         disabled={isLoading}
+      //         aria-label={`Mark loan ${loan.loanId} as returned`}
+      //         className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded text-white bg-lavender-600 hover:bg-lavender-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lavender-500 disabled:opacity-50 disabled:cursor-not-allowed"
+      //       >
+      //         {isLoading ? 'Processing...' : 'Mark Returned'}
+      //       </button>
+      //       );
+      //     }
 
-      // Actions
-      columnHelper.display({
-        id: "actions",
-        header: "Actions",
-        cell: (info) => {
-          const loan = info.row.original;
-
-          if (loan.status === "active") {
-            return (
-            <button
-              onClick={() => handleReturn(loan.loanId)}
-              disabled={isLoading}
-              aria-label={`Mark loan ${loan.loanId} as returned`}
-              className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded text-white bg-lavender-600 hover:bg-lavender-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lavender-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? 'Processing...' : 'Mark Returned'}
-            </button>
-            );
-          }
-
-          return <span className="text-xs text-gray-400">No actions</span>;
-        },
-      }),
+      //     return <span className="text-xs text-gray-400">No actions</span>;
+      //   },
+      // }),
     ],
     [isLoading]
   );

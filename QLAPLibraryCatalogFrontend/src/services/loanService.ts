@@ -1,5 +1,5 @@
 
-import { Loan } from "../types/loans";
+import { Loan, LoanWithDetails } from "../types/loans";
 import api from "./apiService";
 
 export const loanService = {
@@ -25,6 +25,25 @@ export const loanService = {
     const response = await api.get<Loan>(`/api/Loan/${loanId}`);
     return response.data;
   },
+  
+  // Get loans borrowed by user with full details for display
+  async getLoansBorrowedByUserWithDetails(userId: number): Promise<LoanWithDetails[]> {
+    const response = await api.get<LoanWithDetails[]>(`/api/Loan/User/Borrowed/Details?userId=${userId}`);
+    return response.data;
+  },
+
+  // Get loans of user's media with full details for display
+  async getLoansOfUserMediaWithDetails(userId: number): Promise<LoanWithDetails[]> {
+    const response = await api.get<LoanWithDetails[]>(`/api/Loan/User/Lent/Details?userId=${userId}`);
+    return response.data;
+  },
+
+  // Get a single loan by ID with full details for display
+  async getLoanByIdWithDetails(loanId: number): Promise<LoanWithDetails> {
+    const response = await api.get<LoanWithDetails>(`/api/Loan/${loanId}/Details`);
+    return response.data;
+  },
+
 
 //   // Create a new loan
 //   async createLoan(newLoan: CreateLoanRequest): Promise<Loan> {

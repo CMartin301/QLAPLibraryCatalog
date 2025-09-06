@@ -1,39 +1,56 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Loan } from '../types/loans';
+// hooks/useLoans.ts
+import { useState, useEffect } from 'react';
+import { LoanWithDetails } from '../types/loans';
 import { loanService } from '../services/loanService';
 
-export const useLoans = (userId: number | null, type: 'borrowed' | 'lent') => {
-  const [loans, setLoans] = useState<Loan[]>([]);
-  const [loading, setLoading] = useState(false);
+type LoanTab = 'borrowed' | 'lent';
+
+export const useLoans = (userID: number | null, loanTab: LoanTab) => {
+  const [loans, setLoans] = useState<LoanWithDetails[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchLoans = useCallback(async () => {
-    if (!userId) return;
-    
-    setLoading(true);
-    setError(null);
-    
+  const fetchLoans = async () => {
+    if (!userID) {
+      setLoans([]);
+      setLoading(false);
+      return;
+    }
+
     try {
-      const data = type === 'borrowed' 
-        ? await loanService.getLoansBorrowedByUser(userId)
-        : await loanService.getLoansOfUserMedia(userId);
-      setLoans(data);
+      setLoading(true);
+      setError(null);
+      
+      let fetchedLoans: LoanWithDetails[];
+      
+      if (loanTab === 'borrowed') {
+        fetchedLoans = await loanService.getLoansBorrowedByUserWithDetails(userID);
+      } else {
+        fetchedLoans = await loanService.getLoansOfUserMediaWithDetails(userID);
+      }
+      
+      setLoans(fetchedLoans);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load loans');
-      console.error('Error loading loans:', err);
+      console.error('Failed to fetch loans:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch loans');
+      setLoans([]);
     } finally {
       setLoading(false);
     }
-  }, [userId, type]);
+  };
 
   useEffect(() => {
     fetchLoans();
-  }, [fetchLoans]);
+  }, [userID, loanTab]);
+
+  const refetch = () => {
+    fetchLoans();
+  };
 
   return {
     loans,
     loading,
     error,
-    refetch: fetchLoans
+    refetch
   };
 };

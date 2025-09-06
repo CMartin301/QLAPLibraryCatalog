@@ -8,13 +8,12 @@ namespace QLAPLibraryCatalogAPI.Services
     public interface ILoansService
     {
         Task<IEnumerable<LoanDto>> GetLoansAsync();
-        // Task<IEnumerable<LoanDto>> GetUserLoansAsync(int userId);
         Task<IEnumerable<LoanDto>> GetLoansBorrowedByUserAsync(int userId);
         Task<IEnumerable<LoanDto>> GetLoansOfUserMediaAsync(int userId);
         Task<LoanDto?> GetLoanByIdAsync(int loanId);
-        // Task<LoanDto?> ApproveBorrowRequestAsync(int requestId);
-        // Task<LoanDto?> DenyBorrowRequestAsync(int requestId, DenyBorrowRequestDto dto);
-        // Task<bool> CancelBorrowRequestAsync(int requestId, int actorUserId);
+        Task<IEnumerable<LoanWithDetailsDto>> GetLoansBorrowedByUserWithDetailsAsync(int userId);
+        Task<IEnumerable<LoanWithDetailsDto>> GetLoansOfUserMediaWithDetailsAsync(int userId);
+        Task<LoanWithDetailsDto?> GetLoanByIdWithDetailsAsync(int loanId);
     }
 
     public class LoansService : ILoansService
@@ -22,6 +21,10 @@ namespace QLAPLibraryCatalogAPI.Services
         private readonly LibraryCatalogContext _context;
         public LoansService(LibraryCatalogContext context) => _context = context;
 
+        #region Loans Without Details
+        /// <summary>
+        /// Gets all loans without details
+        /// </summary>
         public async Task<IEnumerable<LoanDto>> GetLoansAsync()
         {
             var query = _context.Loans
@@ -30,7 +33,9 @@ namespace QLAPLibraryCatalogAPI.Services
             return await query.Select(loan => MapLoan(loan)).ToListAsync();
         }
 
-        // Loans where the user is the borrower
+        /// <summary>
+        /// Gets loans borrowed by a user without details
+        /// </summary>
         public async Task<IEnumerable<LoanDto>> GetLoansBorrowedByUserAsync(int userId)
         {
             return await _context.Loans
@@ -41,7 +46,9 @@ namespace QLAPLibraryCatalogAPI.Services
                 .ToListAsync();
         }
 
-        // Loans where the user is the lender (owns the copy)
+        /// <summary>
+        /// Gets loans of user's media (where user is the lender) without details
+        /// </summary>
         public async Task<IEnumerable<LoanDto>> GetLoansOfUserMediaAsync(int userId)
         {
             return await _context.Loans
@@ -51,19 +58,9 @@ namespace QLAPLibraryCatalogAPI.Services
                 .Select(loan => MapLoan(loan))
                 .ToListAsync();
         }
-
-        // public async Task<IEnumerable<LoanDto>> GetUserLoansAsync(int userId)
-        // {
-        //     var query = _context.Loans
-        //         .Include(l => l.Request)
-        //         .ThenInclude(r => r.Copy)
-        //         .Where(l => l.Request.Copy.UserId == userId)
-        //         .AsQueryable();
-
-
-        //     return await query.Select(loan => MapLoan(loan)).ToListAsync();
-        // }
-
+        /// <summary>
+        /// Get specific loan by loadId without details
+        /// </summary>
         public async Task<LoanDto?> GetLoanByIdAsync(int loanId)
         {
             var loan = await _context.Loans
@@ -71,9 +68,66 @@ namespace QLAPLibraryCatalogAPI.Services
 
             return loan == null ? null : MapLoan(loan);
         }
+        #endregion
+        #region Loans With Details
+        /// <summary>
+        /// Gets loans borrowed by a user with all related details for display
+        /// </summary>
+        public async Task<IEnumerable<LoanWithDetailsDto>> GetLoansBorrowedByUserWithDetailsAsync(int userId)
+        {
+            return await _context.Loans
+                .Include(l => l.Request)
+                    .ThenInclude(r => r.Borrower)
+                .Include(l => l.Request)
+                    .ThenInclude(r => r.Copy)
+                        .ThenInclude(c => c.User) // Owner
+                .Include(l => l.Request)
+                    .ThenInclude(r => r.Copy)
+                        .ThenInclude(c => c.Media)
+                .Where(l => l.Request.BorrowerId == userId)
+                .Select(loan => MapLoanWithDetails(loan))
+                .ToListAsync();
+        }
 
-        
+        /// <summary>
+        /// Gets loans of user's media (where user is the lender) with all related details
+        /// </summary>
+        public async Task<IEnumerable<LoanWithDetailsDto>> GetLoansOfUserMediaWithDetailsAsync(int userId)
+        {
+            return await _context.Loans
+                .Include(l => l.Request)
+                    .ThenInclude(r => r.Borrower)
+                .Include(l => l.Request)
+                    .ThenInclude(r => r.Copy)
+                        .ThenInclude(c => c.User) // Owner
+                .Include(l => l.Request)
+                    .ThenInclude(r => r.Copy)
+                        .ThenInclude(c => c.Media)
+                .Where(l => l.Request.Copy.UserId == userId)
+                .Select(loan => MapLoanWithDetails(loan))
+                .ToListAsync();
+        }
 
+        /// <summary>
+        /// Gets a single loan by ID with all related details
+        /// </summary>
+        public async Task<LoanWithDetailsDto?> GetLoanByIdWithDetailsAsync(int loanId)
+        {
+            var loan = await _context.Loans
+                .Include(l => l.Request)
+                    .ThenInclude(r => r.Borrower)
+                .Include(l => l.Request)
+                    .ThenInclude(r => r.Copy)
+                        .ThenInclude(c => c.User) // Owner
+                .Include(l => l.Request)
+                    .ThenInclude(r => r.Copy)
+                        .ThenInclude(c => c.Media)
+                .FirstOrDefaultAsync(l => l.LoanId == loanId);
+
+            return loan == null ? null : MapLoanWithDetails(loan);
+        }
+
+        #endregion      
         // public async Task<LoanDto?> MarkReturnedAsync(int requestId, ReturnLoanDto dto)
         // {
         //     var loan = await _context.Loans
@@ -109,6 +163,10 @@ namespace QLAPLibraryCatalogAPI.Services
         //     };
         // }
 
+        #region Mapping Methods
+        /// <summary>
+        /// Maps a basic Loan entity to LoanDto
+        /// </summary>
         private static LoanDto MapLoan(Loan loan)
         {
             return new LoanDto
@@ -123,6 +181,69 @@ namespace QLAPLibraryCatalogAPI.Services
                 LateFeeAmount = loan.LateFeeAmount,
                 LateFeePaid = loan.LateFeePaid,
             };
+        }
+        /// <summary>
+        /// Maps a Loan entity with all related data to LoanWithDetailsDto
+        /// </summary>
+        private static LoanWithDetailsDto MapLoanWithDetails(Loan loan)
+        {
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            var isOverdue = loan.DueDate.HasValue && loan.ReturnedDate == null && today > loan.DueDate.Value;
+            var daysOverdue = isOverdue && loan.DueDate.HasValue 
+                ? (int?)(today.DayNumber - loan.DueDate.Value.DayNumber)
+                : null;
+
+            // Create display string for loan period
+            var loanPeriodDisplay = "";
+            if (loan.StartDate.HasValue && loan.DueDate.HasValue)
+            {
+                loanPeriodDisplay = $"{loan.StartDate.Value:MM/dd/yyyy} → {loan.DueDate.Value:MM/dd/yyyy}";
+            }
+            else if (loan.StartDate.HasValue)
+            {
+                loanPeriodDisplay = $"Started: {loan.StartDate.Value:MM/dd/yyyy}";
+            }
+            else
+            {
+                loanPeriodDisplay = "Dates TBD";
+            }
+
+            return new LoanWithDetailsDto
+            {
+                // Basic loan info
+                LoanId = loan.LoanId,
+                RequestId = loan.RequestId,
+                StartDate = loan.StartDate,
+                DueDate = loan.DueDate,
+                ReturnedDate = loan.ReturnedDate,
+                Status = loan.Status ?? "active",
+                ReturnNotes = loan.ReturnNotes,
+                LateFeeAmount = loan.LateFeeAmount,
+                LateFeePaid = loan.LateFeePaid,
+                
+                // Media info
+                MediaTitle = loan.Request?.Copy?.Media?.Title ?? "Unknown Title",
+                MediaType = loan.Request?.Copy?.Media?.MediaType?.ToString() ?? "Unknown Type",
+                MediaAuthor = loan.Request?.Copy?.Media?.Creator,
+                MediaGenre = loan.Request?.Copy?.Media?.Genre,
+                
+                // User info
+                BorrowerId = loan.Request?.BorrowerId ?? 0,
+                BorrowerUsername = loan.Request?.Borrower?.Username ?? "Unknown User",
+                OwnerId = loan.Request?.Copy?.UserId ?? 0,
+                OwnerUsername = loan.Request?.Copy?.User?.Username ?? "Unknown Owner",
+                
+                // Copy info
+                CopyId = loan.Request?.CopyId ?? 0,
+                CopyCondition = loan.Request?.Copy?.Condition,
+                CopyNotes = loan.Request?.Copy?.Notes,
+                
+                // Calculated fields
+                DaysOverdue = daysOverdue,
+                IsOverdue = isOverdue,
+                LoanPeriodDisplay = loanPeriodDisplay
+            };
+        #endregion
         }
     }
 }
