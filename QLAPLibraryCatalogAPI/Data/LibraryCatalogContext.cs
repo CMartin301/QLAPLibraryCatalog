@@ -86,8 +86,6 @@ public partial class LibraryCatalogContext : DbContext
 
             entity.HasIndex(e => e.RequestId, "idx_loans_request_id");
 
-            entity.HasIndex(e => e.Status, "idx_loans_status");
-
             entity.HasIndex(e => e.RequestId, "loans_request_id_key").IsUnique();
 
             entity.Property(e => e.LoanId).HasColumnName("loan_id");
@@ -98,10 +96,6 @@ public partial class LibraryCatalogContext : DbContext
             entity.Property(e => e.RequestId).HasColumnName("request_id");
             entity.Property(e => e.ReturnedDate).HasColumnName("returned_date");
             entity.Property(e => e.StartDate).HasColumnName("start_date");
-            entity.Property(e => e.Status)
-                .HasMaxLength(20)
-                .HasDefaultValueSql("'active'::character varying")
-                .HasColumnName("status");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("updated_at");

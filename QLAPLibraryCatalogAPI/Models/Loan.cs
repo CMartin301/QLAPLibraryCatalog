@@ -14,8 +14,6 @@ public partial class Loan
     public DateOnly? DueDate { get; set; }
 
     public DateOnly? ReturnedDate { get; set; }
-
-    public string? Status { get; set; }
     public DateTime? BorrowerReturnedAt { get; set; }
     public DateTime? LenderConfirmedReturnAt { get; set; }
     public string? BorrowerReturnNotes { get; set; }

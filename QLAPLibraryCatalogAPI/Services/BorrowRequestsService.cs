@@ -82,7 +82,7 @@ namespace QLAPLibraryCatalogAPI.Services
             // Check for active loans for that copy
             var hasActiveLoan = await _context.Loans
                 .Include(l => l.Request)
-                .AnyAsync(l => l.Request.CopyId == dto.CopyId && l.Status == "active");
+                .AnyAsync(l => l.Request.CopyId == dto.CopyId && l.ReturnedDate == null);
 
             if (copy.IsAvailable != true || hasActiveLoan) throw new InvalidOperationException("Copy is currently unavailable.");
 
@@ -291,7 +291,6 @@ namespace QLAPLibraryCatalogAPI.Services
                 RequestId = request.RequestId,
                 StartDate = request.RequestedStartDate,
                 DueDate = request.RequestedEndDate,
-                Status = "active",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };

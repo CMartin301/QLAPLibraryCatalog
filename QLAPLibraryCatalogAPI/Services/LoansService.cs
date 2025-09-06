@@ -217,6 +217,9 @@ namespace QLAPLibraryCatalogAPI.Services
         /// </summary>
         private static LoanDto MapLoan(Loan loan)
         {
+            string status = "returned";
+            if (loan.ReturnedDate == null) status = "active";
+
             return new LoanDto
             {
                 LoanId = loan.LoanId,
@@ -224,7 +227,7 @@ namespace QLAPLibraryCatalogAPI.Services
                 StartDate = loan.StartDate,
                 DueDate = loan.DueDate,
                 ReturnedDate = loan.ReturnedDate,
-                Status = loan.Status,
+                Status = status,
                 BorrowerReturnedAt = loan.BorrowerReturnedAt,
                 BorrowerReturnNotes = loan.BorrowerReturnNotes,
                 LenderConfirmedAt = loan.LenderConfirmedReturnAt,
@@ -242,6 +245,9 @@ namespace QLAPLibraryCatalogAPI.Services
                 ? (int?)(today.DayNumber - loan.DueDate.Value.DayNumber)
                 : null;
 
+            string status = "returned";
+            if (loan.ReturnedDate == null) status = "active";
+            
             return new LoanWithDetailsDto
             {
                 // Basic loan info
@@ -250,29 +256,29 @@ namespace QLAPLibraryCatalogAPI.Services
                 StartDate = loan.StartDate,
                 DueDate = loan.DueDate,
                 ReturnedDate = loan.ReturnedDate,
-                Status = loan.Status ?? "active",
+                Status = status,
                 BorrowerReturnedAt = loan.BorrowerReturnedAt,
                 BorrowerReturnNotes = loan.BorrowerReturnNotes,
                 LenderConfirmedAt = loan.LenderConfirmedReturnAt,
                 LenderReturnNotes = loan.LenderReturnNotes,
-                
+
                 // Media info
                 MediaTitle = loan.Request?.Copy?.Media?.Title ?? "Unknown Title",
                 MediaType = loan.Request?.Copy?.Media?.MediaType?.ToString() ?? "Unknown Type",
                 MediaCreator = loan.Request?.Copy?.Media?.Creator,
                 MediaGenre = loan.Request?.Copy?.Media?.Genre,
-                
+
                 // User info
                 BorrowerId = loan.Request?.BorrowerId ?? 0,
                 BorrowerUsername = loan.Request?.Borrower?.Username ?? "Unknown User",
                 OwnerId = loan.Request?.Copy?.UserId ?? 0,
                 OwnerUsername = loan.Request?.Copy?.User?.Username ?? "Unknown Owner",
-                
+
                 // Copy info
                 CopyId = loan.Request?.CopyId ?? 0,
                 CopyCondition = loan.Request?.Copy?.Condition,
                 CopyNotes = loan.Request?.Copy?.Notes,
-                
+
                 // Calculated fields
                 DaysOverdue = daysOverdue,
                 IsOverdue = isOverdue,
