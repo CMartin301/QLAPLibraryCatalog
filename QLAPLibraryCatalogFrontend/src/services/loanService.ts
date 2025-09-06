@@ -53,7 +53,7 @@ export const loanService = {
 
   // Mark loan as returned
   async returnLoan(loanId: number, returnRequest: ReturnLoanRequest): Promise<Loan> {
-    const response = await api.put<Loan>(`/api/Loan/${loanId}/Return?isBorrower${returnRequest.isBorrower}`, returnRequest.returnNotes);
+    const response = await api.put<Loan>(`/api/Loan/${loanId}/Return?isBorrower=${returnRequest.isBorrower}`, returnRequest.returnNotes);
     return response.data;
   },
 

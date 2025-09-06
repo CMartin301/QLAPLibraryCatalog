@@ -22,7 +22,7 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
         /// <summary> Borrower notes on return </summary>
         public string? BorrowerReturnNotes { get; set; }
         /// <summary> Date and time for lender confirming return </summary>
-        public DateTime? LenderConfirmedAt { get; set; }
+        public DateTime? LenderConfirmedReturnAt { get; set; }
         /// <summary> Lender notes on return </summary>
         public string? LenderReturnNotes { get; set; }
     }
@@ -48,7 +48,7 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
         /// <summary> Borrower notes on return </summary>
         public string? BorrowerReturnNotes { get; set; }
         /// <summary> Date and time for lender confirming return </summary>
-        public DateTime? LenderConfirmedAt { get; set; }
+        public DateTime? LenderConfirmedReturnAt { get; set; }
         /// <summary> Lender notes on return </summary>
         public string? LenderReturnNotes { get; set; }
 
