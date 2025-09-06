@@ -7,9 +7,10 @@ export interface Loan {
   dueDate: string | null;
   returnedDate: string | null;
   status: "active" | "returned" | "overdue";
-  returnNotes: string | null;
-  lateFeeAmount: number;
-  lateFeePaid: boolean;
+  borrowerReturnedAt: string | null;
+  borrowerReturnNotes: string | null;
+  lenderConfirmedReturnAt: string | null;
+  lenderReturnNotes: string | null;
 }
 
 
@@ -22,7 +23,10 @@ export interface LoanWithDetails {
   dueDate: string | null;
   returnedDate: string | null;
   status: "active" | "returned" | "overdue";
-  returnNotes: string | null;
+  borrowerReturnedAt: string | null;
+  borrowerReturnNotes: string | null;
+  lenderConfirmedReturnAt: string | null;
+  lenderReturnNotes: string | null;
   
   // Media information
   mediaTitle: string;
@@ -47,8 +51,6 @@ export interface LoanWithDetails {
 }
 // Update a loan when returning an item
 export interface ReturnLoanRequest {
-  returnedDate: string;
+  isBorrower: boolean;
   returnNotes?: string | null;
-  lateFeeAmount?: number;
-  lateFeePaid?: boolean;
 }

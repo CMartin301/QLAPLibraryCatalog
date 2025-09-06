@@ -14,14 +14,10 @@ public partial class Loan
     public DateOnly? DueDate { get; set; }
 
     public DateOnly? ReturnedDate { get; set; }
-
-    public string? Status { get; set; }
-
-    public string? ReturnNotes { get; set; }
-
-    public decimal? LateFeeAmount { get; set; }
-
-    public bool? LateFeePaid { get; set; }
+    public DateTime? BorrowerReturnedAt { get; set; }
+    public DateTime? LenderConfirmedReturnAt { get; set; }
+    public string? BorrowerReturnNotes { get; set; }
+    public string? LenderReturnNotes { get; set; }
 
     public DateTime? CreatedAt { get; set; }
 

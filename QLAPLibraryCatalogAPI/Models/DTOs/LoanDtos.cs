@@ -13,12 +13,18 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
         public DateOnly? StartDate { get; set; }
         /// <summary> End date/due date of the loan </summary>
         public DateOnly? DueDate { get; set; }
-        /// <summary> Date the media was actually returned </summary>
+        /// <summary> Date at which both borrower and lender have confirmed return</summary>
         public DateOnly? ReturnedDate { get; set; }
         /// <summary> Status, ex. pending, complete, etc. </summary>
         public string? Status { get; set; } = "active";
-        /// <summary> Notes upon return of media </summary>
-        public string? ReturnNotes { get; set; }
+        /// <summary> Date and time for borrower confirming return </summary>
+        public DateTime? BorrowerReturnedAt { get; set; }
+        /// <summary> Borrower notes on return </summary>
+        public string? BorrowerReturnNotes { get; set; }
+        /// <summary> Date and time for lender confirming return </summary>
+        public DateTime? LenderConfirmedReturnAt { get; set; }
+        /// <summary> Lender notes on return </summary>
+        public string? LenderReturnNotes { get; set; }
     }
     /// <summary>
     /// Comprehensive loan DTO that includes related entity details for display purposes
@@ -37,8 +43,14 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
         public DateOnly? ReturnedDate { get; set; }
         /// <summary> Status, ex. pending, complete, etc. </summary>
         public string? Status { get; set; } = "active";
-        /// <summary> Notes upon return of media </summary>
-        public string? ReturnNotes { get; set; }
+        /// <summary> Date and time for borrower confirming return </summary>
+        public DateTime? BorrowerReturnedAt { get; set; }
+        /// <summary> Borrower notes on return </summary>
+        public string? BorrowerReturnNotes { get; set; }
+        /// <summary> Date and time for lender confirming return </summary>
+        public DateTime? LenderConfirmedReturnAt { get; set; }
+        /// <summary> Lender notes on return </summary>
+        public string? LenderReturnNotes { get; set; }
 
         // Media information
         /// <summary> Title of media on loan </summary>
@@ -78,6 +90,5 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
     // {
     //     public DateOnly? ReturnedDate { get; set; }
     //     public string? ReturnNotes { get; set; }
-    //     public decimal? LateFeePerDay { get; set; }
     // }
 }

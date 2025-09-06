@@ -37,15 +37,15 @@ const BorrowingDashboard: React.FC = () => {
 
   return (
     <div className="container-fluid py-4 bg-pattern min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-        {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-lavender-600 mb-2">
+      {/* Page Header */}
+      <div className="row mb-4">
+        <div className="col">
+          <h1 className="text-2xl md:text-3xl font-bold text-lavender-500 mb-3">
             Borrowing Dashboard
           </h1>
-          <p className="text-gray-600">Manage your requests and loans</p>
+          <p className="text-muted">Manage your requests and loans</p>
         </div>
+      </div>
 
         {/* Main Tabs */}
         <div className="mb-6 border-b border-gray-200">
@@ -173,7 +173,6 @@ const BorrowingDashboard: React.FC = () => {
             </div>
           </div>
         )}
-      </div>
     </div>
   );
 };

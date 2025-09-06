@@ -1,19 +1,11 @@
 import { useMemo, useState } from "react";
 import {
   createColumnHelper,
-  getCoreRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  getFilteredRowModel,
-  useReactTable,
   SortingState,
 } from "@tanstack/react-table";
-import {
-  Search,
-  Calendar
-} from "lucide-react";
 import { DataTable } from "../shared/DataTable";
 import { LoanWithDetails } from "../../types/loans";
+import { loanService } from "../../services/loanService";
 
 interface LoansTableProps {
   loans: LoanWithDetails[];
@@ -31,192 +23,84 @@ export function LoansTable({ loans, onRefresh, error, loading }: LoansTableProps
   const columnHelper = createColumnHelper<LoanWithDetails>();
 
   const columns = useMemo(
-    () => [
-      // Media Title (new)
-      columnHelper.accessor("mediaTitle", {
-        header: "Media",
-        cell: (info) => (
-          <div>
-            <div className="font-medium text-gray-900">{info.getValue()}</div>
-            <div className="text-sm text-gray-500">{info.row.original.mediaType}</div>
-          </div>
-        ),
-        enableSorting: true,
-      enableResizing: true,
-      }),
+  () => [
+    columnHelper.accessor("mediaTitle", {
+      header: "Media",
+      cell: (info) => (
+        <div>
+          <div className="font-medium text-gray-900">{info.getValue()}</div>
+          <div className="text-sm text-gray-500">{info.row.original.mediaType}</div>
+        </div>
+      ),
+      enableSorting: true,
+      size: 250,   // wide for text
+    }),
 
-      // Borrower Username (new)
-      columnHelper.accessor("borrowerUsername", {
-        header: "Borrower",
-        cell: (info) => (
-          <span className="text-sm text-gray-900">{info.getValue()}</span>
-        ),
-        enableSorting: true,
-      enableResizing: true,
-      }),
+    columnHelper.accessor("borrowerUsername", {
+      header: "Borrower",
+      cell: (info) => <span className="text-sm text-gray-900">{info.getValue()}</span>,
+      enableSorting: true,
+      size: 150,   // medium
+    }),
 
-      // Owner Username (new)
-      columnHelper.accessor("ownerUsername", {
-        header: "Owner",
-        cell: (info) => (
-          <span className="text-sm text-gray-900">{info.getValue()}</span>
-        ),
-        enableSorting: true,
-      enableResizing: true,
-      }),
+    columnHelper.accessor("ownerUsername", {
+      header: "Owner",
+      cell: (info) => <span className="text-sm text-gray-900">{info.getValue()}</span>,
+      enableSorting: true,
+      size: 150,
+    }),
 
-      // Loan start date
-      columnHelper.accessor("startDate", {
-        header: "Start Date",
-        cell: (info) => (
-          <span className="text-sm text-gray-900">{info.getValue()}</span>
-        ),
-        enableSorting: true,
-      enableResizing: true,
-      }),
+    columnHelper.accessor("startDate", {
+      header: "Start Date",
+      cell: (info) => <span className="text-sm text-gray-900">{info.getValue()}</span>,
+      enableSorting: true,
+      size: 120,   // narrow date
+    }),
 
-      // Loan end date
-      columnHelper.accessor("dueDate", {
-        header: "Due Date",
-        cell: (info) => (
-          <span className="text-sm text-gray-900">{info.getValue()}</span>
-        ),
-        enableSorting: true,
-      enableResizing: true,
-      }),
-      
-      // Status (updated with overdue logic)
-      columnHelper.accessor("status", {
-        header: "Status",
-      //   enableSorting: false,
-      // enableResizing: true,
-  size: 200,     // starting width
-  meta: { grow: 1 },
-        cell: (info) => {
-          const loan = info.row.original;
-          const status = info.getValue() as LoanStatus;
-          
-          // Override status if overdue
-          const displayStatus = loan.isOverdue ? "overdue" : status;
-          
-          const statusConfig = {
-            active: {
-              bg: "bg-blue-100",
-              text: "text-blue-800",
-              label: "Active",
-            },
-            returned: {
-              bg: "bg-green-100",
-              text: "text-green-800",
-              label: "Returned",
-            },
-            overdue: {
-              bg: "bg-red-100",
-              text: "text-red-800",
-              label: `Overdue (${loan.daysOverdue} days)`,
-            },
-          };
+    columnHelper.accessor("dueDate", {
+      header: "Due Date",
+      cell: (info) => <span className="text-sm text-gray-900">{info.getValue()}</span>,
+      enableSorting: true,
+      size: 120,   // narrow date
+    }),
 
-          const config = statusConfig[displayStatus] || statusConfig.active;
+    columnHelper.accessor("status", {
+      header: "Status",
+      size: 160,   // fit for badge
+      cell: (info) => { /* ...status cell... */ },
+    }),
 
-          return (
-            <span
-              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.bg} ${config.text}`}
-            >
-              {config.label}
-            </span>
-          );
-        },
-      }),
+    columnHelper.display({
+      id: "actions",
+      header: "Actions",
+      size: 180,   // fixed button width
+      cell: (info) => { /* ...actions... */ },
+    }),
+  ],
+  [isLoading]
+);
 
 
-      // // Actions (keep existing but update loan ID reference)
-      // columnHelper.display({
-      //   id: "actions",
-      //   header: "Actions",
-      //   cell: (info) => {
-      //     const loan = info.row.original;
 
-      //     if (loan.status === "active" && !loan.isOverdue) {
-      //       return (
-      //       <button
-      //         onClick={() => handleReturn(loan.loanId)}
-      //         disabled={isLoading}
-      //         aria-label={`Mark loan ${loan.loanId} as returned`}
-      //         className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded text-white bg-lavender-600 hover:bg-lavender-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lavender-500 disabled:opacity-50 disabled:cursor-not-allowed"
-      //       >
-      //         {isLoading ? 'Processing...' : 'Mark Returned'}
-      //       </button>
-      //       );
-      //     }
-
-      //     return <span className="text-xs text-gray-400">No actions</span>;
-      //   },
-      // }),
-    ],
-    [isLoading]
-  );
-
-  const table = useReactTable({
-    data: loans,
-    columns,
-    state: {
-      globalFilter,
-      sorting,
-    },
-    onGlobalFilterChange: setGlobalFilter,
-    onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    initialState: {
-      pagination: {
-        pageSize: 10,
-      },
-    },
-  });
 
   // Action handler
-  // const handleReturn = async (loanId: number) => {
-  //   setIsLoading(true);
-  //   try {
-  //   //   await loanService.returnLoan(loanId, {
-  //   //     returnedDate: new Date().toISOString(),
-  //   //   });
-  //     onRefresh();
-  //   } catch (error) {
-  //     console.error("Failed to mark loan returned:", error);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
+  const handleReturn = async (loanId: number) => {
+    setIsLoading(true);
+    try {
+      await loanService.returnLoan(loanId, {
+        isBorrower: true
+      });
+      onRefresh();
+    } catch (error) {
+      console.error("Failed to mark loan returned:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="bg-[var(--color-card)] rounded-lg shadow-sm border border-[var(--color-border)]">
-      {/* Search Header */}
-      <div className="p-6 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <div className="relative flex-1 max-w-md">
-            <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-              size={18}
-            />
-            <input
-              type="text"
-              placeholder="Search loans..."
-              value={globalFilter}
-              onChange={(e) => setGlobalFilter(e.target.value)}
-              aria-label="Search loans"
-              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:border-lavender-500"
-            />
-          </div>
-          <div className="ml-4 text-sm text-gray-500">
-            Showing {table.getFilteredRowModel().rows.length} loan
-            {table.getFilteredRowModel().rows.length !== 1 ? "s" : ""}
-          </div>
-        </div>
-      </div>
+
 
       {error && (
           <div className="p-4 bg-red-50 border-l-4 border-red-400">

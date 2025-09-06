@@ -6,7 +6,12 @@ import useAuth from '../../hooks/useAuth';
  * Simplified: No loading logic (handled by LoadingBoundary)
  */
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, hasInitialized } = useAuth();
+  
+  if (!hasInitialized) {
+    return null; // LoadingBoundary handles this
+  }
+  
   return isLoggedIn ? <>{children}</> : <Navigate to="/login" replace />;
 }
 
@@ -15,6 +20,11 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
  * Simplified: No initialization logic (handled by AuthInitializer)
  */
 export function AuthRoute({ children }: { children: React.ReactNode }) {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, hasInitialized } = useAuth();
+  
+  if (!hasInitialized) {
+    return null; // LoadingBoundary handles this
+  }
+  
   return isLoggedIn ? <Navigate to="/dashboard" replace /> : <>{children}</>;
 }

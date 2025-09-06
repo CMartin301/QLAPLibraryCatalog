@@ -13,9 +13,9 @@ interface LoadingBoundaryProps {
  * Shows loading UI while auth state is being determined.
  */
 export function LoadingBoundary({ children, fallback }: LoadingBoundaryProps) {
-  const { isLoading } = useAuth();
+  const { isLoading, hasInitialized } = useAuth();
 
-  if (isLoading) {
+  if (isLoading || !hasInitialized) {
     return (
       fallback || (
         <div className="min-h-screen bg-gray-100 flex items-center justify-center">

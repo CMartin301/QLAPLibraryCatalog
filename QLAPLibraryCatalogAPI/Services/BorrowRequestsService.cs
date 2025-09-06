@@ -25,6 +25,7 @@ namespace QLAPLibraryCatalogAPI.Services
         public async Task<IEnumerable<BorrowRequestDto>> GetBorrowRequestsAsync()
         {
             var q = _context.BorrowRequests
+                .Include(r => r.Borrower)
                 .Include(r => r.Copy)
                 .ThenInclude(c => c.Media)
                 .AsQueryable();
@@ -34,6 +35,7 @@ namespace QLAPLibraryCatalogAPI.Services
         public async Task<IEnumerable<BorrowRequestDto>> GetBorrowRequestsForBorrowerAsync(int borrowerId)
         {
             var query = _context.BorrowRequests
+                .Include(r => r.Borrower)
                 .Include(r => r.Copy)
                 .ThenInclude(c => c.Media)
                 .AsQueryable();
@@ -45,6 +47,7 @@ namespace QLAPLibraryCatalogAPI.Services
         public async Task<IEnumerable<BorrowRequestDto>> GetBorrowRequestsForLenderAsync(int lenderId)
         {
             var query = _context.BorrowRequests
+                .Include(r => r.Borrower)
                 .Include(r => r.Copy)
                 .ThenInclude(c => c.Media)
                 .AsQueryable();
@@ -57,6 +60,7 @@ namespace QLAPLibraryCatalogAPI.Services
         public async Task<BorrowRequestDto?> GetBorrowRequestByIdAsync(int requestId)
         {
             var r = await _context.BorrowRequests
+                .Include(r => r.Borrower)
                 .Include(x => x.Copy)
                 .ThenInclude(c => c.Media)
                 .FirstOrDefaultAsync(x => x.RequestId == requestId);
@@ -82,7 +86,7 @@ namespace QLAPLibraryCatalogAPI.Services
             // Check for active loans for that copy
             var hasActiveLoan = await _context.Loans
                 .Include(l => l.Request)
-                .AnyAsync(l => l.Request.CopyId == dto.CopyId && l.Status == "active");
+                .AnyAsync(l => l.Request.CopyId == dto.CopyId && l.ReturnedDate == null);
 
             if (copy.IsAvailable != true || hasActiveLoan) throw new InvalidOperationException("Copy is currently unavailable.");
 
@@ -240,9 +244,7 @@ namespace QLAPLibraryCatalogAPI.Services
         //         DueDate = loan.DueDate,
         //         ReturnedDate = loan.ReturnedDate,
         //         Status = loan.Status,
-        //         ReturnNotes = loan.ReturnNotes,
-        //         LateFeeAmount = loan.LateFeeAmount,
-        //         LateFeePaid = loan.LateFeePaid
+        //         ReturnNotes = loan.ReturnNotes
         //     };
         // }
 
@@ -293,9 +295,6 @@ namespace QLAPLibraryCatalogAPI.Services
                 RequestId = request.RequestId,
                 StartDate = request.RequestedStartDate,
                 DueDate = request.RequestedEndDate,
-                Status = "active",
-                LateFeeAmount = 0m,
-                LateFeePaid = false,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -310,6 +309,7 @@ namespace QLAPLibraryCatalogAPI.Services
             {
                 RequestId = r.RequestId,
                 BorrowerId = r.BorrowerId,
+                BorrowerUsername = r.Borrower.Username,
                 CopyId = r.CopyId,
                 Status = r.Status,
                 Message = r.Message,
@@ -320,36 +320,8 @@ namespace QLAPLibraryCatalogAPI.Services
                 DenialReason = r.DenialReason,
                 CreatedAt = r.CreatedAt,
                 UpdatedAt = r.UpdatedAt,
-                Copy = r.Copy == null ? null : new MediaCopyDto
-                {
-                    CopyId = r.Copy.CopyId,
-                    UserId = r.Copy.UserId,
-                    MediaId = r.Copy.MediaId,
-                    Condition = r.Copy.Condition,
-                    MaxLoanDays = r.Copy.MaxLoanDays,
-                    RequiresApproval = r.Copy.RequiresApproval,
-                    IsAvailable = r.Copy.IsAvailable,
-                    Notes = r.Copy.Notes
-                },
-                Media = r.Copy?.Media == null ? null : new MediaDto
-                {
-                    MediaId = r.Copy.Media.MediaId,
-                    MediaTypeId = r.Copy.Media.MediaTypeId,
-                    Title = r.Copy.Media.Title,
-                    Subtitle = r.Copy.Media.Subtitle,
-                    Creator = r.Copy.Media.Creator,
-                    Publisher = r.Copy.Media.Publisher,
-                    PublicationDate = r.Copy.Media.PublicationDate,
-                    Language = r.Copy.Media.Language,
-                    Genre = r.Copy.Media.Genre,
-                    Description = r.Copy.Media.Description,
-                    CoverImageUrl = r.Copy.Media.CoverImageUrl,
-                    Isbn10 = r.Copy.Media.Isbn10,
-                    Isbn13 = r.Copy.Media.Isbn13,
-                    PageCount = r.Copy.Media.PageCount,
-                    IssueNumber = r.Copy.Media.IssueNumber,
-                    Volume = r.Copy.Media.Volume
-                }
+                MediaTitle = r.Copy.Media.Title,
+                MediaCreator = r.Copy.Media.Creator
             };
         }
     }

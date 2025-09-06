@@ -86,8 +86,6 @@ public partial class LibraryCatalogContext : DbContext
 
             entity.HasIndex(e => e.RequestId, "idx_loans_request_id");
 
-            entity.HasIndex(e => e.Status, "idx_loans_status");
-
             entity.HasIndex(e => e.RequestId, "loans_request_id_key").IsUnique();
 
             entity.Property(e => e.LoanId).HasColumnName("loan_id");
@@ -95,24 +93,16 @@ public partial class LibraryCatalogContext : DbContext
                 .HasDefaultValueSql("now()")
                 .HasColumnName("created_at");
             entity.Property(e => e.DueDate).HasColumnName("due_date");
-            entity.Property(e => e.LateFeeAmount)
-                .HasPrecision(10, 2)
-                .HasDefaultValueSql("0.00")
-                .HasColumnName("late_fee_amount");
-            entity.Property(e => e.LateFeePaid)
-                .HasDefaultValue(false)
-                .HasColumnName("late_fee_paid");
             entity.Property(e => e.RequestId).HasColumnName("request_id");
-            entity.Property(e => e.ReturnNotes).HasColumnName("return_notes");
             entity.Property(e => e.ReturnedDate).HasColumnName("returned_date");
             entity.Property(e => e.StartDate).HasColumnName("start_date");
-            entity.Property(e => e.Status)
-                .HasMaxLength(20)
-                .HasDefaultValueSql("'active'::character varying")
-                .HasColumnName("status");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("updated_at");
+    entity.Property(e => e.BorrowerReturnedAt).HasColumnName("borrower_returned_at");
+    entity.Property(e => e.LenderConfirmedReturnAt).HasColumnName("lender_confirmed_return_at");
+    entity.Property(e => e.BorrowerReturnNotes).HasColumnName("borrower_return_notes");
+    entity.Property(e => e.LenderReturnNotes).HasColumnName("lender_return_notes");
 
             entity.HasOne(d => d.Request).WithOne(p => p.Loan)
                 .HasForeignKey<Loan>(d => d.RequestId)

@@ -18,6 +18,8 @@ namespace QLAPLibraryCatalogAPI.Services
         Task<IEnumerable<LoanWithDetailsDto>> GetLoansBorrowedByUserWithDetailsAsync(int userId);
         Task<IEnumerable<LoanWithDetailsDto>> GetLoansOfUserMediaWithDetailsAsync(int userId);
         Task<LoanWithDetailsDto?> GetLoanByIdWithDetailsAsync(int loanId);
+        Task<LoanDto?> ExtendLoan(int loanId, DateOnly? newDueDate);
+        Task<LoanDto?> ReturnLoan(int loanId, bool isBorrower, string? comments);
 #pragma warning restore 1591
     }
     /// <summary>
@@ -135,48 +137,89 @@ namespace QLAPLibraryCatalogAPI.Services
             return loan == null ? null : MapLoanWithDetails(loan);
         }
 
-        #endregion      
-        // public async Task<LoanDto?> MarkReturnedAsync(int requestId, ReturnLoanDto dto)
-        // {
-        //     var loan = await _context.Loans
-        //         .Include(l => l.Request)
-        //             .ThenInclude(r => r.Copy)
-        //         .FirstOrDefaultAsync(l => l.RequestId == requestId);
+        #endregion
+        #region Loan Actions
+        /// <summary>
+        /// Extend a loan by changing the due date
+        /// </summary>
+        /// <param name="loanId"></param>
+        /// <param name="newDueDate"></param>
+        /// <returns></returns>
+        public async Task<LoanDto?> ExtendLoan(int loanId, DateOnly? newDueDate)
+        {
+            var existingLoan = await _context.Loans.FindAsync(loanId);
+            if (existingLoan == null) return null;
 
-        //     if (loan == null) return null;
-        //     if (loan.Status != "active") throw new InvalidOperationException("Only active loans can be returned.");
+            if (existingLoan.ReturnedDate != null)
+                throw new InvalidOperationException("Cannot extend a loan that has already been returned.");
 
-        //     var returnedDate = dto.ReturnedDate ?? DateOnly.FromDateTime(DateTime.UtcNow);
-        //     loan.ReturnedDate = returnedDate;
-        //     loan.Status = "returned";
-        //     loan.ReturnNotes = dto.ReturnNotes;
-        //     loan.UpdatedAt = DateTime.UtcNow;
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            if (newDueDate != null && newDueDate <= today)
+                throw new InvalidOperationException("New due date must be in the future.");
 
-        //     // mark copy available
-        //     loan.Request.Copy.IsAvailable = true;
+            if (newDueDate != null && newDueDate <= existingLoan.DueDate)
+                throw new InvalidOperationException("New due date must be later than current due date.");
+            
 
-        //     await _context.SaveChangesAsync();
+            existingLoan.DueDate = newDueDate;
+            existingLoan.UpdatedAt = DateTime.UtcNow;
 
-        //     return new LoanDto
-        //     {
-        //         LoanId = loan.LoanId,
-        //         RequestId = loan.RequestId,
-        //         StartDate = loan.StartDate,
-        //         DueDate = loan.DueDate,
-        //         ReturnedDate = loan.ReturnedDate,
-        //         Status = loan.Status,
-        //         ReturnNotes = loan.ReturnNotes,
-        //         LateFeeAmount = loan.LateFeeAmount,
-        //         LateFeePaid = loan.LateFeePaid
-        //     };
-        // }
+            await _context.SaveChangesAsync();
 
+            return await GetLoanByIdAsync(loanId);
+        }
+        /// <summary>
+        /// Confirm loan return for either borrower or lender
+        /// </summary>
+        /// <param name="loanId"></param>
+        /// <param name="isBorrower"></param>
+        /// <param name="comments"></param>
+        /// <returns></returns>
+        public async Task<LoanDto?> ReturnLoan(int loanId, bool isBorrower, string? comments)
+        {
+            var existingLoan = await _context.Loans.FindAsync(loanId);
+            if (existingLoan == null) return null;
+
+            if(existingLoan.ReturnedDate != null)
+                throw new InvalidOperationException("You cannot return a loan that has already been returned.");
+
+            if (isBorrower)
+            {
+                if(existingLoan.BorrowerReturnedAt != null)
+                    throw new InvalidOperationException("You have already returned this loan.");
+                existingLoan.BorrowerReturnedAt = DateTime.UtcNow;
+                existingLoan.BorrowerReturnNotes = comments;
+                existingLoan.UpdatedAt = DateTime.UtcNow;
+            }
+            else
+            {
+                if(existingLoan.LenderConfirmedReturnAt != null)
+                    throw new InvalidOperationException("You have already confirmed the return of this loan.");
+                existingLoan.LenderConfirmedReturnAt = DateTime.UtcNow;
+                existingLoan.LenderReturnNotes = comments;
+                existingLoan.UpdatedAt = DateTime.UtcNow;
+            }
+
+            if (existingLoan.LenderConfirmedReturnAt != null && existingLoan.BorrowerReturnedAt != null)
+            {
+                existingLoan.ReturnedDate = DateOnly.FromDateTime(DateTime.UtcNow);
+            }
+
+            await _context.SaveChangesAsync();
+
+            return await GetLoanByIdAsync(loanId);
+        }
+
+        #endregion
         #region Mapping Methods
         /// <summary>
         /// Maps a basic Loan entity to LoanDto
         /// </summary>
         private static LoanDto MapLoan(Loan loan)
         {
+            string status = "returned";
+            if (loan.ReturnedDate == null) status = "active";
+
             return new LoanDto
             {
                 LoanId = loan.LoanId,
@@ -184,8 +227,11 @@ namespace QLAPLibraryCatalogAPI.Services
                 StartDate = loan.StartDate,
                 DueDate = loan.DueDate,
                 ReturnedDate = loan.ReturnedDate,
-                Status = loan.Status,
-                ReturnNotes = loan.ReturnNotes,
+                Status = status,
+                BorrowerReturnedAt = loan.BorrowerReturnedAt,
+                BorrowerReturnNotes = loan.BorrowerReturnNotes,
+                LenderConfirmedReturnAt = loan.LenderConfirmedReturnAt,
+                LenderReturnNotes = loan.LenderReturnNotes
             };
         }
         /// <summary>
@@ -199,6 +245,9 @@ namespace QLAPLibraryCatalogAPI.Services
                 ? (int?)(today.DayNumber - loan.DueDate.Value.DayNumber)
                 : null;
 
+            string status = "returned";
+            if (loan.ReturnedDate == null) status = "active";
+            
             return new LoanWithDetailsDto
             {
                 // Basic loan info
@@ -207,26 +256,29 @@ namespace QLAPLibraryCatalogAPI.Services
                 StartDate = loan.StartDate,
                 DueDate = loan.DueDate,
                 ReturnedDate = loan.ReturnedDate,
-                Status = loan.Status ?? "active",
-                ReturnNotes = loan.ReturnNotes,
-                
+                Status = status,
+                BorrowerReturnedAt = loan.BorrowerReturnedAt,
+                BorrowerReturnNotes = loan.BorrowerReturnNotes,
+                LenderConfirmedReturnAt = loan.LenderConfirmedReturnAt,
+                LenderReturnNotes = loan.LenderReturnNotes,
+
                 // Media info
                 MediaTitle = loan.Request?.Copy?.Media?.Title ?? "Unknown Title",
                 MediaType = loan.Request?.Copy?.Media?.MediaType?.ToString() ?? "Unknown Type",
                 MediaCreator = loan.Request?.Copy?.Media?.Creator,
                 MediaGenre = loan.Request?.Copy?.Media?.Genre,
-                
+
                 // User info
                 BorrowerId = loan.Request?.BorrowerId ?? 0,
                 BorrowerUsername = loan.Request?.Borrower?.Username ?? "Unknown User",
                 OwnerId = loan.Request?.Copy?.UserId ?? 0,
                 OwnerUsername = loan.Request?.Copy?.User?.Username ?? "Unknown Owner",
-                
+
                 // Copy info
                 CopyId = loan.Request?.CopyId ?? 0,
                 CopyCondition = loan.Request?.Copy?.Condition,
                 CopyNotes = loan.Request?.Copy?.Notes,
-                
+
                 // Calculated fields
                 DaysOverdue = daysOverdue,
                 IsOverdue = isOverdue,
