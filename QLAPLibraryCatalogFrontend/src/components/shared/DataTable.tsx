@@ -17,6 +17,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Search,
+  Plus,
 } from "lucide-react";
 
 // --- Extend ColumnMeta so we can use `meta.grow`
@@ -35,6 +36,10 @@ interface DataTableProps<T> {
   showSearch?: boolean;
   error?: string | null;
   onRefresh?: () => void;
+  actionButton?: {  
+    text: string;
+    onClick: () => void;
+  } | null;
 }
 
 export function DataTable<T>({
@@ -46,6 +51,7 @@ export function DataTable<T>({
   showSearch = true,
   error,
   onRefresh,
+  actionButton, 
 }: DataTableProps<T>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -95,11 +101,23 @@ export function DataTable<T>({
                 className="w-full pl-10 pr-3 py-2 border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
               />
             </div>
-            <div className="text-sm text-[var(--color-muted)]">
-              Showing {table.getFilteredRowModel().rows.length} of {data.length} entries
-            </div>
+
+            {/* action button */}
+        {actionButton && (
+          <button
+            type="button"
+            onClick={actionButton.onClick}
+            className="py-2 pl-4 pr-5 bg-lavender-400 hover:bg-lavender-500
+                      text-white text-sm font-medium rounded-lg shadow
+                      transition-all duration-200 transform hover:scale-[1.01]
+                      flex items-center gap-2 justify-center whitespace-nowrap"
+          >
+            <Plus size={16} className="text-white" />
+            {actionButton.text}
+          </button>
+        )}
+      </div>
           </div>
-        </div>
       )}
 
       {/* Error Display */}

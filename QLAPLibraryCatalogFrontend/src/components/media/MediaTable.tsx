@@ -382,82 +382,7 @@ const handleCloseBorrowModal = () => {
 
   return (
     <div className="bg-[var(--color-card)] rounded-lg shadow-sm border border-[var(--color-border)]">
-      <div className="p-4 border-b border-[var(--color-border)]">
-        <div className="flex items-center justify-between gap-4 flex-wrap">
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            {/* Search Input */}
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" size={18} />
-              <input
-                type="text"
-                placeholder="Search books..."
-                value={globalFilter ?? ''}
-                onChange={e => setGlobalFilter(e.target.value)}
-                className="w-full pl-10 pr-3 py-2 border border-[var(--color-border)] rounded-lg text-sm
-                           focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
-              />
-            </div>
-            
-            {/* Genre Filter Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setShowGenreFilter(!showGenreFilter)}
-                className={`flex items-center gap-2 px-3 py-2 border rounded-lg text-sm transition-colors ${
-                  selectedGenres.length > 0
-                    ? 'bg-lavender-50 border-lavender-200 text-lavender-700'
-                    : 'border-[var(--color-border)] text-[var(--color-text)]'
-                }`}
-              >
-                <Filter size={16} />
-                Genre {selectedGenres.length > 0 && `(${selectedGenres.length})`}
-              </button>
-              
-              {showGenreFilter && (
-                <div className="absolute top-full mt-1 left-0 z-10 bg-white border border-[var(--color-border)] rounded-lg shadow-lg min-w-48">
-                  <div className="p-2">
-                    {selectedGenres.length > 0 && (
-                      <button
-                        onClick={clearGenreFilter}
-                        className="flex items-center gap-2 w-full px-2 py-1 text-sm text-red-600 hover:bg-red-50 rounded"
-                      >
-                        <X size={14} />
-                        Clear filters
-                      </button>
-                    )}
-                    {availableGenres.map(genre => (
-                      <label key={genre} className="flex items-center gap-2 px-2 py-1 hover:bg-gray-50 rounded cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={selectedGenres.includes(genre)}
-                          onChange={() => handleGenreFilter(genre)}
-                          className="rounded border-gray-300 text-lavender-500 focus:ring-lavender-500"
-                        />
-                        <span className="text-sm">{genre}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Action Button (if applicable) */}
-          {actionButton && (
-            <button
-              type="button"
-              onClick={actionButton.onClick}
-              className="py-2 pl-4 pr-5 bg-lavender-400 hover:bg-lavender-500
-                        text-white text-sm font-medium rounded-lg shadow
-                        transition-all duration-200 transform hover:scale-[1.01]
-                        flex items-center gap-2 justify-center whitespace-nowrap"
-            >
-              <Plus size={16} className="text-white" />
-              {actionButton.text}
-            </button>
-          )}
-        </div>
-      </div>
-
+      
       {error && (
         <div className="p-4 bg-red-50 border-l-4 border-red-400">
           <p className="text-red-700">Error: {error}</p>
@@ -484,6 +409,7 @@ const handleCloseBorrowModal = () => {
           searchPlaceholder="Search books..."
           error={error}
           onRefresh={onRefresh}
+          actionButton={actionButton} 
         />
       )}
 
