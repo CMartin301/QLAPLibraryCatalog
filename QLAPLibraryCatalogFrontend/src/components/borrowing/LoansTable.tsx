@@ -65,19 +65,26 @@ export function LoansTable({ loans, onRefresh, error, loading }: LoansTableProps
       enableResizing: true,
       }),
 
-      // Loan Period (updated to use calculated field)
-      columnHelper.accessor("loanPeriodDisplay", {
-        header: "Loan Period",
+      // Loan start date
+      columnHelper.accessor("startDate", {
+        header: "Start Date",
         cell: (info) => (
-          <div className="flex items-center space-x-2">
-            <Calendar className="w-4 h-4 text-gray-400" />
-            <span className="text-sm text-gray-900">{info.getValue()}</span>
-          </div>
+          <span className="text-sm text-gray-900">{info.getValue()}</span>
         ),
-        enableSorting: false,
+        enableSorting: true,
       enableResizing: true,
       }),
 
+      // Loan end date
+      columnHelper.accessor("dueDate", {
+        header: "Due Date",
+        cell: (info) => (
+          <span className="text-sm text-gray-900">{info.getValue()}</span>
+        ),
+        enableSorting: true,
+      enableResizing: true,
+      }),
+      
       // Status (updated with overdue logic)
       columnHelper.accessor("status", {
         header: "Status",

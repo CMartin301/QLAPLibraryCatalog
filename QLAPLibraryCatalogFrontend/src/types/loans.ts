@@ -23,8 +23,6 @@ export interface LoanWithDetails {
   returnedDate: string | null;
   status: "active" | "returned" | "overdue";
   returnNotes: string | null;
-  lateFeeAmount: number | null;
-  lateFeePaid: boolean | null;
   
   // Media information
   mediaTitle: string;
@@ -46,7 +44,6 @@ export interface LoanWithDetails {
   // Calculated fields for display
   daysOverdue?: number | null;
   isOverdue: boolean;
-  loanPeriodDisplay: string;
 }
 // Update a loan when returning an item
 export interface ReturnLoanRequest {
