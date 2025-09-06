@@ -8,6 +8,7 @@ import { borrowRequestService } from '../../services/borrowRequestService';
 import { loanService } from '../../services/loanService';
 import { BorrowRequestsTable } from './BorrowRequestsTable';
 import LoansTable from './LoansTable';
+import { useLoans } from '../../hooks/useLoans';
 
 type MainTab = 'requests' | 'loans';
 type RequestTab = 'sent' | 'received';
@@ -25,16 +26,15 @@ const BorrowingDashboard: React.FC = () => {
 
   // --- Loans ---
   const [loanTab, setLoanTab] = useState<LoanTab>('borrowed');
-  const [loans, setLoans] = useState<Loan[]>([]);
-  const [loansLoading, setLoansLoading] = useState(true);
+  const { loans, loading: loansLoading, error: loansError, refetch: refetchLoans } = useLoans(userID, loanTab);
+  // const [loans, setLoans] = useState<Loan[]>([]);
+  // const [loansLoading, setLoansLoading] = useState(true);
 
   useEffect(() => {
     if (!userID) return;
     if (mainTab === 'requests') {
       loadBorrowRequests();
-    } else {
-      loadLoans();
-    }
+    } 
   }, [mainTab, requestTab, loanTab, userID]);
 
   // ---- Load Borrow Requests ----
@@ -57,25 +57,25 @@ const BorrowingDashboard: React.FC = () => {
     }
   };
 
-  // ---- Load Loans ----
-  const loadLoans = async () => {
-    if (!userID) return;
-    setLoansLoading(true);
+  // // ---- Load Loans ----
+  // const loadLoans = async () => {
+  //   if (!userID) return;
+  //   setLoansLoading(true);
 
-    try {
-      let items: Loan[] = [];
-      if (loanTab === 'borrowed') {
-        items = await loanService.getLoansBorrowedByUser(userID);
-      } else {
-        items = await loanService.getLoansOfUserMedia(userID);
-      }
-      setLoans(items);
-    } catch (err) {
-      console.error('Error loading loans', err);
-    } finally {
-      setLoansLoading(false);
-    }
-  };
+  //   try {
+  //     let items: Loan[] = [];
+  //     if (loanTab === 'borrowed') {
+  //       items = await loanService.getLoansBorrowedByUser(userID);
+  //     } else {
+  //       items = await loanService.getLoansOfUserMedia(userID);
+  //     }
+  //     setLoans(items);
+  //   } catch (err) {
+  //     console.error('Error loading loans', err);
+  //   } finally {
+  //     setLoansLoading(false);
+  //   }
+  // };
 
   return (
     <div className="container-fluid py-4 bg-pattern min-h-screen">
@@ -209,7 +209,7 @@ const BorrowingDashboard: React.FC = () => {
 
             {/* Loans Table */}
             <div className="bg-white rounded-lg shadow-sm">
-              <LoansTable loans={loans} onRefresh={loadLoans} />
+              <LoansTable loans={loans} onRefresh={refetchLoans} />
             </div>
           </div>
         )}
