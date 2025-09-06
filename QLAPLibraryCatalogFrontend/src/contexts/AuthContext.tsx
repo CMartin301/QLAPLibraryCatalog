@@ -189,18 +189,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
               error: null
             });
             console.log('Session restored for user:', user.username);
+            return;
           } catch (error) {
             // Invalid stored user data, clear storage
             logout();
+            return;
           }
         } else {
           // Token expired, clear storage
           logout();
-          console.log('Session expired, please log in again');
+          return;
         }
       }
-    }
-  }, []);
+    }  
+    setAuthState(prev => ({
+    ...prev,
+    hasInitialized: true,
+    isLoading: false
+  }));
+}, [logout]); 
 
   // Context value that will be provided to children
   const value: AuthContextType = {
