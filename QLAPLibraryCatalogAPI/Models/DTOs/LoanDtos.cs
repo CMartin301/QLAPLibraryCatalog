@@ -78,6 +78,5 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
     // {
     //     public DateOnly? ReturnedDate { get; set; }
     //     public string? ReturnNotes { get; set; }
-    //     public decimal? LateFeePerDay { get; set; }
     // }
 }

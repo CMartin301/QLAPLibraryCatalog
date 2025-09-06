@@ -19,10 +19,6 @@ public partial class Loan
 
     public string? ReturnNotes { get; set; }
 
-    public decimal? LateFeeAmount { get; set; }
-
-    public bool? LateFeePaid { get; set; }
-
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }

@@ -95,13 +95,6 @@ public partial class LibraryCatalogContext : DbContext
                 .HasDefaultValueSql("now()")
                 .HasColumnName("created_at");
             entity.Property(e => e.DueDate).HasColumnName("due_date");
-            entity.Property(e => e.LateFeeAmount)
-                .HasPrecision(10, 2)
-                .HasDefaultValueSql("0.00")
-                .HasColumnName("late_fee_amount");
-            entity.Property(e => e.LateFeePaid)
-                .HasDefaultValue(false)
-                .HasColumnName("late_fee_paid");
             entity.Property(e => e.RequestId).HasColumnName("request_id");
             entity.Property(e => e.ReturnNotes).HasColumnName("return_notes");
             entity.Property(e => e.ReturnedDate).HasColumnName("returned_date");

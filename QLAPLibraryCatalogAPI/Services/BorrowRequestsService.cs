@@ -240,9 +240,7 @@ namespace QLAPLibraryCatalogAPI.Services
         //         DueDate = loan.DueDate,
         //         ReturnedDate = loan.ReturnedDate,
         //         Status = loan.Status,
-        //         ReturnNotes = loan.ReturnNotes,
-        //         LateFeeAmount = loan.LateFeeAmount,
-        //         LateFeePaid = loan.LateFeePaid
+        //         ReturnNotes = loan.ReturnNotes
         //     };
         // }
 
@@ -294,8 +292,6 @@ namespace QLAPLibraryCatalogAPI.Services
                 StartDate = request.RequestedStartDate,
                 DueDate = request.RequestedEndDate,
                 Status = "active",
-                LateFeeAmount = 0m,
-                LateFeePaid = false,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };

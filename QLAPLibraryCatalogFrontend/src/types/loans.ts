@@ -8,8 +8,6 @@ export interface Loan {
   returnedDate: string | null;
   status: "active" | "returned" | "overdue";
   returnNotes: string | null;
-  lateFeeAmount: number;
-  lateFeePaid: boolean;
 }
 
 
@@ -49,6 +47,4 @@ export interface LoanWithDetails {
 export interface ReturnLoanRequest {
   returnedDate: string;
   returnNotes?: string | null;
-  lateFeeAmount?: number;
-  lateFeePaid?: boolean;
 }

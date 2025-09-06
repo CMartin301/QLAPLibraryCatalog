@@ -10,9 +10,7 @@
     "dueDate": "2025-09-03",
     "returnedDate": null,
     "status": "active",
-    "returnNotes": null,
-    "lateFeeAmount": 0.0,
-    "lateFeePaid": false
+    "returnNotes": null
   },
   {
     "loanId": 2,
@@ -21,9 +19,7 @@
     "dueDate": "2025-08-20",
     "returnedDate": "2025-08-18",
     "status": "returned",
-    "returnNotes": "Returned in good condition.",
-    "lateFeeAmount": 0.0,
-    "lateFeePaid": true
+    "returnNotes": "Returned in good condition."
   },
   {
     "loanId": 3,
@@ -32,9 +28,7 @@
     "dueDate": "2025-09-10",
     "returnedDate": null,
     "status": "active",
-    "returnNotes": null,
-    "lateFeeAmount": 0.0,
-    "lateFeePaid": false
+    "returnNotes": null
   },
   {
     "loanId": 4,
@@ -43,9 +37,7 @@
     "dueDate": "2025-09-08",
     "returnedDate": "2025-09-07",
     "status": "returned",
-    "returnNotes": "Returned early by admin.",
-    "lateFeeAmount": 0.0,
-    "lateFeePaid": true
+    "returnNotes": "Returned early by admin."
   },
   {
     "loanId": 5,
@@ -54,9 +46,7 @@
     "dueDate": "2025-09-05",
     "returnedDate": null,
     "status": "active",
-    "returnNotes": null,
-    "lateFeeAmount": 0.0,
-    "lateFeePaid": false
+    "returnNotes": null
   },
   {
     "loanId": 6,
@@ -65,9 +55,7 @@
     "dueDate": null,
     "returnedDate": null,
     "status": "active",
-    "returnNotes": null,
-    "lateFeeAmount": 0.0,
-    "lateFeePaid": false
+    "returnNotes": null
   },
   {
     "loanId": 7,
@@ -76,9 +64,7 @@
     "dueDate": null,
     "returnedDate": null,
     "status": "active",
-    "returnNotes": null,
-    "lateFeeAmount": 0.0,
-    "lateFeePaid": false
+    "returnNotes": null
   }
 ]
 }

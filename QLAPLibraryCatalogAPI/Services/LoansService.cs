@@ -166,8 +166,6 @@ namespace QLAPLibraryCatalogAPI.Services
         //         ReturnedDate = loan.ReturnedDate,
         //         Status = loan.Status,
         //         ReturnNotes = loan.ReturnNotes,
-        //         LateFeeAmount = loan.LateFeeAmount,
-        //         LateFeePaid = loan.LateFeePaid
         //     };
         // }
 
