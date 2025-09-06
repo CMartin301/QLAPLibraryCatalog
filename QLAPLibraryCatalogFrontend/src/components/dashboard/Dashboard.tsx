@@ -41,14 +41,6 @@ interface ActivityItemProps {
   activity: Activity;
 }
 
-interface DueDateItem {
-  id: number;
-  title: string;
-  author: string;
-  dueDate: string;
-  overdue: boolean;
-}
-
 // --- Components ---
 const StatCard: React.FC<StatCardProps> = ({ icon: Icon, title, value, description, color = 'lavender' }) => (
   <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">

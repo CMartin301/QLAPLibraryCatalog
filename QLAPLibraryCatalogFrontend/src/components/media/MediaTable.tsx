@@ -1,8 +1,7 @@
 // MediaTable.tsx
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   createColumnHelper,
-  flexRender,
   getCoreRowModel,
   getSortedRowModel,
   getFilteredRowModel,
@@ -12,7 +11,7 @@ import {
   getPaginationRowModel,
   PaginationState,
 } from '@tanstack/react-table';
-import { ChevronUp, ChevronDown, Search, Plus, Filter, X, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Search, Plus, Filter, X } from 'lucide-react';
 import { Media, MediaFormData, CreateMediaRequest, CreateMediaCopyRequest } from '../../types/media';
 import { AddMediaForm } from './AddMediaForm';
 import { Modal } from '../shared/Modal';

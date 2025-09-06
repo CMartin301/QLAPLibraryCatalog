@@ -10,10 +10,8 @@ import {
 } from "@tanstack/react-table";
 import {
   Search,
-  Calendar,
-  DollarSign,
+  Calendar
 } from "lucide-react";
-import { Loan } from "../../types/loans";
 import { DataTable } from "../shared/DataTable";
 import { LoanWithDetails } from "../../types/loans";
 
@@ -173,19 +171,19 @@ export function LoansTable({ loans, onRefresh, error, loading }: LoansTableProps
   });
 
   // Action handler
-  const handleReturn = async (loanId: number) => {
-    setIsLoading(true);
-    try {
-    //   await loanService.returnLoan(loanId, {
-    //     returnedDate: new Date().toISOString(),
-    //   });
-      onRefresh();
-    } catch (error) {
-      console.error("Failed to mark loan returned:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // const handleReturn = async (loanId: number) => {
+  //   setIsLoading(true);
+  //   try {
+  //   //   await loanService.returnLoan(loanId, {
+  //   //     returnedDate: new Date().toISOString(),
+  //   //   });
+  //     onRefresh();
+  //   } catch (error) {
+  //     console.error("Failed to mark loan returned:", error);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
   return (
     <div className="bg-[var(--color-card)] rounded-lg shadow-sm border border-[var(--color-border)]">

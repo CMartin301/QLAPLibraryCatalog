@@ -1,8 +1,7 @@
 // src/components/borrowing/BorrowRequestsTable.tsx
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   createColumnHelper,
-  flexRender,
   getCoreRowModel,
   getPaginationRowModel,
   getSortedRowModel,
@@ -11,15 +10,7 @@ import {
   SortingState,
 } from '@tanstack/react-table';
 import { 
-  Search, 
-  ChevronUp, 
-  ChevronDown, 
-  ChevronLeft, 
-  ChevronRight,
-  Calendar,
-  MessageSquare,
-  User,
-  Book
+  Search
 } from 'lucide-react';
 import useAuth from '../../hooks/useAuth';
 import { borrowRequestService } from '../../services/borrowRequestService';
