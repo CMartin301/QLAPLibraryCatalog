@@ -6,7 +6,7 @@ export interface Loan {
   startDate: string | null;
   dueDate: string | null;
   returnedDate: string | null;
-  status: "active" | "returned" | "overdue"; // You can expand if backend has more
+  status: "active" | "returned" | "overdue";
   returnNotes: string | null;
   lateFeeAmount: number;
   lateFeePaid: boolean;

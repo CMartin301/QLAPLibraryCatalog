@@ -25,11 +25,13 @@ import { DataTable } from "../shared/DataTable";
 interface LoansTableProps {
   loans: Loan[];
   onRefresh: () => void;
+  error?: string | null;
+  loading?: boolean;
 }
 
 type LoanStatus = "active" | "returned" | "overdue";
 
-export function LoansTable({ loans, onRefresh }: LoansTableProps) {
+export function LoansTable({ loans, onRefresh, error, loading }: LoansTableProps) {
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -174,13 +176,14 @@ export function LoansTable({ loans, onRefresh }: LoansTableProps) {
 
           if (loan.status === "active") {
             return (
-              <button
-                onClick={() => handleReturn(loan.loanId)}
-                disabled={isLoading}
-                className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded text-white bg-lavender-600 hover:bg-lavender-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lavender-500 disabled:opacity-50"
-              >
-                Mark Returned
-              </button>
+            <button
+              onClick={() => handleReturn(loan.loanId)}
+              disabled={isLoading}
+              aria-label={`Mark loan ${loan.loanId} as returned`}
+              className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded text-white bg-lavender-600 hover:bg-lavender-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lavender-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? 'Processing...' : 'Mark Returned'}
+            </button>
             );
           }
 
@@ -241,6 +244,7 @@ export function LoansTable({ loans, onRefresh }: LoansTableProps) {
               placeholder="Search loans..."
               value={globalFilter}
               onChange={(e) => setGlobalFilter(e.target.value)}
+              aria-label="Search loans"
               className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:border-lavender-500"
             />
           </div>
@@ -251,12 +255,29 @@ export function LoansTable({ loans, onRefresh }: LoansTableProps) {
         </div>
       </div>
 
+      {error && (
+          <div className="p-4 bg-red-50 border-l-4 border-red-400">
+            <p className="text-red-700">Error: {error}</p>
+            <button 
+              onClick={onRefresh}
+              className="mt-2 text-red-600 underline"
+            >
+              Try again
+            </button>
+          </div>
+        )}
       {/* Table */}
-      <DataTable
-        data={loans}
-        columns={columns}
-        emptyMessage="No loans found"
-      />
+      {loading ? (
+        <div className="p-8 text-center text-gray-500">
+          Loading loans...
+        </div>
+      ) : (
+        <DataTable
+          data={loans}
+          columns={columns}
+          emptyMessage="No loans found"
+        />
+      )}
 
     </div>
   );
