@@ -1,58 +1,96 @@
-// Modal.tsx - Updated with wider layout
-import React, { useEffect } from "react";
+// components/shared/HeadlessModal.tsx
+import { Fragment, ReactNode } from 'react'
+import { Dialog, Transition } from '@headlessui/react'
+import { X } from 'lucide-react'
 
 interface ModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  title?: string;
-  children: React.ReactNode;
+  isOpen: boolean
+  onClose: () => void
+  title?: string
+  children: ReactNode
+  size?: 'sm' | 'md' | 'lg' | 'xl'
 }
 
-export function Modal({ isOpen, onClose, title, children }: ModalProps) {
-  // Close on Esc key
-  useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", handleEsc);
-    return () => document.removeEventListener("keydown", handleEsc);
-  }, [onClose]);
-
-  if (!isOpen) return null;
+export function Modal({ 
+  isOpen, 
+  onClose, 
+  title, 
+  children, 
+  size = 'md' 
+}: ModalProps) {
+  const sizeClasses = {
+    sm: 'max-w-md',
+    md: 'max-w-lg', 
+    lg: 'max-w-2xl',
+    xl: 'max-w-4xl'
+  }
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4"
-      onClick={onClose}
-    >
-      <div
-        className="bg-[var(--color-card)] rounded-xl shadow-lg w-full max-w-4xl relative animate-fade-in"
-        onClick={(e) => e.stopPropagation()}
+    <Transition show={isOpen} as={Fragment}>
+      <Dialog 
+        onClose={onClose}
+        className="relative z-50"
       >
-        <div className="p-6 overflow-hidden">
-          {/* Close button */}
-          <button
-            onClick={onClose}
-            aria-label="Close modal"
-            className="absolute top-3 right-3 text-[var(--color-muted)] hover:text-[var(--color-primary)]"
-          >
-            ✕
-          </button>
+        {/* Backdrop */}
+        <Transition.Child
+          as={Fragment}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-black bg-opacity-25" />
+        </Transition.Child>
 
-          {title && (
-            <h2 className="text-xl font-semibold text-[var(--color-text)] mb-6 pr-10">
-              {title}
-            </h2>
-          )}
+        {/* Modal positioning */}
+        <div className="fixed inset-0 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4">
+            
+            {/* Modal panel */}
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <Dialog.Panel 
+                className={`
+                  w-full ${sizeClasses[size]} 
+                  transform overflow-hidden rounded-lg bg-white 
+                  p-6 shadow-xl transition-all
+                `}
+              >
+                {/* Header */}
+                {title && (
+                  <div className="flex items-center justify-between mb-4">
+                    <Dialog.Title className="text-lg font-semibold text-gray-900">
+                      {title}
+                    </Dialog.Title>
+                    <button
+                      onClick={onClose}
+                      className="rounded-md p-1 hover:bg-gray-100 transition-colors"
+                      aria-label="Close modal"
+                    >
+                      <X size={20} className="text-gray-500" />
+                    </button>
+                  </div>
+                )}
 
-          {/* The scrollable container */}
-          <div className="overflow-y-auto max-h-[calc(90vh-120px)] pr-2">
-            {children}
+                {/* Content */}
+                <div className="mt-2">
+                  {children}
+                </div>
+              </Dialog.Panel>
+            </Transition.Child>
+
           </div>
         </div>
-      </div>
-    </div>
-  );
+      </Dialog>
+    </Transition>
+  )
 }
