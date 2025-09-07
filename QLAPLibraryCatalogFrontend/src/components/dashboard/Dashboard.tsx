@@ -85,6 +85,7 @@ const Dashboard: React.FC = () => {
             value={mockData.stats.totalBooks}
             description="Total items you own"
             color="lavender"
+            to="/my-library"
           />
           <StatCard
             icon={ArrowLeftRight}
@@ -92,6 +93,7 @@ const Dashboard: React.FC = () => {
             value={mockData.stats.activeLoans}
             description="Currently borrowed/lent"
             color="blue"
+            to="/borrowing"
           />
           <StatCard
             icon={Calendar}
@@ -99,6 +101,7 @@ const Dashboard: React.FC = () => {
             value={mockData.stats.pendingRequests}
             description="Awaiting response"
             color="orange"
+            to="/borrowing"
           />
           <StatCard
             icon={Clock}
@@ -106,7 +109,9 @@ const Dashboard: React.FC = () => {
             value={mockData.stats.overdueItems}
             description="Need attention"
             color="red"
+            to="/borrowing"
           />
+
         </div>
 
         {/* Main Content Grid */}
