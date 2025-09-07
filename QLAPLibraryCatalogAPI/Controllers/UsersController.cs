@@ -18,9 +18,7 @@ namespace QLAPLibraryCatalogAPI.Controllers
     {
         private readonly IUsersService _usersService;
         private readonly IAuthService _authService;
-        /// <summary>
-        /// Constructor
-        /// </summary>
+        /// <summary> Constructor </summary>
         public UsersController(IUsersService usersService, IAuthService authService)
         {
             _usersService = usersService;

@@ -15,9 +15,7 @@ namespace QLAPLibraryCatalogAPI.Controllers
     public class MediaCopiesController : ControllerBase
     {
         private readonly IMediaCopiesService _mediaCopiesService;
-        /// <summary>
-        /// Constructor
-        /// </summary>
+        /// <summary> Constructor </summary>
         public MediaCopiesController(IMediaCopiesService mediaCopiesService)
         {
             _mediaCopiesService = mediaCopiesService;

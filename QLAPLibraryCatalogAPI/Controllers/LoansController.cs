@@ -12,9 +12,7 @@ namespace QLAPLibraryCatalogAPI.Controllers
     public class LoansController : ControllerBase
     {
         private readonly ILoansService _loansService;
-        /// <summary>
-        /// Constructor
-        /// </summary>
+        /// <summary> Constructor </summary>
         public LoansController(ILoansService LoansService)
         {
             _loansService = LoansService;

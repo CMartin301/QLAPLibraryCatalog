@@ -15,9 +15,7 @@ namespace QLAPLibraryCatalogAPI.Controllers
     public class MediaTypesController : ControllerBase
     {
         private readonly IMediaTypesService _mediaTypeService;
-        /// <summary>
-        /// Constructor
-        /// </summary>
+        /// <summary> Constructor </summary>
         public MediaTypesController(IMediaTypesService mediaTypeService)
         {
             _mediaTypeService = mediaTypeService;

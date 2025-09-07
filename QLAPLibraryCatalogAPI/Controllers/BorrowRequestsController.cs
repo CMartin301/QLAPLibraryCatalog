@@ -12,9 +12,7 @@ namespace QLAPLibraryCatalogAPI.Controllers
     public class BorrowRequestsController : ControllerBase
     {
         private readonly IBorrowRequestService _borrowRequestsService;
-        /// <summary>
-        /// Constructor
-        /// </summary>
+        /// <summary> Constructor </summary>
         public BorrowRequestsController(IBorrowRequestService borrowRequestsService)
         {
            _borrowRequestsService = borrowRequestsService; 
