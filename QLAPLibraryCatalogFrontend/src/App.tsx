@@ -1,7 +1,6 @@
 
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
-import Dashboard from './components/dashboard/Dashboard';
 import AuthContainer from './components/auth/AuthContainer';
 import { AuthInitializer } from './components/auth/AuthInitializer';
 import { LoadingBoundary } from './components/auth/LoadingBoundary';
@@ -13,6 +12,7 @@ import MyLibraryPage from './components/myLibrary/MyLibraryPage';
 import NetworkCatalogPage from './components/networkCatalog/NetworkCatalogPage';
 import UserPreferencesContainer from './components/preferences/UserPreferencesContainer';
 import BorrowingDashboard from './components/borrowing/BorrowingPage';
+import Dashboard from './components/dashboard/Dashboard';
 
 /**
  * App Layout Component
