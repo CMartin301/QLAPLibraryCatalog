@@ -3,12 +3,11 @@ import React, { useEffect } from 'react';
 import { Calendar, ArrowLeftRight } from 'lucide-react';
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import useAuth from '../../hooks/useAuth';
-import { BorrowRequestsTable } from './BorrowRequestsTable';
-import LoansTable from './LoansTable';
+import { BorrowRequestsTable } from './borrowRequests/BorrowRequestsTable';
 import { useLoans } from '../../hooks/useLoans';
 import { useBorrowRequests } from '../../hooks/useBorrowRequests';
-import BorrowedLoansTable from './BorrowedLoansTable';
-import LentLoansTable from './LentLoansTable';
+import BorrowedLoansTable from './loans/BorrowedLoansTable';
+import LentLoansTable from './loans/LentLoansTable';
 
 const BorrowingDashboard: React.FC = () => {
   const { userID } = useAuth();

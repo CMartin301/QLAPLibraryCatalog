@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react";
 import {
   createColumnHelper,
-  SortingState,
 } from "@tanstack/react-table";
-import { DataTable } from "../shared/DataTable";
-import { LoanWithDetails } from "../../types/loans";
-import { loanService } from "../../services/loanService";
+import { LoanWithDetails } from "../../../types/loans";
+import { loanService } from "../../../services/loanService";
+import { useTableState } from "../../../hooks/useTableState";
+import { TableContainer } from "../../shared/TableContainer";
 
 interface BorrowedLoansTableProps {
   loans: LoanWithDetails[];
@@ -15,8 +15,7 @@ interface BorrowedLoansTableProps {
 }
 
 export function BorrowedLoansTable({ loans, onRefresh, error, loading }: BorrowedLoansTableProps) {
-  const [globalFilter, setGlobalFilter] = useState("");
-  const [sorting, setSorting] = useState<SortingState>([]);
+const tableState = useTableState<LoanWithDetails>();
   const [isLoading, setIsLoading] = useState(false);
 
   const columnHelper = createColumnHelper<LoanWithDetails>();
@@ -109,31 +108,14 @@ export function BorrowedLoansTable({ loans, onRefresh, error, loading }: Borrowe
   };
 
   return (
-    <div className="bg-[var(--color-card)] rounded-lg shadow-sm border border-[var(--color-border)]">
-      {error && (
-        <div className="p-4 bg-red-50 border-l-4 border-red-400">
-          <p className="text-red-700">Error: {error}</p>
-          <button 
-            onClick={onRefresh}
-            className="mt-2 text-red-600 underline"
-          >
-            Try again
-          </button>
-        </div>
-      )}
-
-      {loading ? (
-        <div className="p-8 text-center text-gray-500">
-          Loading loans...
-        </div>
-      ) : (
-        <DataTable
-          data={loans}
-          columns={columns}
-          emptyMessage="No borrowed loans found"
-        />
-      )}
-    </div>
+  <TableContainer
+    data={loans}
+    columns={columns}
+    loading={loading}
+    error={error}
+    onRefresh={onRefresh}
+    emptyMessage="No borrowed loans found"
+  />
   );
 }
 

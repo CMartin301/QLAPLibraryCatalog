@@ -1,7 +1,7 @@
 import { useState, Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Calendar, X } from 'lucide-react';
-import { LoanWithDetails } from '../../types/loans';
+import { LoanWithDetails } from '../../../types/loans';
 
 interface ExtendLoanModalProps {
   isOpen: boolean;

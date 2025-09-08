@@ -5,7 +5,7 @@ import useAuth from '../../hooks/useAuth';
 import MediaTable from '../media/MediaTable';
 import { Media } from '../../types/media';
 import { mediaService } from '../../services/mediaService';
-import { BorrowRequestsTable } from '../borrowing/BorrowRequestsTable';
+import { BorrowRequestsTable } from '../borrowing/borrowRequests/BorrowRequestsTable';
 import { BorrowRequestDto } from '../../types/borrowRequests';
 import { borrowRequestService } from '../../services/borrowRequestService';
 import { useBorrowRequests } from '../../hooks/useBorrowRequests';

@@ -3,10 +3,12 @@ import {
   createColumnHelper,
   SortingState,
 } from "@tanstack/react-table";
-import { DataTable } from "../shared/DataTable";
-import { LoanWithDetails } from "../../types/loans";
-import { loanService } from "../../services/loanService";
+import { DataTable } from "../../shared/DataTable";
+import { LoanWithDetails } from "../../../types/loans";
+import { loanService } from "../../../services/loanService";
 import { ExtendLoanModal } from "./ExtendLoanModal";
+import { useTableState } from "../../../hooks/useTableState";
+import { TableContainer } from "../../shared/TableContainer";
 
 interface LentLoansTableProps {
   loans: LoanWithDetails[];
@@ -16,8 +18,7 @@ interface LentLoansTableProps {
 }
 
 export function LentLoansTable({ loans, onRefresh, error, loading }: LentLoansTableProps) {
-  const [globalFilter, setGlobalFilter] = useState("");
-  const [sorting, setSorting] = useState<SortingState>([]);
+    const tableState = useTableState<LoanWithDetails>();
   const [isLoading, setIsLoading] = useState(false);
   const [extendModal, setExtendModal] = useState<{
     isOpen: boolean;
@@ -139,39 +140,24 @@ export function LentLoansTable({ loans, onRefresh, error, loading }: LentLoansTa
   };
 
   return (
-    <div className="bg-[var(--color-card)] rounded-lg shadow-sm border border-[var(--color-border)]">
-      {error && (
-        <div className="p-4 bg-red-50 border-l-4 border-red-400">
-          <p className="text-red-700">Error: {error}</p>
-          <button 
-            onClick={onRefresh}
-            className="mt-2 text-red-600 underline"
-          >
-            Try again
-          </button>
-        </div>
-      )}
+  <>
+    <TableContainer
+      data={loans}
+      columns={columns}
+      loading={loading}
+      error={error}
+      onRefresh={onRefresh}
+      emptyMessage="No lent loans found"
+    />
 
-      {loading ? (
-        <div className="p-8 text-center text-gray-500">
-          Loading loans...
-        </div>
-      ) : (
-        <DataTable
-          data={loans}
-          columns={columns}
-          emptyMessage="No lent loans found"
-        />
-      )}
-
-      <ExtendLoanModal
-        isOpen={extendModal.isOpen}
-        onClose={() => setExtendModal({ isOpen: false, loan: null })}
-        loan={extendModal.loan}
-        onExtend={handleExtendSubmit}
-        isLoading={isLoading}
-      />
-    </div>
+    <ExtendLoanModal
+      isOpen={extendModal.isOpen}
+      onClose={() => setExtendModal({ isOpen: false, loan: null })}
+      loan={extendModal.loan}
+      onExtend={handleExtendSubmit}
+      isLoading={isLoading}
+    />
+  </>
   );
 }
 

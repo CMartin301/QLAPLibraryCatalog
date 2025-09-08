@@ -12,10 +12,10 @@ import {
 import { 
   Search
 } from 'lucide-react';
-import useAuth from '../../hooks/useAuth';
-import { borrowRequestService } from '../../services/borrowRequestService';
-import { BorrowRequestDto } from '../../types/borrowRequests';
-import { DataTable } from '../shared/DataTable';
+import useAuth from '../../../hooks/useAuth';
+import { borrowRequestService } from '../../../services/borrowRequestService';
+import { BorrowRequestDto } from '../../../types/borrowRequests';
+import { DataTable } from '../../shared/DataTable';
 
 interface BorrowRequestsTableProps {
   requests: BorrowRequestDto[];
