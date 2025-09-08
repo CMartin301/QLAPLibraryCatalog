@@ -17,7 +17,7 @@ namespace QLAPLibraryCatalogAPI.Services
         Task<bool> ReactivateMediaTypeAsync(int mediaTypeId);
 #pragma warning restore 1591
     }
-    
+
     /// <summary>
     /// Service/data layer operations on/access to media types
     /// </summary>
@@ -37,13 +37,7 @@ namespace QLAPLibraryCatalogAPI.Services
         {
             return await _context.MediaTypes
                 .Where(m => m.IsActive == true)
-                .Select(m => new MediaTypeDto
-                {
-                    MediaTypeId = m.MediaTypeId,
-                    Name = m.Name,
-                    DisplayName = m.DisplayName,
-                    Description = m.Description
-                })
+                .Select(mediaType => MapMediaType(mediaType))
                 .ToListAsync();
         }
         /// <summary>
@@ -55,21 +49,15 @@ namespace QLAPLibraryCatalogAPI.Services
         {
             return await _context.MediaTypes
                 .Where(m => m.MediaTypeId == mediaTypeId)
-                .Select(m => new MediaTypeDto
-                {
-                    MediaTypeId = m.MediaTypeId,
-                    Name = m.Name,
-                    DisplayName = m.DisplayName,
-                    Description = m.Description
-                })
+                .Select(mediaType => MapMediaType(mediaType))
                 .FirstOrDefaultAsync();
         }
-         /// <summary>
-         /// Creates new media type
-         /// </summary>
-         /// <param name="createMediaTypeDto"></param>
-         /// <returns></returns>
-         /// <exception cref="InvalidOperationException"></exception>
+        /// <summary>
+        /// Creates new media type
+        /// </summary>
+        /// <param name="createMediaTypeDto"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public async Task<MediaTypeDto> CreateMediaTypeAsync(CreateMediaTypeDto createMediaTypeDto)
         {
             var mediaType = new MediaType
@@ -81,10 +69,10 @@ namespace QLAPLibraryCatalogAPI.Services
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
-            
+
             _context.MediaTypes.Add(mediaType);
             await _context.SaveChangesAsync();
-            
+
             return await GetMediaTypeByIdAsync(mediaType.MediaTypeId) ?? throw new InvalidOperationException("Failed to retrieve created media type");
         }
         /// <summary>
@@ -102,9 +90,9 @@ namespace QLAPLibraryCatalogAPI.Services
             existing.DisplayName = updateMediaDto.DisplayName ?? "";
             existing.Description = updateMediaDto.Description;
             existing.UpdatedAt = DateTime.UtcNow;
-            
+
             await _context.SaveChangesAsync();
-            
+
             return await GetMediaTypeByIdAsync(id);
         }
         /// <summary>
@@ -122,7 +110,7 @@ namespace QLAPLibraryCatalogAPI.Services
             await _context.SaveChangesAsync();
 
             return true;
-        }    
+        }
         /// <summary>
         /// Reactivate existing media type
         /// </summary>
@@ -139,5 +127,22 @@ namespace QLAPLibraryCatalogAPI.Services
 
             return true;
         }
+        
+
+        #region Mapping Methods
+        /// <summary>
+        /// Maps a media type into a media type DTO
+        /// </summary>
+        private static MediaTypeDto MapMediaType(MediaType mediaType)
+        {
+            return new MediaTypeDto
+            {
+                MediaTypeId = mediaType.MediaTypeId,
+                Name = mediaType.Name,
+                DisplayName = mediaType.DisplayName,
+                Description = mediaType.Description
+            };
+        }
+        #endregion
     }
 }

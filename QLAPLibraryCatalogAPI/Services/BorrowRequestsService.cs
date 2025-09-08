@@ -27,10 +27,10 @@ namespace QLAPLibraryCatalogAPI.Services
         private readonly LibraryCatalogContext _context;
         /// <summary> Constructor </summary>
         public BorrowRequestService(LibraryCatalogContext context) => _context = context;
-    /// <summary>
-    /// Gets all borrow requests
-    /// </summary>
-    /// <returns></returns>
+        /// <summary>
+        /// Gets all borrow requests
+        /// </summary>
+        /// <returns></returns>
         public async Task<IEnumerable<BorrowRequestDto>> GetBorrowRequestsAsync()
         {
             var q = _context.BorrowRequests
@@ -75,11 +75,11 @@ namespace QLAPLibraryCatalogAPI.Services
                 .Where(r => r.Copy.UserId == lenderId)
                 .Select(r => MapBorrowRequest(r)).ToListAsync();
         }
-/// <summary>
-/// Gets borrow request by ID
-/// </summary>
-/// <param name="requestId"></param>
-/// <returns></returns>
+        /// <summary>
+        /// Gets borrow request by ID
+        /// </summary>
+        /// <param name="requestId"></param>
+        /// <returns></returns>
         public async Task<BorrowRequestDto?> GetBorrowRequestByIdAsync(int requestId)
         {
             var r = await _context.BorrowRequests
@@ -90,12 +90,12 @@ namespace QLAPLibraryCatalogAPI.Services
 
             return r == null ? null : MapBorrowRequest(r);
         }
-/// <summary>
-/// Creates new borrow request
-/// </summary>
-/// <param name="dto"></param>
-/// <returns></returns>
-/// <exception cref="InvalidOperationException"></exception>
+        /// <summary>
+        /// Creates new borrow request
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public async Task<BorrowRequestDto> CreateBorrowRequestAsync(CreateBorrowRequestDto dto)
         {
             var borrower = await _context.Users
@@ -105,7 +105,7 @@ namespace QLAPLibraryCatalogAPI.Services
             var copy = await _context.MediaCopies
                 // .Include(c => c.Media)
                 .Include(c => c.User)
-                    // .ThenInclude(u => u.UserPreferences)
+                // .ThenInclude(u => u.UserPreferences)
                 .FirstOrDefaultAsync(c => c.CopyId == dto.CopyId)
                 ?? throw new InvalidOperationException("Media copy not found");
 
@@ -173,12 +173,12 @@ namespace QLAPLibraryCatalogAPI.Services
 
             return await GetBorrowRequestByIdAsync(request.RequestId) ?? throw new InvalidOperationException("Failed to fetch created request");
         }
-/// <summary>
-/// Approves existing borrow request
-/// </summary>
-/// <param name="requestId"></param>
-/// <returns></returns>
-/// <exception cref="InvalidOperationException"></exception>
+        /// <summary>
+        /// Approves existing borrow request
+        /// </summary>
+        /// <param name="requestId"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public async Task<BorrowRequestDto?> ApproveBorrowRequestAsync(int requestId)
         {
             var request = await _context.BorrowRequests
@@ -200,10 +200,10 @@ namespace QLAPLibraryCatalogAPI.Services
 
                 await CreateLoanForApprovedRequest_Internal(
                     request
-                    // borrowerDefaultDays: request.Borrower.UserPreferences?.DefaultLoanDays,
-                    // copyMaxDays: request.Copy.MaxLoanDays,
-                    // overrideStartDate: dto.StartDate,
-                    // overrideDueDate: dto.DueDate
+                // borrowerDefaultDays: request.Borrower.UserPreferences?.DefaultLoanDays,
+                // copyMaxDays: request.Copy.MaxLoanDays,
+                // overrideStartDate: dto.StartDate,
+                // overrideDueDate: dto.DueDate
                 );
 
                 request.Copy.IsAvailable = false;
@@ -219,13 +219,13 @@ namespace QLAPLibraryCatalogAPI.Services
 
             return await GetBorrowRequestByIdAsync(request.RequestId);
         }
-/// <summary>
-/// Denies existing borrow request
-/// </summary>
-/// <param name="requestId"></param>
-/// <param name="dto"></param>
-/// <returns></returns>
-/// <exception cref="InvalidOperationException"></exception>
+        /// <summary>
+        /// Denies existing borrow request
+        /// </summary>
+        /// <param name="requestId"></param>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public async Task<BorrowRequestDto?> DenyBorrowRequestAsync(int requestId, DenyBorrowRequestDto dto)
         {
             var request = await _context.BorrowRequests.FirstOrDefaultAsync(r => r.RequestId == requestId);
@@ -240,13 +240,13 @@ namespace QLAPLibraryCatalogAPI.Services
 
             return await GetBorrowRequestByIdAsync(request.RequestId);
         }
-/// <summary>
-/// Cancels existing borrow request
-/// </summary>
-/// <param name="requestId"></param>
-/// <param name="actorUserId"></param>
-/// <returns></returns>
-/// <exception cref="InvalidOperationException"></exception>
+        /// <summary>
+        /// Cancels existing borrow request
+        /// </summary>
+        /// <param name="requestId"></param>
+        /// <param name="actorUserId"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public async Task<bool> CancelBorrowRequestAsync(int requestId, int actorUserId)
         {
             var request = await _context.BorrowRequests.FirstOrDefaultAsync(r => r.RequestId == requestId);
@@ -315,6 +315,7 @@ namespace QLAPLibraryCatalogAPI.Services
             await _context.SaveChangesAsync();
         }
 
+        #region Mapping Methods
         private static BorrowRequestDto MapBorrowRequest(BorrowRequest request)
         {
             return new BorrowRequestDto
@@ -336,5 +337,6 @@ namespace QLAPLibraryCatalogAPI.Services
                 MediaCreator = request.Copy.Media.Creator
             };
         }
+        #endregion
     }
 }

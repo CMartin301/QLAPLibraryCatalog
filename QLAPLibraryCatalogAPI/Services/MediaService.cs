@@ -67,45 +67,8 @@ namespace QLAPLibraryCatalogAPI.Services
                 query = query.Include(m => m.MediaCopies);
             }
 
-            return await query.Select(m => new MediaDto
-            {
-                MediaId = m.MediaId,
-                MediaTypeId = m.MediaTypeId,
-                Title = m.Title,
-                Subtitle = m.Subtitle,
-                Creator = m.Creator,
-                Publisher = m.Publisher,
-                PublicationDate = m.PublicationDate,
-                Language = m.Language,
-                Genre = m.Genre,
-                Description = m.Description,
-                CoverImageUrl = m.CoverImageUrl,
-                Isbn10 = m.Isbn10,
-                Isbn13 = m.Isbn13,
-                PageCount = m.PageCount,
-                IssueNumber = m.IssueNumber,
-                Volume = m.Volume,
-                MediaType = new MediaTypeDto
-                {
-                    MediaTypeId = m.MediaType.MediaTypeId,
-                    Name = m.MediaType.Name,
-                    DisplayName = m.MediaType.DisplayName,
-                    Description = m.MediaType.Description
-                },
-                Copies = includeCopies
-                        ? m.MediaCopies.Select(c => new MediaCopyDto
-                        {
-                            CopyId = c.CopyId,
-                            UserId = c.UserId,
-                            MediaId = c.MediaId,
-                            Condition = c.Condition,
-                            MaxLoanDays = c.MaxLoanDays,
-                            RequiresApproval = c.RequiresApproval,
-                            IsAvailable = c.IsAvailable,
-                            Notes = c.Notes
-                        }).ToList()
-                        : new List<MediaCopyDto>()
-            })
+            return await query
+                .Select(user => MapMedia(user, includeCopies))
                 .ToListAsync();
         }
 /// <summary>
@@ -125,45 +88,7 @@ namespace QLAPLibraryCatalogAPI.Services
 
             return await query
                 .Where(m => m.MediaId == mediaId)
-                .Select(m => new MediaDto
-                {
-                    MediaId = m.MediaId,
-                    MediaTypeId = m.MediaTypeId,
-                    Title = m.Title,
-                    Subtitle = m.Subtitle,
-                    Creator = m.Creator,
-                    Publisher = m.Publisher,
-                    PublicationDate = m.PublicationDate,
-                    Language = m.Language,
-                    Genre = m.Genre,
-                    Description = m.Description,
-                    CoverImageUrl = m.CoverImageUrl,
-                    Isbn10 = m.Isbn10,
-                    Isbn13 = m.Isbn13,
-                    PageCount = m.PageCount,
-                    IssueNumber = m.IssueNumber,
-                    Volume = m.Volume,
-                    MediaType = new MediaTypeDto
-                    {
-                        MediaTypeId = m.MediaType.MediaTypeId,
-                        Name = m.MediaType.Name,
-                        DisplayName = m.MediaType.DisplayName,
-                        Description = m.MediaType.Description
-                    },
-                    Copies = includeCopies
-                        ? m.MediaCopies.Select(c => new MediaCopyDto
-                        {
-                            CopyId = c.CopyId,
-                            UserId = c.UserId,
-                            MediaId = c.MediaId,
-                            Condition = c.Condition,
-                            MaxLoanDays = c.MaxLoanDays,
-                            RequiresApproval = c.RequiresApproval,
-                            IsAvailable = c.IsAvailable,
-                            Notes = c.Notes
-                        }).ToList()
-                        : new List<MediaCopyDto>()
-                })
+                .Select(user => MapMedia(user, includeCopies))
                 .FirstOrDefaultAsync();
         }
 /// <summary>
@@ -309,5 +234,52 @@ namespace QLAPLibraryCatalogAPI.Services
                 .ToListAsync();
         }
 
+        #region Mapping Methods
+        /// <summary>
+        /// Maps a media into a media DTO
+        /// </summary>
+        private static MediaDto MapMedia(Media m, bool includeCopies)
+        {
+            return new MediaDto
+                {
+                    MediaId = m.MediaId,
+                    MediaTypeId = m.MediaTypeId,
+                    Title = m.Title,
+                    Subtitle = m.Subtitle,
+                    Creator = m.Creator,
+                    Publisher = m.Publisher,
+                    PublicationDate = m.PublicationDate,
+                    Language = m.Language,
+                    Genre = m.Genre,
+                    Description = m.Description,
+                    CoverImageUrl = m.CoverImageUrl,
+                    Isbn10 = m.Isbn10,
+                    Isbn13 = m.Isbn13,
+                    PageCount = m.PageCount,
+                    IssueNumber = m.IssueNumber,
+                    Volume = m.Volume,
+                    MediaType = new MediaTypeDto
+                    {
+                        MediaTypeId = m.MediaType.MediaTypeId,
+                        Name = m.MediaType.Name,
+                        DisplayName = m.MediaType.DisplayName,
+                        Description = m.MediaType.Description
+                    },
+                    Copies = includeCopies
+                        ? m.MediaCopies.Select(c => new MediaCopyDto
+                        {
+                            CopyId = c.CopyId,
+                            UserId = c.UserId,
+                            MediaId = c.MediaId,
+                            Condition = c.Condition,
+                            MaxLoanDays = c.MaxLoanDays,
+                            RequiresApproval = c.RequiresApproval,
+                            IsAvailable = c.IsAvailable,
+                            Notes = c.Notes
+                        }).ToList()
+                        : new List<MediaCopyDto>()
+                };
+        }
+        #endregion
     }
 }
