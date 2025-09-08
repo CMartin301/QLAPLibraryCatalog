@@ -6,6 +6,7 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
     public int RequestId { get; set; }
     public int BorrowerId { get; set; }
     public string BorrowerUsername { get; set; } = null!;
+    public string OwnerUsername { get; set; } = null!;  
     public int CopyId { get; set; }
     public string? Status { get; set; } = "pending";
     public string? Message { get; set; }

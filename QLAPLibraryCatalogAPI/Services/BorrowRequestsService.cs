@@ -36,7 +36,8 @@ namespace QLAPLibraryCatalogAPI.Services
             var q = _context.BorrowRequests
                 .Include(r => r.Borrower)
                 .Include(r => r.Copy)
-                .ThenInclude(c => c.Media)
+                    .ThenInclude(c => c.Media)
+                .Include(r => r.Copy.User)
                 .AsQueryable();
 
             return await q.Select(r => MapBorrowRequest(r)).ToListAsync();
@@ -51,7 +52,8 @@ namespace QLAPLibraryCatalogAPI.Services
             var query = _context.BorrowRequests
                 .Include(r => r.Borrower)
                 .Include(r => r.Copy)
-                .ThenInclude(c => c.Media)
+                    .ThenInclude(c => c.Media)
+                .Include(r => r.Copy.User)
                 .AsQueryable();
 
             return await query
@@ -68,7 +70,8 @@ namespace QLAPLibraryCatalogAPI.Services
             var query = _context.BorrowRequests
                 .Include(r => r.Borrower)
                 .Include(r => r.Copy)
-                .ThenInclude(c => c.Media)
+                    .ThenInclude(c => c.Media)
+                .Include(r => r.Copy.User)
                 .AsQueryable();
 
             return await query
@@ -85,7 +88,8 @@ namespace QLAPLibraryCatalogAPI.Services
             var r = await _context.BorrowRequests
                 .Include(r => r.Borrower)
                 .Include(x => x.Copy)
-                .ThenInclude(c => c.Media)
+                    .ThenInclude(c => c.Media)
+                .Include(r => r.Copy.User)
                 .FirstOrDefaultAsync(x => x.RequestId == requestId);
 
             return r == null ? null : MapBorrowRequest(r);
@@ -323,6 +327,7 @@ namespace QLAPLibraryCatalogAPI.Services
                 RequestId = request.RequestId,
                 BorrowerId = request.BorrowerId,
                 BorrowerUsername = request.Borrower.Username ?? "",
+                OwnerUsername = request.Copy.User.Username ?? string.Empty,
                 CopyId = request.CopyId,
                 Status = request.Status,
                 Message = request.Message,
