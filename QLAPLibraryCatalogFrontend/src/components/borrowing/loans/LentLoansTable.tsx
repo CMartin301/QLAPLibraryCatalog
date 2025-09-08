@@ -3,7 +3,7 @@ import { createColumnHelper } from "@tanstack/react-table";
 import { LoanWithDetails } from "../../../types/loans";
 import { loanService } from "../../../services/loanService";
 import { ExtendLoanModal } from "./ExtendLoanModal";
-import { useTableState } from "../../../hooks/useTableState";
+// import { useTableState } from "../../../hooks/useTableState";
 import { TableContainer } from "../../shared/TableContainer";
 import { useTableActions } from "../../../hooks/useTableActions";
 
@@ -15,7 +15,7 @@ interface LentLoansTableProps {
 }
 
 export function LentLoansTable({ loans, onRefresh, error, loading }: LentLoansTableProps) {
-  const tableState = useTableState<LoanWithDetails>();
+  // const tableState = useTableState<LoanWithDetails>();
   const { executeAction, isLoading } = useTableActions();
 
   const [extendModal, setExtendModal] = useState<{

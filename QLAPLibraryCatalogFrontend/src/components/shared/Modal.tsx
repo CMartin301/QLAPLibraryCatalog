@@ -1,4 +1,4 @@
-// components/shared/HeadlessModal.tsx
+// components/shared/Modal.tsx
 import { Fragment, ReactNode } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { X } from 'lucide-react'
@@ -6,8 +6,9 @@ import { X } from 'lucide-react'
 interface ModalProps {
   isOpen: boolean
   onClose: () => void
-  title?: string
+  title?: ReactNode
   children: ReactNode
+  footer?: ReactNode
   size?: 'sm' | 'md' | 'lg' | 'xl'
 }
 
@@ -16,6 +17,7 @@ export function Modal({
   onClose, 
   title, 
   children, 
+  footer, 
   size = 'md' 
 }: ModalProps) {
   const sizeClasses = {
@@ -85,6 +87,13 @@ export function Modal({
                 <div className="mt-2">
                   {children}
                 </div>
+
+                {/* Footer */}
+                {footer && (
+                  <div className="mt-6 flex justify-end gap-3">
+                    {footer}
+                  </div>
+                )}
               </Dialog.Panel>
             </Transition.Child>
 
