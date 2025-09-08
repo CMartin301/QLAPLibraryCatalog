@@ -5,8 +5,10 @@ using QLAPLibraryCatalogAPI.Models.DTOs;
 
 namespace QLAPLibraryCatalogAPI.Services
 {
+    /// <summary> Interface </summary>
     public interface IBorrowRequestService
     {
+#pragma warning disable 1591
         Task<IEnumerable<BorrowRequestDto>> GetBorrowRequestsAsync();
         Task<IEnumerable<BorrowRequestDto>> GetBorrowRequestsForBorrowerAsync(int borrowerId);
         Task<IEnumerable<BorrowRequestDto>> GetBorrowRequestsForLenderAsync(int lenderId);
@@ -15,13 +17,20 @@ namespace QLAPLibraryCatalogAPI.Services
         Task<BorrowRequestDto?> ApproveBorrowRequestAsync(int requestId);
         Task<BorrowRequestDto?> DenyBorrowRequestAsync(int requestId, DenyBorrowRequestDto dto);
         Task<bool> CancelBorrowRequestAsync(int requestId, int actorUserId);
+#pragma warning restore 1591
     }
-
+    /// <summary>
+    /// Service/data layer operations on/access to borrow requests
+    /// </summary>
     public class BorrowRequestService : IBorrowRequestService
     {
         private readonly LibraryCatalogContext _context;
+        /// <summary> Constructor </summary>
         public BorrowRequestService(LibraryCatalogContext context) => _context = context;
-
+    /// <summary>
+    /// Gets all borrow requests
+    /// </summary>
+    /// <returns></returns>
         public async Task<IEnumerable<BorrowRequestDto>> GetBorrowRequestsAsync()
         {
             var q = _context.BorrowRequests
@@ -32,6 +41,11 @@ namespace QLAPLibraryCatalogAPI.Services
 
             return await q.Select(r => MapBorrowRequest(r)).ToListAsync();
         }
+        /// <summary>
+        /// Gets borrow requests the user has borrowed
+        /// </summary>
+        /// <param name="borrowerId"></param>
+        /// <returns></returns>
         public async Task<IEnumerable<BorrowRequestDto>> GetBorrowRequestsForBorrowerAsync(int borrowerId)
         {
             var query = _context.BorrowRequests
@@ -44,6 +58,11 @@ namespace QLAPLibraryCatalogAPI.Services
                 .Where(r => r.BorrowerId == borrowerId)
                 .Select(r => MapBorrowRequest(r)).ToListAsync();
         }
+        /// <summary>
+        /// Gets borrow requests the user has lent
+        /// </summary>
+        /// <param name="lenderId"></param>
+        /// <returns></returns>
         public async Task<IEnumerable<BorrowRequestDto>> GetBorrowRequestsForLenderAsync(int lenderId)
         {
             var query = _context.BorrowRequests
@@ -56,7 +75,11 @@ namespace QLAPLibraryCatalogAPI.Services
                 .Where(r => r.Copy.UserId == lenderId)
                 .Select(r => MapBorrowRequest(r)).ToListAsync();
         }
-
+/// <summary>
+/// Gets borrow request by ID
+/// </summary>
+/// <param name="requestId"></param>
+/// <returns></returns>
         public async Task<BorrowRequestDto?> GetBorrowRequestByIdAsync(int requestId)
         {
             var r = await _context.BorrowRequests
@@ -67,7 +90,12 @@ namespace QLAPLibraryCatalogAPI.Services
 
             return r == null ? null : MapBorrowRequest(r);
         }
-
+/// <summary>
+/// Creates new borrow request
+/// </summary>
+/// <param name="dto"></param>
+/// <returns></returns>
+/// <exception cref="InvalidOperationException"></exception>
         public async Task<BorrowRequestDto> CreateBorrowRequestAsync(CreateBorrowRequestDto dto)
         {
             var borrower = await _context.Users
@@ -145,7 +173,12 @@ namespace QLAPLibraryCatalogAPI.Services
 
             return await GetBorrowRequestByIdAsync(request.RequestId) ?? throw new InvalidOperationException("Failed to fetch created request");
         }
-
+/// <summary>
+/// Approves existing borrow request
+/// </summary>
+/// <param name="requestId"></param>
+/// <returns></returns>
+/// <exception cref="InvalidOperationException"></exception>
         public async Task<BorrowRequestDto?> ApproveBorrowRequestAsync(int requestId)
         {
             var request = await _context.BorrowRequests
@@ -186,7 +219,13 @@ namespace QLAPLibraryCatalogAPI.Services
 
             return await GetBorrowRequestByIdAsync(request.RequestId);
         }
-
+/// <summary>
+/// Denies existing borrow request
+/// </summary>
+/// <param name="requestId"></param>
+/// <param name="dto"></param>
+/// <returns></returns>
+/// <exception cref="InvalidOperationException"></exception>
         public async Task<BorrowRequestDto?> DenyBorrowRequestAsync(int requestId, DenyBorrowRequestDto dto)
         {
             var request = await _context.BorrowRequests.FirstOrDefaultAsync(r => r.RequestId == requestId);
@@ -201,7 +240,13 @@ namespace QLAPLibraryCatalogAPI.Services
 
             return await GetBorrowRequestByIdAsync(request.RequestId);
         }
-
+/// <summary>
+/// Cancels existing borrow request
+/// </summary>
+/// <param name="requestId"></param>
+/// <param name="actorUserId"></param>
+/// <returns></returns>
+/// <exception cref="InvalidOperationException"></exception>
         public async Task<bool> CancelBorrowRequestAsync(int requestId, int actorUserId)
         {
             var request = await _context.BorrowRequests.FirstOrDefaultAsync(r => r.RequestId == requestId);
@@ -214,39 +259,6 @@ namespace QLAPLibraryCatalogAPI.Services
             await _context.SaveChangesAsync();
             return true;
         }
-
-        // public async Task<LoanDto?> MarkReturnedAsync(int requestId, ReturnLoanDto dto)
-        // {
-        //     var loan = await _context.Loans
-        //         .Include(l => l.Request)
-        //             .ThenInclude(r => r.Copy)
-        //         .FirstOrDefaultAsync(l => l.RequestId == requestId);
-
-        //     if (loan == null) return null;
-        //     if (loan.Status != "active") throw new InvalidOperationException("Only active loans can be returned.");
-
-        //     var returnedDate = dto.ReturnedDate ?? DateOnly.FromDateTime(DateTime.UtcNow);
-        //     loan.ReturnedDate = returnedDate;
-        //     loan.Status = "returned";
-        //     loan.ReturnNotes = dto.ReturnNotes;
-        //     loan.UpdatedAt = DateTime.UtcNow;
-
-        //     // mark copy available
-        //     loan.Request.Copy.IsAvailable = true;
-
-        //     await _context.SaveChangesAsync();
-
-        //     return new LoanDto
-        //     {
-        //         LoanId = loan.LoanId,
-        //         RequestId = loan.RequestId,
-        //         StartDate = loan.StartDate,
-        //         DueDate = loan.DueDate,
-        //         ReturnedDate = loan.ReturnedDate,
-        //         Status = loan.Status,
-        //         ReturnNotes = loan.ReturnNotes
-        //     };
-        // }
 
         // ---------------- Helper ----------------
         private async Task CreateLoanForApprovedRequest_Internal(
@@ -303,25 +315,25 @@ namespace QLAPLibraryCatalogAPI.Services
             await _context.SaveChangesAsync();
         }
 
-        private static BorrowRequestDto MapBorrowRequest(BorrowRequest r)
+        private static BorrowRequestDto MapBorrowRequest(BorrowRequest request)
         {
             return new BorrowRequestDto
             {
-                RequestId = r.RequestId,
-                BorrowerId = r.BorrowerId,
-                BorrowerUsername = r.Borrower.Username,
-                CopyId = r.CopyId,
-                Status = r.Status,
-                Message = r.Message,
-                RequestedStartDate = r.RequestedStartDate,
-                RequestedEndDate = r.RequestedEndDate,
-                ApprovedAt = r.ApprovedAt,
-                DeniedAt = r.DeniedAt,
-                DenialReason = r.DenialReason,
-                CreatedAt = r.CreatedAt,
-                UpdatedAt = r.UpdatedAt,
-                MediaTitle = r.Copy.Media.Title,
-                MediaCreator = r.Copy.Media.Creator
+                RequestId = request.RequestId,
+                BorrowerId = request.BorrowerId,
+                BorrowerUsername = request.Borrower.Username ?? "",
+                CopyId = request.CopyId,
+                Status = request.Status,
+                Message = request.Message,
+                RequestedStartDate = request.RequestedStartDate,
+                RequestedEndDate = request.RequestedEndDate,
+                ApprovedAt = request.ApprovedAt,
+                DeniedAt = request.DeniedAt,
+                DenialReason = request.DenialReason,
+                CreatedAt = request.CreatedAt,
+                UpdatedAt = request.UpdatedAt,
+                MediaTitle = request.Copy.Media.Title,
+                MediaCreator = request.Copy.Media.Creator
             };
         }
     }

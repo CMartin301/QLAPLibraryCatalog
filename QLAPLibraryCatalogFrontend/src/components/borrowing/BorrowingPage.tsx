@@ -1,6 +1,6 @@
 // src/components/borrowing/BorrowingDashboard.tsx
 import React, { useEffect } from 'react';
-import { Calendar, User, Book, ArrowLeftRight } from 'lucide-react';
+import { Calendar, ArrowLeftRight } from 'lucide-react';
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import useAuth from '../../hooks/useAuth';
 import { BorrowRequestsTable } from './BorrowRequestsTable';

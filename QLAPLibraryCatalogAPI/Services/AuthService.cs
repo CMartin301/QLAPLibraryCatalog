@@ -10,25 +10,35 @@ using QLAPLibraryCatalogAPI.Models;
 
 namespace QLAPLibraryCatalogAPI.Services
 {
+    /// <summary> Interface </summary>
     public interface IAuthService
     {
+#pragma warning disable 1591
         Task<AuthResponseDto?> AuthenticateAsync(LoginDto loginDto);
         string GenerateJwtToken(int userId, string email);
         string HashPassword(string password);
         bool VerifyPassword(string password, string hash);
+#pragma warning restore 1591
     }
 
+    /// <summary>
+    /// Service/data layer operations on/access to authentication
+    /// </summary>
     public class AuthService : IAuthService
     {
         private readonly IConfiguration _configuration;
         private readonly LibraryCatalogContext _context;
-
+        /// <summary> Constructor </summary>
         public AuthService(IConfiguration configuration, LibraryCatalogContext context)
         {
             _configuration = configuration;
             _context = context;
         }
-
+        /// <summary>
+        /// Authenticate user. Confirm password and call to generate JWT
+        /// </summary>
+        /// <param name="loginDto"></param>
+        /// <returns></returns>
         public async Task<AuthResponseDto?> AuthenticateAsync(LoginDto loginDto)
         {
             var user = await _context.Users
@@ -76,7 +86,13 @@ namespace QLAPLibraryCatalogAPI.Services
             };
         }
 
-
+        /// <summary>
+        /// Generate JWT
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public string GenerateJwtToken(int userId, string email)
         {
             var jwtSettings = _configuration.GetSection("JwtSettings");
@@ -107,12 +123,21 @@ namespace QLAPLibraryCatalogAPI.Services
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
-
+        /// <summary>
+        /// Hashes given string using BCrypt
+        /// </summary>
+        /// <param name="password"></param>
+        /// <returns></returns>
         public string HashPassword(string password)
         {
             return BCrypt.Net.BCrypt.HashPassword(password);
         }
-
+        /// <summary>
+        /// Verifies given string using BCrypt
+        /// </summary>
+        /// <param name="password"></param>
+        /// <param name="hash"></param>
+        /// <returns></returns>
         public bool VerifyPassword(string password, string hash)
         {
             return BCrypt.Net.BCrypt.Verify(password, hash);

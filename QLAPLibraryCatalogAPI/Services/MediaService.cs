@@ -5,8 +5,10 @@ using QLAPLibraryCatalogAPI.Models.DTOs;
 
 namespace QLAPLibraryCatalogAPI.Services
 {
+    /// <summary> Interface </summary>
     public interface IMediaService
     {
+#pragma warning disable 1591
         Task<IEnumerable<MediaDto>> GetAllMediaAsync(bool includeCopies = false, string? search = null);
         Task<MediaDto?> GetMediaByIdAsync(int mediaId, bool includeCopies = false);
         Task<MediaDto> CreateMediaAsync(CreateMediaDto createMediaDto);
@@ -15,28 +17,38 @@ namespace QLAPLibraryCatalogAPI.Services
 
         Task<IEnumerable<MediaDto>> GetUserMediaAsync(int userId, bool includeCopies = false);
         // Task<MediaDto?> GetUserMediaByIdAsync(int mediaId, bool includeCopies = false);
+#pragma warning restore 1591
 
     }
 
+    /// <summary>
+    /// Service/data layer operations on/access to media
+    /// </summary>
     public class MediaService : IMediaService
     {
         private readonly LibraryCatalogContext _context;
-
+        /// <summary> Constructor </summary>
         public MediaService(LibraryCatalogContext context)
         {
             _context = context;
         }
+        /// <summary>
+        /// Gets all media
+        /// </summary>
+        /// <param name="includeCopies"></param>
+        /// <param name="search"></param>
+        /// <returns></returns>
         public async Task<IEnumerable<MediaDto>> GetAllMediaAsync(bool includeCopies = false, string? search = null)
         {
             var query = _context.Media
                 .Include(m => m.MediaType)
                 .AsQueryable();
-            
+
 
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var searchTerm = search.ToLower();
-                query = query.Where(m => 
+                query = query.Where(m =>
                     m.Title.ToLower().Contains(searchTerm) ||
                     (m.Subtitle != null && m.Subtitle.ToLower().Contains(searchTerm)) ||
                     m.Creator.ToLower().Contains(searchTerm) ||
@@ -96,7 +108,12 @@ namespace QLAPLibraryCatalogAPI.Services
             })
                 .ToListAsync();
         }
-
+/// <summary>
+/// Gets media by ID
+/// </summary>
+/// <param name="mediaId"></param>
+/// <param name="includeCopies"></param>
+/// <returns></returns>
         public async Task<MediaDto?> GetMediaByIdAsync(int mediaId, bool includeCopies = false)
         {
             var query = _context.Media
@@ -149,7 +166,12 @@ namespace QLAPLibraryCatalogAPI.Services
                 })
                 .FirstOrDefaultAsync();
         }
-
+/// <summary>
+/// Creates new media object
+/// </summary>
+/// <param name="createMediaDto"></param>
+/// <returns></returns>
+/// <exception cref="InvalidOperationException"></exception>
         public async Task<MediaDto> CreateMediaAsync(CreateMediaDto createMediaDto)
         {
             var media = new Media
@@ -178,7 +200,12 @@ namespace QLAPLibraryCatalogAPI.Services
 
             return await GetMediaByIdAsync(media.MediaId) ?? throw new InvalidOperationException("Failed to retrieve created media");
         }
-
+/// <summary>
+/// Updates existing media object
+/// </summary>
+/// <param name="mediaId"></param>
+/// <param name="updateMediaDto"></param>
+/// <returns></returns>
         public async Task<MediaDto?> UpdateMediaAsync(int mediaId, CreateMediaDto updateMediaDto)
         {
             var existingMedia = await _context.Media.FindAsync(mediaId);
@@ -205,7 +232,11 @@ namespace QLAPLibraryCatalogAPI.Services
 
             return await GetMediaByIdAsync(mediaId);
         }
-
+/// <summary>
+/// Deletes existing media object
+/// </summary>
+/// <param name="id"></param>
+/// <returns></returns>
         public async Task<bool> DeleteMediaAsync(int id)
         {
             var media = await _context.Media.FindAsync(id);
@@ -217,7 +248,12 @@ namespace QLAPLibraryCatalogAPI.Services
             return true;
         }
         
-
+/// <summary>
+/// Gets all media a user owns a copy of
+/// </summary>
+/// <param name="userId"></param>
+/// <param name="includeCopies"></param>
+/// <returns></returns>
         public async Task<IEnumerable<MediaDto>> GetUserMediaAsync(int userId, bool includeCopies = false)
         {
             var query = _context.Media

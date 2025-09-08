@@ -10,16 +10,25 @@ namespace QLAPLibraryCatalogAPI.Services
     /// </summary>
     public interface IDashboardService
     {
+#pragma warning disable 1591
         Task<DashboardStatsDto> GetStatsAsync(int userId);
         Task<IEnumerable<RecentActivityDto>> GetRecentActivityAsync(int userId, int count = 5);
         Task<IEnumerable<UpcomingDueDateDto>> GetUpcomingDueDatesAsync(int userId, int daysAhead = 7);
+#pragma warning restore 1591
     }
+    /// <summary>
+    /// Service/data layer operations on/access to dashboard data
+    /// </summary>
     public class DashboardService : IDashboardService
     {
         private readonly LibraryCatalogContext _context;
-
+        /// <summary> Constructor </summary>
         public DashboardService(LibraryCatalogContext context) => _context = context;
-
+/// <summary>
+/// Gets overview stats for user dashboard
+/// </summary>
+/// <param name="userId"></param>
+/// <returns></returns>
         public async Task<DashboardStatsDto> GetStatsAsync(int userId)
         {
             var totalBooks = await _context.MediaCopies.CountAsync(c => c.UserId == userId);
@@ -40,7 +49,12 @@ namespace QLAPLibraryCatalogAPI.Services
                 OverdueItems = overdueItems
             };
         }
-
+/// <summary>
+/// Gets recent activity for user
+/// </summary>
+/// <param name="userId"></param>
+/// <param name="count"></param>
+/// <returns></returns>
         public async Task<IEnumerable<RecentActivityDto>> GetRecentActivityAsync(int userId, int count = 5)
         {
             return await _context.Loans
@@ -57,7 +71,12 @@ namespace QLAPLibraryCatalogAPI.Services
                 .AsNoTracking()
                 .ToListAsync();
         }
-
+/// <summary>
+/// Gets upcoming due dates for user
+/// </summary>
+/// <param name="userId"></param>
+/// <param name="daysAhead"></param>
+/// <returns></returns>
         public async Task<IEnumerable<UpcomingDueDateDto>> GetUpcomingDueDatesAsync(int userId, int daysAhead = 7)
         {
             var today = DateOnly.FromDateTime(DateTime.UtcNow);

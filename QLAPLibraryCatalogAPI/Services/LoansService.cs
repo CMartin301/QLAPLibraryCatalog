@@ -283,7 +283,7 @@ namespace QLAPLibraryCatalogAPI.Services
                 DaysOverdue = daysOverdue,
                 IsOverdue = isOverdue,
             };
-        #endregion
         }
+        #endregion
     }
 }
