@@ -6,8 +6,9 @@ import { ExtendLoanModal } from "./ExtendLoanModal";
 // import { useTableState } from "../../../hooks/useTableState";
 import { TableContainer } from "../../shared/TableContainer";
 import { useTableActions } from "../../../hooks/useTableActions";
-import { getLoanStatusDisplay } from "../../../utilities/loanStatusHelpers";
 import { LoanDetailModal } from "./LoanDetailModal";
+import { StatusBadge } from "../../shared/StatusBadge";
+import { getLoanStatusDisplay } from "../../../utilities/statusDisplayHelpers";
 
 interface LentLoansTableProps {
   loans: LoanWithDetails[];
@@ -101,15 +102,8 @@ export function LentLoansTable({ loans, onRefresh, error, loading }: LentLoansTa
         header: "Status",
         size: 160,
         cell: (info) => {
-          const statusDisplay = getLoanStatusDisplay(info.row.original);
-          
-          return (
-            <span
-              className={`px-2 py-1 text-xs font-medium rounded-full ${statusDisplay.class}`}
-            >
-              {statusDisplay.text}
-            </span>
-          );
+          const config = getLoanStatusDisplay(info.row.original);
+          return <StatusBadge config={config} />;
         },
         enableSorting: true,
       }),

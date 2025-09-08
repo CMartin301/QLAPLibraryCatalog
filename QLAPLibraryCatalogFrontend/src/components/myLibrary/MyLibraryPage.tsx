@@ -1,15 +1,10 @@
 // src/pages/MyLibraryPage.tsx
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 import MediaTable from '../media/MediaTable';
-import { Media } from '../../types/media';
-import { mediaService } from '../../services/mediaService';
-import { BorrowRequestsTable } from '../borrowing/borrowRequests/BorrowRequestsTable';
-import { BorrowRequestDto } from '../../types/borrowRequests';
-import { borrowRequestService } from '../../services/borrowRequestService';
 import { useBorrowRequests } from '../../hooks/useBorrowRequests';
 import { useMedia } from '../../hooks/useMedia';
+import ReceivedBorrowRequestsTable from '../borrowing/borrowRequests/ReceivedBorrowRequestsTable';
 
 
 const MyLibraryPage: React.FC = () => {
@@ -169,12 +164,12 @@ const handleRefresh = () => {
               error={allMediaError}
             />
           ) : (
-            <BorrowRequestsTable 
+
+            <ReceivedBorrowRequestsTable
               requests={borrowRequests}
-              userRole={'lender'}
               onRefresh={refetchBorrowRequests}
-              error={requestsError}
               loading={requestsLoading}
+              error={requestsError}
             />
           )}
 

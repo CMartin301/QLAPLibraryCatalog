@@ -4,6 +4,8 @@ import { BorrowRequestDto } from "../../../types/borrowRequests";
 import { borrowRequestService } from "../../../services/borrowRequestService";
 import { TableContainer } from "../../shared/TableContainer";
 import { useTableActions } from "../../../hooks/useTableActions";
+import { getBorrowRequestStatusDisplay } from "../../../utilities/statusDisplayHelpers";
+import { StatusBadge } from "../../shared/StatusBadge";
 
 interface ReceivedBorrowRequestsTableProps {
   requests: BorrowRequestDto[];
@@ -88,44 +90,28 @@ export function ReceivedBorrowRequestsTable({
         enableSorting: true,
         size: 150,
       }),
-
       columnHelper.accessor("status", {
         header: "Status",
+        size: 140,
         cell: (info) => {
-          const status = info.getValue() as BorrowStatus;
-          const config = getStatusDisplay(status);
-
-          return (
-            <span
-              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.bg} ${config.text}`}
-            >
-              {config.label}
-            </span>
-          );
+          const status = info.getValue() ?? "pending";
+          const config = getBorrowRequestStatusDisplay(status);
+          return <StatusBadge config={config} />;
         },
         enableSorting: true,
-        size: 140,
       }),
-
-      columnHelper.accessor(
-        row => {
-          if (row.requestedStartDate && row.requestedEndDate) {
-            const start = new Date(row.requestedStartDate).toLocaleDateString();
-            const end = new Date(row.requestedEndDate).toLocaleDateString();
-            return `${start} → ${end}`;
-          }
-          return "—";
-        },
-        {
-          id: "dates",
-          header: "Requested Dates",
-          cell: (info) => (
-            <span className="text-sm text-gray-900">{info.getValue()}</span>
-          ),
-          enableSorting: false,
-          size: 180,
-        }
-      ),
+      columnHelper.accessor("requestedStartDate", {
+        header: "Start Date",
+        cell: (info) => <span className="text-sm text-gray-900">{info.getValue()}</span>,
+        enableSorting: true,
+        size: 120,
+      }),
+      columnHelper.accessor("requestedEndDate", {
+        header: "Due Date",
+        cell: (info) => <span className="text-sm text-gray-900">{info.getValue()}</span>,
+        enableSorting: true,
+        size: 120,
+      }),
 
       columnHelper.accessor(row => row.message || "—", {
         id: "message",
