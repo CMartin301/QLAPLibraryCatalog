@@ -157,7 +157,7 @@ namespace QLAPLibraryCatalogAPI.Controllers
         /// <param name="loanId"></param>
         /// <param name="newDueDate"></param>
         /// <returns></returns>
-        [HttpPut("{loanId}")]
+        [HttpPut("{loanId}/Extend")]
         public async Task<IActionResult> ExtendLoanDueDate(int loanId, [FromBody] DateOnly? newDueDate)
         {
             try

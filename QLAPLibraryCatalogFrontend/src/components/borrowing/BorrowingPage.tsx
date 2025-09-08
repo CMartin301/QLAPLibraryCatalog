@@ -7,6 +7,8 @@ import { BorrowRequestsTable } from './BorrowRequestsTable';
 import LoansTable from './LoansTable';
 import { useLoans } from '../../hooks/useLoans';
 import { useBorrowRequests } from '../../hooks/useBorrowRequests';
+import BorrowedLoansTable from './BorrowedLoansTable';
+import LentLoansTable from './LentLoansTable';
 
 const BorrowingDashboard: React.FC = () => {
   const { userID } = useAuth();
@@ -149,24 +151,24 @@ const BorrowingDashboard: React.FC = () => {
                 {/* Borrowed Loans */}
                 <TabPanel>
                   <div className="bg-white rounded-lg shadow-sm">
-                    <LoansTable 
-                      loans={borrowedLoans} 
-                      onRefresh={refetchBorrowed}
-                      loading={borrowedLoading}
-                      error={borrowedError}
-                    />
+    <BorrowedLoansTable 
+      loans={borrowedLoans} 
+      onRefresh={refetchBorrowed}
+      loading={borrowedLoading}
+      error={borrowedError}
+    />
                   </div>
                 </TabPanel>
 
                 {/* Lent Loans */}
                 <TabPanel>
                   <div className="bg-white rounded-lg shadow-sm">
-                    <LoansTable 
-                      loans={lentLoans} 
-                      onRefresh={refetchLent}
-                      loading={lentLoading}
-                      error={lentError}
-                    />
+    <LentLoansTable 
+      loans={lentLoans} 
+      onRefresh={refetchLent}
+      loading={lentLoading}
+      error={lentError}
+    />
                   </div>
                 </TabPanel>
               </TabPanels>

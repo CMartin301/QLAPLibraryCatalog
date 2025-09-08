@@ -56,5 +56,10 @@ export const loanService = {
     const response = await api.put<Loan>(`/api/Loan/${loanId}/Return?isBorrower=${returnRequest.isBorrower}`, returnRequest.returnNotes);
     return response.data;
   },
+  // extend due date of loan
+  async extendLoan(loanId: number, newDueDate: string): Promise<Loan> {
+    const response = await api.put<Loan>(`/api/Loan/${loanId}/Extend`, newDueDate);
+    return response.data;
+  },
 
 };
