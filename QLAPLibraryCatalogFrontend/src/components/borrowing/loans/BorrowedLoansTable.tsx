@@ -93,7 +93,11 @@ export function BorrowedLoansTable({
         id: "actions",
         header: "Actions",
         size: 180,
-        cell: (info) => (
+        cell: (info) => {
+        const loan = info.row.original;
+
+        if (loan.status !== "returned" && loan.borrowerReturnedAt === null) {
+          return (
           <button
             onClick={() => handleReturn(info.row.original.loanId)}
             disabled={isLoading || info.row.original.borrowerReturnedAt !== null}
@@ -101,7 +105,30 @@ export function BorrowedLoansTable({
           >
             {isLoading ? "Processing..." : "Mark Returned"}
           </button>
-        ),
+          );
+        }
+        if (loan.status !== "returned" && loan.lenderConfirmedReturnAt === null) {
+          return (
+          <span className="text-xs text-gray-400">
+            Awaiting Lender Return Confirmation
+          </span>
+          );
+        }
+        // if (loan.status === "returned") {
+        //   return (
+        //   <span className="text-xs text-gray-400">
+        //     No Actions
+        //   </span>
+        //   );
+        // }
+
+        return (
+          <span className="text-xs text-gray-400">
+            No Actions
+          </span>
+          );
+
+      },
       }),
     ],
     [isLoading]

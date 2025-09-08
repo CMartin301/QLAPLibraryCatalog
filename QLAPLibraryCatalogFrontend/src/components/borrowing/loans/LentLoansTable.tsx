@@ -129,6 +129,67 @@ export function LentLoansTable({ loans, onRefresh, error, loading }: LentLoansTa
           </div>
         ),
       }),
+      columnHelper.display({
+        id: "actions2",
+        header: "Actions2",
+        size: 180,
+        cell: (info) => {
+        const loan = info.row.original;
+
+        if (loan.status !== "returned" && loan.lenderConfirmedReturnAt === null && loan.borrowerReturnedAt === null) {
+          return (
+            <div className="flex gap-2">
+            <button
+              onClick={() => handleReturn(info.row.original.loanId)}
+              // disabled={isLoading || info.row.original.status !== "active"}
+              className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? "Processing..." : "Mark Returned"}
+            </button>
+            <button
+              onClick={() => handleExtend(info.row.original)}
+              // disabled={isLoading || info.row.original.status !== "active"}
+              className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Extend Loan
+            </button>
+          </div>
+          );
+        }
+        if (loan.status !== "returned" && loan.lenderConfirmedReturnAt === null) {
+          return (
+          <button
+            onClick={() => handleReturn(info.row.original.loanId)}
+            // disabled={isLoading || info.row.original.borrowerReturnedAt !== null}
+            className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoading ? "Processing..." : "Mark Returned"}
+          </button>
+          );
+        }
+        if (loan.status !== "returned" && loan.borrowerReturnedAt === null) {
+          return (
+          <span className="text-xs text-gray-400">
+            Awaiting Borrower Return Confirmation
+          </span>
+          );
+        }
+        // if (loan.status === "returned") {
+        //   return (
+        //   <span className="text-xs text-gray-400">
+        //     No Actions
+        //   </span>
+        //   );
+        // }
+
+        return (
+          <span className="text-xs text-gray-400">
+            No Actions
+          </span>
+          );
+
+      },
+      }),
     ],
     [isLoading]
   );
