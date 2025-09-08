@@ -1,56 +1,37 @@
 import { useState, useCallback } from "react";
-
-export interface ActionState {
-  isLoading: boolean;
-  error: string | null;
-}
-
-export interface AsyncActionConfig {
-  onSuccess?: () => void;
-  onError?: (error: Error) => void;
-  successMessage?: string; // let caller decide if they want toast
-}
+import { toast } from "react-hot-toast";
 
 export function useTableActions() {
-  const [actionState, setActionState] = useState<ActionState>({
-    isLoading: false,
-    error: null,
-  });
+  const [isLoading, setIsLoading] = useState(false);
 
   const executeAction = useCallback(
-    async (action: () => Promise<unknown>, config: AsyncActionConfig = {}) => {
-      const { onSuccess, onError, successMessage } = config;
-      setActionState({ isLoading: true, error: null });
+    async (
+      action: () => Promise<unknown>,
+      config: {
+        onSuccess?: () => void;
+        onError?: (error: Error) => void;
+        successMessage?: string;
+        errorMessage?: string;
+      } = {}
+    ) => {
+      const { onSuccess, onError, successMessage, errorMessage } = config;
+
+      setIsLoading(true);
 
       try {
         await action();
-        if (successMessage) {
-          // Hook into your app’s toast/notification system
-          console.info(successMessage);
-        }
+        if (successMessage) toast.success(successMessage); // show success toast
         onSuccess?.();
       } catch (err) {
-        const error =
-          err instanceof Error ? err : new Error("An unexpected error occurred");
-        setActionState({ isLoading: false, error: error.message });
+        const error = err instanceof Error ? err : new Error("An unexpected error occurred");
+        toast.error(errorMessage ?? error.message); // show error toast
         onError?.(error);
-        throw error; // rethrow so the component can react if it wants
       } finally {
-        setActionState((prev) => ({ ...prev, isLoading: false }));
+        setIsLoading(false);
       }
     },
     []
   );
 
-  const clearError = useCallback(() => {
-    setActionState((prev) => ({ ...prev, error: null }));
-  }, []);
-
-  return {
-    actionState,
-    executeAction,
-    clearError,
-    isLoading: actionState.isLoading,
-    error: actionState.error,
-  };
+  return { executeAction, isLoading };
 }

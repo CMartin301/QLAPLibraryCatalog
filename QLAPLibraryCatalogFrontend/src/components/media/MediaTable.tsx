@@ -20,9 +20,9 @@ import { mediaService } from '../../services/mediaService';
 import { useModalScrollLock } from '../../hooks/useModalScrollLock';
 import { AddMediaCopyForm } from './AddMediaCopyForm';
 import useAuth from '../../hooks/useAuth';
-import { AddBorrowRequestForm } from '../borrowing/AddBorrowRequestForm';
 import { DataTable } from '../shared/DataTable';
 import { MediaModal } from './MediaModal';
+import { AddBorrowRequestForm } from '../borrowing/borrowRequests/AddBorrowRequestForm';
 
 
 

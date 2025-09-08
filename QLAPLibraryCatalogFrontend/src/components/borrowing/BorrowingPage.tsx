@@ -132,7 +132,7 @@ const BorrowingDashboard: React.FC = () => {
                         : 'text-gray-600 hover:text-gray-800'
                     }`
                   }>
-                    Loans I Borrowed
+                    Borrowed Loans
                   </Tab>
                   <Tab className={({ selected }) =>
                     `ml-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
@@ -141,7 +141,7 @@ const BorrowingDashboard: React.FC = () => {
                         : 'text-gray-600 hover:text-gray-800'
                     }`
                   }>
-                    Loans of My Media
+                    Lent Loans
                   </Tab>
                 </div>
               </TabList>

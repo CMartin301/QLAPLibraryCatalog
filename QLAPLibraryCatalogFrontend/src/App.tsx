@@ -13,20 +13,21 @@ import NetworkCatalogPage from './components/networkCatalog/NetworkCatalogPage';
 import UserPreferencesContainer from './components/preferences/UserPreferencesContainer';
 import BorrowingDashboard from './components/borrowing/BorrowingPage';
 import Dashboard from './components/dashboard/Dashboard';
+import { Toaster } from 'react-hot-toast';   // ⬅️ import here
 
 /**
  * App Layout Component
  */
 function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className=" bg-gray-100 flex justify-center py-6 px-4 sm:px-6 lg:px-8">
+    <div className="bg-gray-100 flex justify-center py-6 px-4 sm:px-6 lg:px-8">
       {children}
     </div>
   );
 }
 
 /**
- * App Routes - Clean route definitions
+ * App Routes
  */
 function AppRoutes() {
   return (
@@ -42,7 +43,6 @@ function AppRoutes() {
           </AuthRoute>
         } 
       />
-      
       <Route 
         path="/register" 
         element={
@@ -65,7 +65,6 @@ function AppRoutes() {
           </ProtectedRoute>
         } 
       />
-      
       <Route 
         path="/my-library" 
         element={
@@ -115,14 +114,7 @@ function AppRoutes() {
 }
 
 /**
- * Industry Standard App Structure
- * 
- * 1. Error Boundary - Catches auth errors
- * 2. Router - Enables navigation
- * 3. Auth Provider - Provides auth state
- * 4. Auth Initializer - One-time initialization
- * 5. Loading Boundary - Centralized loading
- * 6. Routes - Clean route definitions
+ * App Root
  */
 function App() {
   return (
@@ -132,6 +124,21 @@ function App() {
           <AuthInitializer />
           <LoadingBoundary>
             <Header />
+            <Toaster
+              position="top-center"          // centered horizontally
+              gutter={16}                    // spacing from top
+              containerStyle={{ marginTop: '64px' }} // adjust for header height if needed
+              toastOptions={{
+                success: {
+                  style: { background: "#4ade80", color: "#fff" },
+                  duration: 4000,
+                },
+                error: {
+                  style: { background: "#f87171", color: "#fff" },
+                  duration: 4000,
+                },
+              }}
+            />
             <AppRoutes />
             <Footer />
           </LoadingBoundary>
