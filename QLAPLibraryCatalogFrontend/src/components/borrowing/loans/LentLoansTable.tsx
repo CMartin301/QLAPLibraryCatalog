@@ -7,6 +7,7 @@ import { ExtendLoanModal } from "./ExtendLoanModal";
 import { TableContainer } from "../../shared/TableContainer";
 import { useTableActions } from "../../../hooks/useTableActions";
 import { getLoanStatusDisplay } from "../../../utilities/loanStatusHelpers";
+import { LoanDetailModal } from "./LoanDetailModal";
 
 interface LentLoansTableProps {
   loans: LoanWithDetails[];
@@ -18,12 +19,19 @@ interface LentLoansTableProps {
 export function LentLoansTable({ loans, onRefresh, error, loading }: LentLoansTableProps) {
   // const tableState = useTableState<LoanWithDetails>();
   const { executeAction, isLoading } = useTableActions();
+  const [detailModal, setDetailModal] = useState<{
+    isOpen: boolean;
+    loan: LoanWithDetails | null;
+  }>({ isOpen: false, loan: null });
 
   const [extendModal, setExtendModal] = useState<{
     isOpen: boolean;
     loan: LoanWithDetails | null;
   }>({ isOpen: false, loan: null });
 
+  const handleRowClick = (loan: LoanWithDetails) => {
+  setDetailModal({ isOpen: true, loan });
+};
   const columnHelper = createColumnHelper<LoanWithDetails>();
 
   const handleReturn = async (loanId: number): Promise<void> => {
@@ -59,10 +67,14 @@ export function LentLoansTable({ loans, onRefresh, error, loading }: LentLoansTa
       columnHelper.accessor("mediaTitle", {
         header: "Media",
         cell: (info) => (
-          <div>
+          <button
+            onClick={() => handleRowClick(info.row.original)}
+            className="text-left w-full p-1 hover:bg-gray-50 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:ring-offset-1"
+            aria-label={`View details for loan of ${info.getValue()}`}
+          >
             <div className="font-medium text-gray-900">{info.getValue()}</div>
             <div className="text-sm text-gray-500">{info.row.original.mediaType}</div>
-          </div>
+          </button>
         ),
         enableSorting: true,
         size: 250,
@@ -173,6 +185,12 @@ export function LentLoansTable({ loans, onRefresh, error, loading }: LentLoansTa
         loan={extendModal.loan}
         onExtend={handleExtendSubmit}
         isLoading={isLoading}
+      />
+      
+      <LoanDetailModal
+        isOpen={detailModal.isOpen}
+        onClose={() => setDetailModal({ isOpen: false, loan: null })}
+        loan={detailModal.loan}
       />
     </>
   );

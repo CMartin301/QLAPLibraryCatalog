@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { LoanWithDetails } from "../../../types/loans";
 import { loanService } from "../../../services/loanService";
@@ -6,6 +6,7 @@ import { loanService } from "../../../services/loanService";
 import { TableContainer } from "../../shared/TableContainer";
 import { useTableActions } from "../../../hooks/useTableActions";
 import { getLoanStatusDisplay } from "../../../utilities/loanStatusHelpers";
+import { LoanDetailModal } from "./LoanDetailModal";
 
 interface BorrowedLoansTableProps {
   loans: LoanWithDetails[];
@@ -22,6 +23,14 @@ export function BorrowedLoansTable({
 }: BorrowedLoansTableProps) {
   // const tableState = useTableState<LoanWithDetails>();
   const { executeAction, isLoading } = useTableActions();
+  const [detailModal, setDetailModal] = useState<{
+    isOpen: boolean;
+    loan: LoanWithDetails | null;
+  }>({ isOpen: false, loan: null });
+
+  const handleRowClick = (loan: LoanWithDetails) => {
+  setDetailModal({ isOpen: true, loan });
+};
 
   const columnHelper = createColumnHelper<LoanWithDetails>();
 
@@ -42,10 +51,14 @@ export function BorrowedLoansTable({
       columnHelper.accessor("mediaTitle", {
         header: "Media",
         cell: (info) => (
-          <div>
+          <button
+            onClick={() => handleRowClick(info.row.original)}
+            className="text-left w-full p-1 hover:bg-gray-50 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:ring-offset-1"
+            aria-label={`View details for loan of ${info.getValue()}`}
+          >
             <div className="font-medium text-gray-900">{info.getValue()}</div>
             <div className="text-sm text-gray-500">{info.row.original.mediaType}</div>
-          </div>
+          </button>
         ),
         enableSorting: true,
         size: 250,
@@ -90,7 +103,7 @@ export function BorrowedLoansTable({
         size: 180,
         cell: (info) => {
           const loan = info.row.original;
-          
+
           // Borrower can only mark returned if they haven't already
           if (loan.borrowerReturnedAt === null) {
             return (
@@ -116,14 +129,22 @@ export function BorrowedLoansTable({
   );
 
   return (
-    <TableContainer
-      data={loans}
-      columns={columns}
-      loading={loading || isLoading}
-      error={error} // only fetch/load errors
-      onRefresh={onRefresh}
-      emptyMessage="No borrowed loans found"
-    />
+    <>
+      <TableContainer
+        data={loans}
+        columns={columns}
+        loading={loading || isLoading}
+        error={error} // only fetch/load errors
+        onRefresh={onRefresh}
+        emptyMessage="No borrowed loans found"
+      />
+
+      <LoanDetailModal
+        isOpen={detailModal.isOpen}
+        onClose={() => setDetailModal({ isOpen: false, loan: null })}
+        loan={detailModal.loan}
+      />
+    </>
   );
 }
 
