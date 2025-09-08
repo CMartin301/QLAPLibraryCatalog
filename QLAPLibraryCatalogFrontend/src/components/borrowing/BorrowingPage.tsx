@@ -3,11 +3,12 @@ import React, { useEffect } from 'react';
 import { Calendar, ArrowLeftRight } from 'lucide-react';
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import useAuth from '../../hooks/useAuth';
-import { BorrowRequestsTable } from './borrowRequests/BorrowRequestsTable';
 import { useLoans } from '../../hooks/useLoans';
 import { useBorrowRequests } from '../../hooks/useBorrowRequests';
 import BorrowedLoansTable from './loans/BorrowedLoansTable';
 import LentLoansTable from './loans/LentLoansTable';
+import SentBorrowRequestsTable from './borrowRequests/SentBorrowRequestsTable';
+import ReceivedBorrowRequestsTable from './borrowRequests/ReceivedBorrowRequestsTable';
 
 const BorrowingDashboard: React.FC = () => {
   const { userID } = useAuth();
@@ -76,7 +77,7 @@ const BorrowingDashboard: React.FC = () => {
                         : 'text-gray-600 hover:text-gray-800'
                     }`
                   }>
-                    Requests I've Made
+                    Sent Requests
                   </Tab>
                   <Tab className={({ selected }) =>
                     `ml-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
@@ -85,7 +86,7 @@ const BorrowingDashboard: React.FC = () => {
                         : 'text-gray-600 hover:text-gray-800'
                     }`
                   }>
-                    Requests for My Media
+                    Recieved Requests
                   </Tab>
                 </div>
               </TabList>
@@ -94,9 +95,8 @@ const BorrowingDashboard: React.FC = () => {
                 {/* Sent Requests */}
                 <TabPanel>
                   <div className="bg-white rounded-lg shadow-sm">
-                    <BorrowRequestsTable
+                    <SentBorrowRequestsTable
                       requests={sentRequests}
-                      userRole="borrower"
                       onRefresh={refetchSent}
                       loading={sentLoading}
                       error={sentError}
@@ -107,9 +107,8 @@ const BorrowingDashboard: React.FC = () => {
                 {/* Received Requests */}
                 <TabPanel>
                   <div className="bg-white rounded-lg shadow-sm">
-                    <BorrowRequestsTable
+                    <ReceivedBorrowRequestsTable
                       requests={receivedRequests}
-                      userRole="lender"
                       onRefresh={refetchReceived}
                       loading={receivedLoading}
                       error={receivedError}
