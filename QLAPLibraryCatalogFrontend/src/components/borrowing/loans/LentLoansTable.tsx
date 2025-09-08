@@ -6,6 +6,7 @@ import { ExtendLoanModal } from "./ExtendLoanModal";
 // import { useTableState } from "../../../hooks/useTableState";
 import { TableContainer } from "../../shared/TableContainer";
 import { useTableActions } from "../../../hooks/useTableActions";
+import { getLoanStatusDisplay } from "../../../utilities/loanStatusHelpers";
 
 interface LentLoansTableProps {
   loans: LoanWithDetails[];
@@ -88,19 +89,13 @@ export function LentLoansTable({ loans, onRefresh, error, loading }: LentLoansTa
         header: "Status",
         size: 160,
         cell: (info) => {
-          const status = info.getValue();
-          const statusColors: Record<string, string> = {
-            active: "bg-green-100 text-green-800",
-            returned: "bg-gray-100 text-gray-800",
-            overdue: "bg-red-100 text-red-800",
-          };
+          const statusDisplay = getLoanStatusDisplay(info.row.original);
+          
           return (
             <span
-              className={`px-2 py-1 text-xs font-medium rounded-full ${
-                statusColors[status] || "bg-gray-100 text-gray-800"
-              }`}
+              className={`px-2 py-1 text-xs font-medium rounded-full ${statusDisplay.class}`}
             >
-              {status.charAt(0).toUpperCase() + status.slice(1)}
+              {statusDisplay.text}
             </span>
           );
         },
@@ -110,85 +105,52 @@ export function LentLoansTable({ loans, onRefresh, error, loading }: LentLoansTa
         id: "actions",
         header: "Actions",
         size: 220,
-        cell: (info) => (
-          <div className="flex gap-2">
-            <button
-              onClick={() => handleReturn(info.row.original.loanId)}
-              disabled={isLoading || info.row.original.status !== "active"}
-              className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? "Processing..." : "Mark Returned"}
-            </button>
-            <button
-              onClick={() => handleExtend(info.row.original)}
-              disabled={isLoading || info.row.original.status !== "active"}
-              className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Extend Loan
-            </button>
-          </div>
-        ),
-      }),
-      columnHelper.display({
-        id: "actions2",
-        header: "Actions2",
-        size: 180,
         cell: (info) => {
-        const loan = info.row.original;
+          const loan = info.row.original;
+          
+          // No actions if loan is officially returned
+          if (loan.status === 'returned') {
+            return (
+              <span className="text-xs text-gray-400">
+                No Actions
+              </span>
+            );
+          }
 
-        if (loan.status !== "returned" && loan.lenderConfirmedReturnAt === null && loan.borrowerReturnedAt === null) {
+          const canMarkReturned = loan.lenderConfirmedReturnAt === null;
+          const canExtend = loan.status === 'active' && !loan.borrowerReturnedAt;
+
+          if (!canMarkReturned && !canExtend) {
+            return (
+              <span className="text-xs text-gray-400">
+                No Actions
+              </span>
+            );
+          }
+
           return (
             <div className="flex gap-2">
-            <button
-              onClick={() => handleReturn(info.row.original.loanId)}
-              // disabled={isLoading || info.row.original.status !== "active"}
-              className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? "Processing..." : "Mark Returned"}
-            </button>
-            <button
-              onClick={() => handleExtend(info.row.original)}
-              // disabled={isLoading || info.row.original.status !== "active"}
-              className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Extend Loan
-            </button>
-          </div>
+              {canMarkReturned && (
+                <button
+                  onClick={() => handleReturn(loan.loanId)}
+                  disabled={isLoading}
+                  className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? "Processing..." : "Confirm Return"}
+                </button>
+              )}
+              {canExtend && (
+                <button
+                  onClick={() => handleExtend(loan)}
+                  disabled={isLoading}
+                  className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Extend Loan
+                </button>
+              )}
+            </div>
           );
-        }
-        if (loan.status !== "returned" && loan.lenderConfirmedReturnAt === null) {
-          return (
-          <button
-            onClick={() => handleReturn(info.row.original.loanId)}
-            // disabled={isLoading || info.row.original.borrowerReturnedAt !== null}
-            className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isLoading ? "Processing..." : "Mark Returned"}
-          </button>
-          );
-        }
-        if (loan.status !== "returned" && loan.borrowerReturnedAt === null) {
-          return (
-          <span className="text-xs text-gray-400">
-            Awaiting Borrower Return Confirmation
-          </span>
-          );
-        }
-        // if (loan.status === "returned") {
-        //   return (
-        //   <span className="text-xs text-gray-400">
-        //     No Actions
-        //   </span>
-        //   );
-        // }
-
-        return (
-          <span className="text-xs text-gray-400">
-            No Actions
-          </span>
-          );
-
-      },
+        },
       }),
     ],
     [isLoading]
