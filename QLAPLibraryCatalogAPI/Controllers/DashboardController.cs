@@ -20,6 +20,20 @@ public class DashboardController : ControllerBase
         _dashboardService = dashboardService;
     }
     /// <summary>
+    /// Returns userID from authentication scheme/ JWT
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="UnauthorizedAccessException"></exception>
+    [NonAction]
+    private int GetUserId()
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userIdClaim))
+            throw new UnauthorizedAccessException("User ID claim not found in token.");
+        
+        return int.Parse(userIdClaim);
+    }
+    /// <summary>
     /// Gets overview stats for the user
     /// </summary>
     /// <returns></returns>
@@ -53,19 +67,5 @@ public class DashboardController : ControllerBase
         var userId = GetUserId();
         var dueDates = await _dashboardService.GetUpcomingDueDatesAsync(userId, daysAhead);
         return Ok(dueDates);
-    }
-    /// <summary>
-    /// Returns userID from authentication scheme/ JWT
-    /// </summary>
-    /// <returns></returns>
-    /// <exception cref="UnauthorizedAccessException"></exception>
-    [NonAction]
-    private int GetUserId()
-    {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (string.IsNullOrEmpty(userIdClaim))
-            throw new UnauthorizedAccessException("User ID claim not found in token.");
-        
-        return int.Parse(userIdClaim);
     }
 }

@@ -9,13 +9,13 @@ export const loanService = {
     return response.data;
   },
 
-  async getLoansBorrowedByUser(userId: number): Promise<Loan[]> {
-    const response = await api.get<Loan[]>(`/api/Loan/User/Borrowed?userId=${userId}`);
+  async getLoansBorrowedByUser(): Promise<Loan[]> {
+    const response = await api.get<Loan[]>(`/api/Loan/User/Borrowed`);
     return response.data;
   },
 
-    async getLoansOfUserMedia(userId: number): Promise<Loan[]> {
-    const response = await api.get<Loan[]>(`/api/Loan/User/Lent?userId=${userId}`);
+    async getLoansOfUserMedia(): Promise<Loan[]> {
+    const response = await api.get<Loan[]>(`/api/Loan/User/Lent`);
     return response.data;
   },
 
@@ -27,14 +27,14 @@ export const loanService = {
   },
   
   // Get loans borrowed by user with full details for display
-  async getLoansBorrowedByUserWithDetails(userId: number): Promise<LoanWithDetails[]> {
-    const response = await api.get<LoanWithDetails[]>(`/api/Loan/User/Borrowed/Details?userId=${userId}`);
+  async getLoansBorrowedByUserWithDetails(): Promise<LoanWithDetails[]> {
+    const response = await api.get<LoanWithDetails[]>(`/api/Loan/User/Borrowed/Details`);
     return response.data;
   },
 
   // Get loans of user's media with full details for display
-  async getLoansOfUserMediaWithDetails(userId: number): Promise<LoanWithDetails[]> {
-    const response = await api.get<LoanWithDetails[]>(`/api/Loan/User/Lent/Details?userId=${userId}`);
+  async getLoansOfUserMediaWithDetails(): Promise<LoanWithDetails[]> {
+    const response = await api.get<LoanWithDetails[]>(`/api/Loan/User/Lent/Details`);
     return response.data;
   },
 

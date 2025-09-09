@@ -12,6 +12,7 @@ namespace QLAPLibraryCatalogAPI.Controllers
     /// <summary>
     /// Controller for all user functions
     /// </summary>
+    // [Authorize] 
     [ApiController]
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
@@ -23,6 +24,20 @@ namespace QLAPLibraryCatalogAPI.Controllers
         {
             _usersService = usersService;
             _authService = authService;
+        }
+        /// <summary>
+        /// Returns userID from authentication scheme/ JWT
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
+        [NonAction]
+        private int GetUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim))
+                throw new UnauthorizedAccessException("User ID claim not found in token.");
+            
+            return int.Parse(userIdClaim);
         }
 
         /// <summary>
