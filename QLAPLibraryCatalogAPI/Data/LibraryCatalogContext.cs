@@ -189,7 +189,7 @@ public partial class LibraryCatalogContext : DbContext
                 .HasColumnName("center_lat");
             entity.Property(e => e.CenterLong)
                 .HasPrecision(9, 6)
-                .HasColumnName("center_lng");
+                .HasColumnName("center_long");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("created_at");
