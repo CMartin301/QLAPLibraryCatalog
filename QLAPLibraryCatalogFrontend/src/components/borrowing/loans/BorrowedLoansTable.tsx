@@ -2,7 +2,6 @@ import { useMemo, useState } from "react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { LoanWithDetails } from "../../../types/loans";
 import { loanService } from "../../../services/loanService";
-// import { useTableState } from "../../../hooks/useTableState";
 import { TableContainer } from "../../shared/TableContainer";
 import { useTableActions } from "../../../hooks/useTableActions";
 import { LoanDetailModal } from "./LoanDetailModal";
@@ -22,7 +21,6 @@ export function BorrowedLoansTable({
   error,
   loading,
 }: BorrowedLoansTableProps) {
-  // const tableState = useTableState<LoanWithDetails>();
   const { executeAction, isLoading } = useTableActions();
   const [detailModal, setDetailModal] = useState<{
     isOpen: boolean;
@@ -35,7 +33,6 @@ export function BorrowedLoansTable({
 
   const columnHelper = createColumnHelper<LoanWithDetails>();
 
-  // Async handleReturn with proper Promise
   const handleReturn = async (loanId: number): Promise<void> => {
     return executeAction(
       () => loanService.returnLoan(loanId, { isBorrower: true }),
@@ -49,20 +46,26 @@ export function BorrowedLoansTable({
 
   const columns = useMemo(
     () => [
-      columnHelper.accessor("mediaTitle", {
-        header: "Media",
-        cell: (info) => (
-          <button
-            onClick={() => handleRowClick(info.row.original)}
-            className="text-left w-full p-1 hover:bg-gray-50 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:ring-offset-1"
-            aria-label={`View details for loan of ${info.getValue()}`}
-          >
-            <div className="font-medium text-gray-900">{info.getValue()}</div>
-            <div className="text-sm text-gray-500">{info.row.original.mediaType}</div>
-          </button>
-        ),
+      columnHelper.accessor(row => row.mediaTitle ?? "—", {
+        id: "media",
+        header: "Book",
+        cell: (info) => {
+          const row = info.row.original;
+          return (
+            <div className="flex items-start space-x-3">
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-gray-900 truncate">
+                  {row.mediaTitle || "—"}
+                </p>
+                <p className="text-sm text-gray-500 truncate">
+                  {row.mediaAuthor || "Unknown author"}
+                </p>
+              </div>
+            </div>
+          );
+        },
         enableSorting: true,
-        size: 250,
+        size: 260,
       }),
       columnHelper.accessor("ownerUsername", {
         header: "Owner",
@@ -102,7 +105,10 @@ export function BorrowedLoansTable({
           if (loan.borrowerReturnedAt === null) {
             return (
               <button
-                onClick={() => handleReturn(loan.loanId)}
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent row click
+                  handleReturn(loan.loanId);
+                }}
                 disabled={isLoading}
                 className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
@@ -131,6 +137,8 @@ export function BorrowedLoansTable({
         error={error} // only fetch/load errors
         onRefresh={onRefresh}
         emptyMessage="No borrowed loans found"
+        onRowClick={handleRowClick}
+        rowClassName="cursor-pointer"
       />
 
       <LoanDetailModal

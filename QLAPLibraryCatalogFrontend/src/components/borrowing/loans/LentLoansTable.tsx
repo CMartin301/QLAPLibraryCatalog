@@ -65,20 +65,26 @@ export function LentLoansTable({ loans, onRefresh, error, loading }: LentLoansTa
 
   const columns = useMemo(
     () => [
-      columnHelper.accessor("mediaTitle", {
-        header: "Media",
-        cell: (info) => (
-          <button
-            onClick={() => handleRowClick(info.row.original)}
-            className="text-left w-full p-1 hover:bg-gray-50 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:ring-offset-1"
-            aria-label={`View details for loan of ${info.getValue()}`}
-          >
-            <div className="font-medium text-gray-900">{info.getValue()}</div>
-            <div className="text-sm text-gray-500">{info.row.original.mediaType}</div>
-          </button>
-        ),
+      columnHelper.accessor(row => row.mediaTitle ?? "—", {
+        id: "media",
+        header: "Book",
+        cell: (info) => {
+          const row = info.row.original;
+          return (
+            <div className="flex items-start space-x-3">
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-gray-900 truncate">
+                  {row.mediaTitle || "—"}
+                </p>
+                <p className="text-sm text-gray-500 truncate">
+                  {row.mediaAuthor || "Unknown author"}
+                </p>
+              </div>
+            </div>
+          );
+        },
         enableSorting: true,
-        size: 250,
+        size: 260,
       }),
       columnHelper.accessor("borrowerUsername", {
         header: "Borrower",
@@ -138,7 +144,10 @@ export function LentLoansTable({ loans, onRefresh, error, loading }: LentLoansTa
             <div className="flex gap-2">
               {canMarkReturned && (
                 <button
-                  onClick={() => handleReturn(loan.loanId)}
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent row click
+                  handleReturn(loan.loanId);
+                }}
                   disabled={isLoading}
                   className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -147,7 +156,10 @@ export function LentLoansTable({ loans, onRefresh, error, loading }: LentLoansTa
               )}
               {canExtend && (
                 <button
-                  onClick={() => handleExtend(loan)}
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent row click
+                    handleExtend(loan);
+                  }}
                   disabled={isLoading}
                   className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >

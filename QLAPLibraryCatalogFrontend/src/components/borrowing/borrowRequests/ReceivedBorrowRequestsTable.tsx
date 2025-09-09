@@ -13,9 +13,7 @@ interface ReceivedBorrowRequestsTableProps {
   onRefresh: () => void;
   error?: string | null;
   loading?: boolean;
-}
-
-type BorrowStatus = 'pending' | 'approved' | 'denied' | 'cancelled';
+} 
 
 export function ReceivedBorrowRequestsTable({ 
   requests, 
@@ -61,16 +59,6 @@ export function ReceivedBorrowRequestsTable({
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedRequest(null);
-  };
-
-  const getStatusDisplay = (status: BorrowStatus) => {
-    const statusConfig = {
-      pending: { bg: "bg-yellow-100", text: "text-yellow-800", label: "Pending" },
-      approved: { bg: "bg-green-100", text: "text-green-800", label: "Approved" },
-      denied: { bg: "bg-red-100", text: "text-red-800", label: "Denied" },
-      cancelled: { bg: "bg-gray-100", text: "text-gray-800", label: "Cancelled" },
-    };
-    return statusConfig[status] || statusConfig.pending;
   };
 
   const columns = useMemo(
