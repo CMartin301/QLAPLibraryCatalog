@@ -24,6 +24,13 @@ public partial class MediaCopy
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
+    // Add these properties to your existing MediaCopy class
+    public int? CurrentLocationZoneId { get; set; }
+    public int? HomeLocationZoneId { get; set; }
+
+    // Add these navigation properties
+    public virtual LocationZone? CurrentLocationZone { get; set; }
+    public virtual LocationZone? HomeLocationZone { get; set; }
 
     public virtual ICollection<BorrowRequest> BorrowRequests { get; set; } = new List<BorrowRequest>();
 

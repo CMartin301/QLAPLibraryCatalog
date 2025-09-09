@@ -19,6 +19,7 @@ public partial class LibraryCatalogContext : DbContext
     public virtual DbSet<BorrowRequest> BorrowRequests { get; set; }
 
     public virtual DbSet<Loan> Loans { get; set; }
+    public virtual DbSet<LocationZone> LocationZones { get; set; }
 
     public virtual DbSet<MediaCopy> MediaCopies { get; set; }
 
@@ -144,6 +145,11 @@ public partial class LibraryCatalogContext : DbContext
                 .HasDefaultValueSql("now()")
                 .HasColumnName("updated_at");
             entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.CurrentLocationZoneId)
+                .HasColumnName("current_location_zone_id");
+            entity.Property(e => e.HomeLocationZoneId)
+                .HasColumnName("home_location_zone_id");
+
 
             entity.HasOne(d => d.Media).WithMany(p => p.MediaCopies)
                 .HasForeignKey(d => d.MediaId)
@@ -154,8 +160,43 @@ public partial class LibraryCatalogContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("user_media_copies_user_id_fkey");
+            entity.HasOne(d => d.CurrentLocationZone).WithMany(p => p.CurrentLocationCopies)
+                .HasForeignKey(d => d.CurrentLocationZoneId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("media_copies_current_location_zone_fkey");
+
+            entity.HasOne(d => d.HomeLocationZone).WithMany(p => p.HomeLocationCopies)
+                .HasForeignKey(d => d.HomeLocationZoneId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("media_copies_home_location_zone_fkey");
         });
 
+        modelBuilder.Entity<LocationZone>(entity =>
+        {
+            entity.HasKey(e => e.ZoneId).HasName("location_zones_pkey");
+
+            entity.ToTable("location_zones");
+
+            entity.Property(e => e.ZoneId).HasColumnName("zone_id");
+            entity.Property(e => e.ZoneName)
+                .HasMaxLength(100)
+                .HasColumnName("zone_name");
+            entity.Property(e => e.ZoneType)
+                .HasMaxLength(50)
+                .HasColumnName("zone_type");
+            entity.Property(e => e.CenterLat)
+                .HasPrecision(9, 6)
+                .HasColumnName("center_lat");
+            entity.Property(e => e.CenterLong)
+                .HasPrecision(9, 6)
+                .HasColumnName("center_lng");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("now()")
+                .HasColumnName("created_at");
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("now()")
+                .HasColumnName("updated_at");
+        });
         modelBuilder.Entity<MediaType>(entity =>
         {
             entity.HasKey(e => e.MediaTypeId).HasName("media_types_pkey");
