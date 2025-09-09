@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { BorrowRequestDto } from "../../../types/borrowRequests";
 import { borrowRequestService } from "../../../services/borrowRequestService";
@@ -7,6 +7,7 @@ import { useTableActions } from "../../../hooks/useTableActions";
 import useAuth from "../../../hooks/useAuth";
 import { getBorrowRequestStatusDisplay } from "../../../utilities/statusDisplayHelpers";
 import { StatusBadge } from "../../shared/StatusBadge";
+import BorrowRequestModal from "./BorrowRequestModal";
 
 interface SentBorrowRequestsTableProps {
   requests: BorrowRequestDto[];
@@ -25,6 +26,10 @@ export function SentBorrowRequestsTable({
 }: SentBorrowRequestsTableProps) {
   const { userID } = useAuth();
   const { executeAction, isLoading } = useTableActions();
+  
+  // Modal state
+  const [selectedRequest, setSelectedRequest] = useState<BorrowRequestDto | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const columnHelper = createColumnHelper<BorrowRequestDto>();
 
@@ -39,6 +44,16 @@ export function SentBorrowRequestsTable({
         errorMessage: "Failed to cancel request",
       }
     );
+  };
+
+  const handleRowClick = (request: BorrowRequestDto) => {
+    setSelectedRequest(request);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedRequest(null);
   };
 
   const getStatusDisplay = (status: BorrowStatus) => {
@@ -83,16 +98,6 @@ export function SentBorrowRequestsTable({
         enableSorting: true,
         size: 150,
       }),
-      columnHelper.accessor("status", {
-        header: "Status",
-        size: 140,
-        cell: (info) => {
-          const status = info.getValue() ?? "pending";
-          const config = getBorrowRequestStatusDisplay(status);
-          return <StatusBadge config={config} />;
-        },
-        enableSorting: true,
-      }),
       columnHelper.accessor("requestedStartDate", {
         header: "Start Date",
         cell: (info) => <span className="text-sm text-gray-900">{info.getValue()}</span>,
@@ -106,27 +111,16 @@ export function SentBorrowRequestsTable({
         size: 120,
       }),
 
-      columnHelper.accessor(row => row.message || "—", {
-        id: "message",
-        header: "Message",
-        cell: (info) => (
-          <div className="max-w-xs">
-            {info.getValue() !== "—" ? (
-              <span
-                className="text-sm text-gray-600 truncate"
-                title={info.getValue()}
-              >
-                {info.getValue()}
-              </span>
-            ) : (
-              <span className="text-sm text-gray-400">No message</span>
-            )}
-          </div>
-        ),
-        enableSorting: false,
-        size: 220,
+      columnHelper.accessor("status", {
+        header: "Status",
+        size: 140,
+        cell: (info) => {
+          const status = info.getValue() ?? "pending";
+          const config = getBorrowRequestStatusDisplay(status);
+          return <StatusBadge config={config} />;
+        },
+        enableSorting: true,
       }),
-
       columnHelper.display({
         id: "actions",
         header: "Actions",
@@ -137,7 +131,10 @@ export function SentBorrowRequestsTable({
           if (request.status === "pending") {
             return (
               <button
-                onClick={() => handleCancel(request.requestId)}
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent row click
+                  handleCancel(request.requestId);
+                }}
                 disabled={isLoading}
                 className="px-3 py-1 text-sm border border-gray-300 text-gray-700 bg-white rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lavender-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
@@ -160,14 +157,24 @@ export function SentBorrowRequestsTable({
   );
 
   return (
-    <TableContainer
-      data={requests}
-      columns={columns}
-      loading={loading || isLoading}
-      error={error}
-      onRefresh={onRefresh}
-      emptyMessage="No sent requests found"
-    />
+    <>
+      <TableContainer
+        data={requests}
+        columns={columns}
+        loading={loading || isLoading}
+        error={error}
+        onRefresh={onRefresh}
+        emptyMessage="No sent requests found"
+        onRowClick={handleRowClick}
+        rowClassName="cursor-pointer"
+      />
+
+      <BorrowRequestModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        borrowRequest={selectedRequest}
+      />
+    </>
   );
 }
 

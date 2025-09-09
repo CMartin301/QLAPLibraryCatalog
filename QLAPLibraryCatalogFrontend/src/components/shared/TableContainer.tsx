@@ -17,6 +17,8 @@ interface TableContainerProps<T> {
   header?: ReactNode;
   footer?: ReactNode;
   className?: string;
+  onRowClick?: (row: T) => void;
+  rowClassName?: string;
 }
 
 export function TableContainer<T>({
@@ -31,6 +33,8 @@ export function TableContainer<T>({
   header,
   footer,
   className = 'bg-[var(--color-card)] rounded-lg shadow-sm border border-[var(--color-border)]',
+  onRowClick,
+  rowClassName,
 }: TableContainerProps<T>) {
   return (
     <div className={className}>
@@ -66,6 +70,8 @@ export function TableContainer<T>({
           actionButton={actionButton}
           error={error}
           onRefresh={onRefresh}
+          onRowClick={onRowClick}
+          rowClassName={rowClassName}
         />
       )}
 

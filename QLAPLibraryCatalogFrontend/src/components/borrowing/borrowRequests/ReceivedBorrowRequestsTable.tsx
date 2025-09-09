@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { BorrowRequestDto } from "../../../types/borrowRequests";
 import { borrowRequestService } from "../../../services/borrowRequestService";
@@ -6,6 +6,7 @@ import { TableContainer } from "../../shared/TableContainer";
 import { useTableActions } from "../../../hooks/useTableActions";
 import { getBorrowRequestStatusDisplay } from "../../../utilities/statusDisplayHelpers";
 import { StatusBadge } from "../../shared/StatusBadge";
+import BorrowRequestModal from "./BorrowRequestModal";
 
 interface ReceivedBorrowRequestsTableProps {
   requests: BorrowRequestDto[];
@@ -23,6 +24,10 @@ export function ReceivedBorrowRequestsTable({
   loading 
 }: ReceivedBorrowRequestsTableProps) {
   const { executeAction, isLoading } = useTableActions();
+  
+  // Modal state
+  const [selectedRequest, setSelectedRequest] = useState<BorrowRequestDto | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const columnHelper = createColumnHelper<BorrowRequestDto>();
 
@@ -46,6 +51,16 @@ export function ReceivedBorrowRequestsTable({
         errorMessage: "Failed to deny request",
       }
     );
+  };
+
+  const handleRowClick = (request: BorrowRequestDto) => {
+    setSelectedRequest(request);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedRequest(null);
   };
 
   const getStatusDisplay = (status: BorrowStatus) => {
@@ -90,16 +105,6 @@ export function ReceivedBorrowRequestsTable({
         enableSorting: true,
         size: 150,
       }),
-      columnHelper.accessor("status", {
-        header: "Status",
-        size: 140,
-        cell: (info) => {
-          const status = info.getValue() ?? "pending";
-          const config = getBorrowRequestStatusDisplay(status);
-          return <StatusBadge config={config} />;
-        },
-        enableSorting: true,
-      }),
       columnHelper.accessor("requestedStartDate", {
         header: "Start Date",
         cell: (info) => <span className="text-sm text-gray-900">{info.getValue()}</span>,
@@ -113,27 +118,16 @@ export function ReceivedBorrowRequestsTable({
         size: 120,
       }),
 
-      columnHelper.accessor(row => row.message || "—", {
-        id: "message",
-        header: "Message",
-        cell: (info) => (
-          <div className="max-w-xs">
-            {info.getValue() !== "—" ? (
-              <span
-                className="text-sm text-gray-600 truncate"
-                title={info.getValue()}
-              >
-                {info.getValue()}
-              </span>
-            ) : (
-              <span className="text-sm text-gray-400">No message</span>
-            )}
-          </div>
-        ),
-        enableSorting: false,
-        size: 220,
+      columnHelper.accessor("status", {
+        header: "Status",
+        size: 140,
+        cell: (info) => {
+          const status = info.getValue() ?? "pending";
+          const config = getBorrowRequestStatusDisplay(status);
+          return <StatusBadge config={config} />;
+        },
+        enableSorting: true,
       }),
-
       columnHelper.display({
         id: "actions",
         header: "Actions",
@@ -145,14 +139,20 @@ export function ReceivedBorrowRequestsTable({
             return (
               <div className="flex items-center space-x-2">
                 <button
-                  onClick={() => handleApprove(request.requestId)}
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent row click
+                    handleApprove(request.requestId);
+                  }}
                   disabled={isLoading}
                   className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? "Processing..." : "Approve"}
                 </button>
                 <button
-                  onClick={() => handleDeny(request.requestId)}
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent row click
+                    handleDeny(request.requestId);
+                  }}
                   disabled={isLoading}
                   className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -174,14 +174,24 @@ export function ReceivedBorrowRequestsTable({
   );
 
   return (
-    <TableContainer
-      data={requests}
-      columns={columns}
-      loading={loading || isLoading}
-      error={error}
-      onRefresh={onRefresh}
-      emptyMessage="No received requests found"
-    />
+    <>
+      <TableContainer
+        data={requests}
+        columns={columns}
+        loading={loading || isLoading}
+        error={error}
+        onRefresh={onRefresh}
+        emptyMessage="No received requests found"
+        onRowClick={handleRowClick}
+        rowClassName="cursor-pointer"
+      />
+
+      <BorrowRequestModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        borrowRequest={selectedRequest}
+      />
+    </>
   );
 }
 
