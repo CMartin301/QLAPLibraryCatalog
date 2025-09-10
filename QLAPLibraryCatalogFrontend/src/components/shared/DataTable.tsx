@@ -1,5 +1,5 @@
 // src/components/shared/DataTable.tsx
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   useReactTable,
   getCoreRowModel,

@@ -1,11 +1,7 @@
 // src/pages/MyLibraryPage.tsx
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
-import MediaTable from '../media/MediaTable';
-import { useBorrowRequests } from '../../hooks/useBorrowRequests';
 import { useMedia } from '../../hooks/useMedia';
-import ReceivedBorrowRequestsTable from '../borrowing/borrowRequests/ReceivedBorrowRequestsTable';
 import { UserMediaTable } from '../media/userMediaTable/UserMediaTable';
 
 
@@ -22,25 +18,25 @@ const MyLibraryPage: React.FC = () => {
     refetch: refetchUserMedia 
   } = useMedia(userID, true);
 
-  const { 
-    media: allMedia, 
-    loading: allMediaLoading, 
-    error: allMediaError, 
-    refetch: refetchAllMedia 
-  } = useMedia(null, true);
+  // const { 
+  //   media: allMedia, 
+  //   loading: allMediaLoading, 
+  //   error: allMediaError, 
+  //   refetch: refetchAllMedia 
+  // } = useMedia(null, true);
   // const { 
   //   requests: borrowRequests, 
   //   loading: requestsLoading, 
   //   error: requestsError, 
   //   refetch: refetchBorrowRequests 
   // } = useBorrowRequests(userID, 'received');
-const isLoading = userMediaLoading || allMediaLoading;
-const error = userMediaError || allMediaError;
+// const isLoading = userMediaLoading || allMediaLoading;
+// const error = userMediaError || allMediaError;
 
-const handleRefresh = () => {
-  refetchUserMedia();
-  refetchAllMedia();
-};
+// const handleRefresh = () => {
+//   refetchUserMedia();
+//   refetchAllMedia();
+// };
 
   useEffect(() => {
   }, []);
@@ -51,7 +47,7 @@ const handleRefresh = () => {
     setTimeout(() => setSaveMessage(null), 3000);
   };
 
-  if (isLoading) {
+  if (userMediaLoading) {
     return (
       <div className="container-fluid py-4 bg-pattern">
         <div className="text-center">
