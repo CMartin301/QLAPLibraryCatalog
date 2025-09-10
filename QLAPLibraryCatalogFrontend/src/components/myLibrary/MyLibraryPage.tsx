@@ -1,5 +1,6 @@
 // src/pages/MyLibraryPage.tsx
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 import MediaTable from '../media/MediaTable';
 import { useBorrowRequests } from '../../hooks/useBorrowRequests';
