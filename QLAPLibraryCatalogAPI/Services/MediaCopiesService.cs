@@ -5,99 +5,60 @@ using QLAPLibraryCatalogAPI.Models.DTOs;
 
 namespace QLAPLibraryCatalogAPI.Services
 {
+    /// <summary> Interface </summary>
     public interface IMediaCopiesService
     {
+#pragma warning disable 1591
         Task<IEnumerable<MediaCopyDto>> GetAllMediaCopiesAsync();
         Task<MediaCopyDto?> GetMediaCopyByIdAsync(int mediaCopyId);
         Task<MediaCopyDto> CreateMediaCopyAsync(CreateMediaCopyDto createMediaCopyDto);
         // Task<MediaDto?> UpdateMediaAsync(int id, CreateMediaDto updateMediaDto);
         // Task<bool> DeleteMediaAsync(int id);
+#pragma warning restore 1591
     }
-    
+
+    /// <summary>
+    /// Service/data layer operations on/access to media copies
+    /// </summary>
     public class MediaCopiesService : IMediaCopiesService
     {
         private readonly LibraryCatalogContext _context;
-
+        /// <summary> Constructor </summary>
         public MediaCopiesService(LibraryCatalogContext context)
         {
             _context = context;
         }
-        
+        /// <summary>
+        /// Gets all media copies
+        /// </summary>
+        /// <returns></returns>
         public async Task<IEnumerable<MediaCopyDto>> GetAllMediaCopiesAsync()
         {
-            return await _context.MediaCopies
+            var query = _context.MediaCopies
                 .Include(m => m.Media)
-                .Select(m => new MediaCopyDto
-                {
-                    CopyId = m.CopyId,
-                    UserId = m.UserId,
-                    MediaId = m.MediaId,
-                    Condition = m.Condition,
-                    Notes = m.Notes,
-                    IsAvailable = m.IsAvailable,
-                    MaxLoanDays = m.MaxLoanDays,
-                    RequiresApproval = m.RequiresApproval,
-                    Media = new MediaDto
-                    {
-                        MediaId = m.MediaId,
-                        MediaTypeId = m.Media.MediaTypeId,
-                        Title = m.Media.Title,
-                        Subtitle = m.Media.Subtitle,
-                        Creator = m.Media.Creator,
-                        Publisher = m.Media.Publisher,
-                        PublicationDate = m.Media.PublicationDate,
-                        Language = m.Media.Language,
-                        Genre = m.Media.Genre,
-                        Description = m.Media.Description,
-                        CoverImageUrl = m.Media.CoverImageUrl,
-                        Isbn10 = m.Media.Isbn10,
-                        Isbn13 = m.Media.Isbn13,
-                        PageCount = m.Media.PageCount,
-                        IssueNumber = m.Media.IssueNumber,
-                        Volume = m.Media.Volume,
-                    }
-                })
-                .ToListAsync();
+                .AsQueryable();
+
+            return await query.Select(mediaCopy => MapMediaCopy(mediaCopy)).ToListAsync();
         }
-        
+        /// <summary>
+        /// Gets media copy by ID
+        /// </summary>
+        /// <param name="mediaCopyId"></param>
+        /// <returns></returns>
         public async Task<MediaCopyDto?> GetMediaCopyByIdAsync(int mediaCopyId)
         {
-            return await _context.MediaCopies
+            var mediaCopy = await _context.MediaCopies
                 .Include(m => m.Media)
-                .Where(m => m.CopyId == mediaCopyId)
-                .Select(m => new MediaCopyDto
-                {
-                    CopyId = m.CopyId,
-                    UserId = m.UserId,
-                    MediaId = m.MediaId,
-                    Condition = m.Condition,
-                    Notes = m.Notes,
-                    IsAvailable = m.IsAvailable,
-                    MaxLoanDays = m.MaxLoanDays,
-                    RequiresApproval = m.RequiresApproval,
-                    Media = new MediaDto
-                    {
-                        MediaId = m.MediaId,
-                        MediaTypeId = m.Media.MediaTypeId,
-                        Title = m.Media.Title,
-                        Subtitle = m.Media.Subtitle,
-                        Creator = m.Media.Creator,
-                        Publisher = m.Media.Publisher,
-                        PublicationDate = m.Media.PublicationDate,
-                        Language = m.Media.Language,
-                        Genre = m.Media.Genre,
-                        Description = m.Media.Description,
-                        CoverImageUrl = m.Media.CoverImageUrl,
-                        Isbn10 = m.Media.Isbn10,
-                        Isbn13 = m.Media.Isbn13,
-                        PageCount = m.Media.PageCount,
-                        IssueNumber = m.Media.IssueNumber,
-                        Volume = m.Media.Volume,
-                    }
-                })
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(m => m.CopyId == mediaCopyId);
+
+            return mediaCopy == null ? null : MapMediaCopy(mediaCopy);
         }
-         
+        /// <summary>
+        /// Creates new media copy
+        /// </summary>
+        /// <param name="createMediaCopyDto"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public async Task<MediaCopyDto> CreateMediaCopyAsync(CreateMediaCopyDto createMediaCopyDto)
         {
             var mediaCopy = new MediaCopy
@@ -112,49 +73,51 @@ namespace QLAPLibraryCatalogAPI.Services
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
-            
+
             _context.MediaCopies.Add(mediaCopy);
             await _context.SaveChangesAsync();
-            
+
             return await GetMediaCopyByIdAsync(mediaCopy.CopyId) ?? throw new InvalidOperationException("Failed to retrieve created media copy");
         }
+
+        #region Mapping Methods
+        /// <summary>
+        /// Maps a media copy to a media copy DTO
+        /// </summary>
+        private static MediaCopyDto MapMediaCopy(MediaCopy mediaCopy)
+        {
+            return new MediaCopyDto
+            {
+                CopyId = mediaCopy.CopyId,
+                UserId = mediaCopy.UserId,
+                MediaId = mediaCopy.MediaId,
+                Condition = mediaCopy.Condition,
+                Notes = mediaCopy.Notes,
+                IsAvailable = mediaCopy.IsAvailable,
+                MaxLoanDays = mediaCopy.MaxLoanDays,
+                RequiresApproval = mediaCopy.RequiresApproval,
+                Media = new MediaDto
+                {
+                    MediaId = mediaCopy.MediaId,
+                    MediaTypeId = mediaCopy.Media.MediaTypeId,
+                    Title = mediaCopy.Media.Title,
+                    Subtitle = mediaCopy.Media.Subtitle,
+                    Creator = mediaCopy.Media.Creator,
+                    Publisher = mediaCopy.Media.Publisher,
+                    PublicationDate = mediaCopy.Media.PublicationDate,
+                    Language = mediaCopy.Media.Language,
+                    Genre = mediaCopy.Media.Genre,
+                    Description = mediaCopy.Media.Description,
+                    CoverImageUrl = mediaCopy.Media.CoverImageUrl,
+                    Isbn10 = mediaCopy.Media.Isbn10,
+                    Isbn13 = mediaCopy.Media.Isbn13,
+                    PageCount = mediaCopy.Media.PageCount,
+                    IssueNumber = mediaCopy.Media.IssueNumber,
+                    Volume = mediaCopy.Media.Volume,
+                }
+            };
+        }
+        #endregion
         
-        // public async Task<MediaDto?> UpdateMediaAsync(int id, CreateMediaDto updateMediaDto)
-        // {
-        //     var existing = await _context.Media.FindAsync(id);
-        //     if (existing == null) return null;
-            
-        //     existing.MediaTypeId = updateMediaDto.MediaTypeId;
-        //     existing.Title = updateMediaDto.Title;
-        //     existing.Subtitle = updateMediaDto.Subtitle;
-        //     existing.Creator = updateMediaDto.Creator;
-        //     existing.Publisher = updateMediaDto.Publisher;
-        //     existing.PublicationDate = updateMediaDto.PublicationDate;
-        //     existing.Language = updateMediaDto.Language;
-        //     existing.Genre = updateMediaDto.Genre;
-        //     existing.Description = updateMediaDto.Description;
-        //     existing.CoverImageUrl = updateMediaDto.CoverImageUrl;
-        //     existing.Isbn10 = updateMediaDto.Isbn10;
-        //     existing.Isbn13 = updateMediaDto.Isbn13;
-        //     existing.PageCount = updateMediaDto.PageCount;
-        //     existing.IssueNumber = updateMediaDto.IssueNumber;
-        //     existing.Volume = updateMediaDto.Volume;
-        //     existing.UpdatedAt = DateTime.UtcNow;
-            
-        //     await _context.SaveChangesAsync();
-            
-        //     return await GetUserMediaCopyByIdAsync(mediaCopyId);
-        // }
-        
-        // public async Task<bool> DeleteMediaAsync(int id)
-        // {
-        //     var media = await _context.Media.FindAsync(id);
-        //     if (media == null) return false;
-            
-        //     _context.Media.Remove(media);
-        //     await _context.SaveChangesAsync();
-            
-        //     return true;
-        // }
     }
 }

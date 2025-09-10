@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using QLAPLibraryCatalogAPI.Models.DTOs;
 using QLAPLibraryCatalogAPI.Services;
@@ -7,17 +9,30 @@ namespace QLAPLibraryCatalogAPI.Controllers
     /// <summary>
     /// Controller for all borrow request functions
     /// </summary>
+    [Authorize] 
     [ApiController]
     [Route("api/BorrowRequest")]
     public class BorrowRequestsController : ControllerBase
     {
         private readonly IBorrowRequestService _borrowRequestsService;
-        /// <summary>
-        /// Constructor
-        /// </summary>
+        /// <summary> Constructor </summary>
         public BorrowRequestsController(IBorrowRequestService borrowRequestsService)
         {
            _borrowRequestsService = borrowRequestsService; 
+        }
+        /// <summary>
+        /// Returns userID from authentication scheme/ JWT
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
+        [NonAction]
+        private int GetUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim))
+                throw new UnauthorizedAccessException("User ID claim not found in token.");
+            
+            return int.Parse(userIdClaim);
         }
         /// <summary>
         ///  Gets all borrow requests

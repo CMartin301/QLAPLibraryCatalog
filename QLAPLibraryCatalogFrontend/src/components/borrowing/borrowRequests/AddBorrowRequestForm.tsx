@@ -1,8 +1,8 @@
 // components/forms/AddBorrowRequestForm.tsx
 import React from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { CreateBorrowRequestDto } from "../../types/borrowRequests";
-import { borrowRequestService } from "../../services/borrowRequestService";
+import { CreateBorrowRequestDto } from "../../../types/borrowRequests";
+import { borrowRequestService } from "../../../services/borrowRequestService";
 
 interface BorrowRequestFormData {
   borrowerId: number;

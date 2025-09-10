@@ -1,64 +1,43 @@
-import React from 'react';
-import { Book, Calendar, ArrowLeftRight, Clock, User, TrendingUp } from 'lucide-react';
+import React, { useState } from 'react';
+import { Book, Calendar, ArrowLeftRight, Clock, User, TrendingUp, AlertCircle } from 'lucide-react';
 import useAuth from '../../hooks/useAuth';
+import { useDashboardStats, useRecentActivity, useUpcomingDueDates } from '../../hooks/useDashboard';
+import StatCard from '../shared/StatCard';
+import { RecentActivityItem, UpcomingDueDateItem } from '../../types/dashboard';
 
-// Mock data
-const mockData = {
-  stats: {
-    totalBooks: 24,
-    activeLoans: 3,
-    pendingRequests: 2,
-    overdueItems: 1
-  },
-  recentActivity: [
-    { id: 1, type: 'loan', message: '"The Great Gatsby" borrowed from John Doe', time: '2 hours ago' },
-    { id: 2, type: 'request', message: 'New borrow request for "1984"', time: '1 day ago' },
-    { id: 3, type: 'return', message: '"To Kill a Mockingbird" returned', time: '2 days ago' }
-  ],
-  upcomingDueDates: [
-    { id: 1, title: 'Dune', author: 'Frank Herbert', dueDate: '2025-09-10', overdue: false },
-    { id: 2, title: 'The Hobbit', author: 'J.R.R. Tolkien', dueDate: '2025-09-08', overdue: true }
-  ]
-};
+// Loading component for better UX
+const LoadingSkeleton: React.FC<{ className?: string }> = ({ className = '' }) => (
+  <div className={`animate-pulse bg-gray-200 rounded ${className}`} />
+);
 
-// --- Types ---
-interface StatCardProps {
-  icon: React.ComponentType<{ className?: string }>;
-  title: string;
-  value: number | string;
-  description?: string;
-  color?: string;
-}
-
-interface Activity {
-  id: number;
-  type: 'loan' | 'request' | 'return' | string;
+// Error component for better error handling
+interface ErrorDisplayProps {
   message: string;
-  time: string;
+  onRetry?: () => void;
 }
 
-interface ActivityItemProps {
-  activity: Activity;
-}
-
-// --- Components ---
-const StatCard: React.FC<StatCardProps> = ({ icon: Icon, title, value, description, color = 'lavender' }) => (
-  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-    <div className="flex items-center">
-      <div className={`flex-shrink-0 p-3 bg-${color}-100 rounded-lg`}>
-        <Icon className={`w-6 h-6 text-${color}-600`} />
-      </div>
-      <div className="ml-4 flex-1">
-        <div className="text-2xl font-bold text-gray-900">{value}</div>
-        <div className="text-sm font-medium text-gray-600">{title}</div>
-        {description && <div className="text-xs text-gray-500 mt-1">{description}</div>}
-      </div>
-    </div>
+const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ message, onRetry }) => (
+  <div className="flex flex-col items-center justify-center p-6 text-center">
+    <AlertCircle className="w-12 h-12 text-red-400 mb-3" />
+    <p className="text-gray-600 mb-4">{message}</p>
+    {onRetry && (
+      <button
+        onClick={onRetry}
+        className="px-4 py-2 bg-lavender-500 text-white rounded-lg hover:bg-lavender-600 transition-colors focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:ring-offset-2"
+      >
+        Try Again
+      </button>
+    )}
   </div>
 );
 
+// Activity Item Component (improved)
+interface ActivityItemProps {
+  activity: RecentActivityItem;
+}
+
 const ActivityItem: React.FC<ActivityItemProps> = ({ activity }) => {
-  const getIcon = (type: Activity['type']) => {
+  const getIcon = (type: RecentActivityItem['type']) => {
     switch (type) {
       case 'loan':
         return <ArrowLeftRight className="w-4 h-4 text-blue-500" />;
@@ -71,159 +50,250 @@ const ActivityItem: React.FC<ActivityItemProps> = ({ activity }) => {
     }
   };
 
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+      
+      if (diffInHours < 1) return 'Just now';
+      if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+      
+      const diffInDays = Math.floor(diffInHours / 24);
+      if (diffInDays < 7) return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+      
+      return date.toLocaleDateString();
+    } catch {
+      return dateString; // fallback to original string if parsing fails
+    }
+  };
+
   return (
     <div className="flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
-      <div className="flex-shrink-0 mt-0.5">{getIcon(activity.type)}</div>
+      <div className="flex-shrink-0 mt-0.5" aria-hidden="true">
+        {getIcon(activity.type)}
+      </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-gray-900">{activity.message}</p>
-        <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
+        <p className="text-sm text-gray-900">{activity.description}</p>
+        <time className="text-xs text-gray-500 mt-1" dateTime={activity.date}>
+          {formatDate(activity.date)}
+        </time>
       </div>
     </div>
   );
 };
 
-// --- Main Dashboard ---
+// Due Date Item Component (improved)
+interface DueDateItemProps {
+  item: UpcomingDueDateItem;
+}
+
+const DueDateItem: React.FC<DueDateItemProps> = ({ item }) => {
+  const isOverdue = item.daysUntilDue !== undefined && item.daysUntilDue < 0;
+  const isDueSoon = item.daysUntilDue !== undefined && item.daysUntilDue <= 3 && item.daysUntilDue >= 0;
+
+  const getStatusColor = () => {
+    if (isOverdue) return 'bg-red-100 text-red-700';
+    if (isDueSoon) return 'bg-orange-100 text-orange-700';
+    return 'bg-blue-100 text-blue-700';
+  };
+
+  const getStatusText = () => {
+    if (isOverdue) return `Overdue by ${Math.abs(item.daysUntilDue!)} day${Math.abs(item.daysUntilDue!) > 1 ? 's' : ''}`;
+    if (item.daysUntilDue === 0) return 'Due today';
+    if (item.daysUntilDue === 1) return 'Due tomorrow';
+    if (isDueSoon) return `Due in ${item.daysUntilDue} days`;
+    return `Due ${new Date(item.dueDate).toLocaleDateString()}`;
+  };
+
+  return (
+    <div className="flex items-start space-x-3 p-3 rounded-lg border border-gray-100">
+      <Book className="w-5 h-5 text-lavender-500 mt-1 flex-shrink-0" aria-hidden="true" />
+      <div className="flex-1 min-w-0">
+        <div className="font-medium text-gray-900 text-sm">{item.mediaTitle}</div>
+        <div 
+          className={`text-xs px-2 py-1 rounded-full inline-block mt-2 ${getStatusColor()}`}
+          role="status"
+          aria-label={`${item.mediaTitle} ${getStatusText()}`}
+        >
+          {getStatusText()}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Main Dashboard Component
 const Dashboard: React.FC = () => {
   const { username } = useAuth();
+  
+  // Use your custom hooks instead of mock data
+  const { stats, loading: statsLoading, error: statsError, refetch: refetchStats } = useDashboardStats();
+  const { activity, loading: activityLoading, error: activityError, refetch: refetchActivity } = useRecentActivity(5);
+  const { dueDates, loading: dueDatesLoading, error: dueDatesError, refetch: refetchDueDates } = useUpcomingDueDates(7);
+
 
   return (
     <div className="container-fluid py-4 bg-pattern min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Welcome Header */}
-        <div className="mb-8">
+        <header className="mb-8">
           <div className="text-center mb-5">
             <h1 className="text-2xl md:text-3xl font-bold text-lavender-500 mb-3">
               Welcome back, {username}!
             </h1>
-            <div className="accent-stripes mx-auto mt-3"></div>
+            <div className="accent-stripes mx-auto mt-3" aria-hidden="true"></div>
           </div>
           <p className="text-gray-600 text-center">Here's what's happening with your library</p>
-        </div>
+        </header>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <StatCard
-            icon={Book}
-            title="Books in Collection"
-            value={mockData.stats.totalBooks}
-            description="Total items you own"
-            color="lavender"
-          />
-          <StatCard
-            icon={ArrowLeftRight}
-            title="Active Loans"
-            value={mockData.stats.activeLoans}
-            description="Currently borrowed/lent"
-            color="blue"
-          />
-          <StatCard
-            icon={Calendar}
-            title="Pending Requests"
-            value={mockData.stats.pendingRequests}
-            description="Awaiting response"
-            color="orange"
-          />
-          <StatCard
-            icon={Clock}
-            title="Overdue Items"
-            value={mockData.stats.overdueItems}
-            description="Need attention"
-            color="red"
-          />
-        </div>
+        <section aria-labelledby="stats-heading" className="mb-8">
+          <h2 id="stats-heading" className="sr-only">Library Statistics</h2>
+          
+          {statsLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[...Array(4)].map((_, i) => (
+                <LoadingSkeleton key={i} className="h-24" />
+              ))}
+            </div>
+          ) : statsError ? (
+            <ErrorDisplay message="Failed to load statistics" onRetry={refetchStats} />
+          ) : stats ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <StatCard
+                icon={Book}
+                title="Books in Collection"
+                value={stats.totalBooks}
+                description="Total items you own"
+                color="lavender"
+                to="/my-library"
+              />
+              <StatCard
+                icon={ArrowLeftRight}
+                title="Active Loans"
+                value={stats.activeLoans}
+                description="Currently borrowed/lent"
+                color="blue"
+                to="/borrowing"
+              />
+              <StatCard
+                icon={Calendar}
+                title="Pending Requests"
+                value={stats.pendingRequests}
+                description="Awaiting response"
+                color="orange"
+                to="/borrowing"
+              />
+              <StatCard
+                icon={Clock}
+                title="Overdue Items"
+                value={stats.overdueItems}
+                description="Need attention"
+                color="red"
+                to="/borrowing"
+              />
+            </div>
+          ) : null}
+        </section>
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Recent Activity */}
-          <div className="lg:col-span-2">
+          <section aria-labelledby="activity-heading" className="lg:col-span-2">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200">
               <div className="p-6 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                  <TrendingUp className="w-5 h-5 text-lavender-500 mr-2" />
+                <h2 id="activity-heading" className="text-lg font-semibold text-gray-900 flex items-center">
+                  <TrendingUp className="w-5 h-5 text-lavender-500 mr-2" aria-hidden="true" />
                   Recent Activity
                 </h2>
               </div>
               <div className="p-4">
-                {mockData.recentActivity.length > 0 ? (
-                  <div className="space-y-2">
-                    {mockData.recentActivity.map((activity) => (
-                      <ActivityItem key={activity.id} activity={activity} />
+                {activityLoading ? (
+                  <div className="space-y-3">
+                    {[...Array(3)].map((_, i) => (
+                      <LoadingSkeleton key={i} className="h-16" />
+                    ))}
+                  </div>
+                ) : activityError ? (
+                  <ErrorDisplay message="Failed to load recent activity" onRetry={refetchActivity} />
+                ) : activity.length > 0 ? (
+                  <div className="space-y-2" role="feed" aria-label="Recent library activity">
+                    {activity.map((activityItem, index) => (
+                      <ActivityItem key={`activity-${index}`} activity={activityItem} />
                     ))}
                   </div>
                 ) : (
                   <div className="text-center py-8 text-gray-500">
-                    <Book className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                    <Book className="w-12 h-12 text-gray-300 mx-auto mb-3" aria-hidden="true" />
                     <p>No recent activity</p>
                   </div>
                 )}
               </div>
             </div>
-          </div>
+          </section>
 
           {/* Upcoming Due Dates */}
-          <div className="lg:col-span-1">
+          <section aria-labelledby="due-dates-heading" className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200">
               <div className="p-6 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                  <Clock className="w-5 h-5 text-lavender-500 mr-2" />
+                <h2 id="due-dates-heading" className="text-lg font-semibold text-gray-900 flex items-center">
+                  <Clock className="w-5 h-5 text-lavender-500 mr-2" aria-hidden="true" />
                   Due Soon
                 </h2>
               </div>
               <div className="p-4">
-                {mockData.upcomingDueDates.length > 0 ? (
+                {dueDatesLoading ? (
                   <div className="space-y-4">
-                    {mockData.upcomingDueDates.map((item) => (
-                      <div key={item.id} className="flex items-start space-x-3 p-3 rounded-lg border border-gray-100">
-                        <Book className="w-5 h-5 text-lavender-500 mt-1 flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium text-gray-900 text-sm">{item.title}</div>
-                          <div className="text-xs text-gray-500 mb-2">{item.author}</div>
-                          <div className={`text-xs px-2 py-1 rounded-full inline-block ${
-                            item.overdue 
-                              ? 'bg-red-100 text-red-700' 
-                              : 'bg-orange-100 text-orange-700'
-                          }`}>
-                            Due {new Date(item.dueDate).toLocaleDateString()}
-                          </div>
-                        </div>
-                      </div>
+                    {[...Array(2)].map((_, i) => (
+                      <LoadingSkeleton key={i} className="h-20" />
+                    ))}
+                  </div>
+                ) : dueDatesError ? (
+                  <ErrorDisplay message="Failed to load due dates" onRetry={refetchDueDates} />
+                ) : dueDates.length > 0 ? (
+                  <div className="space-y-4" role="list" aria-label="Upcoming due dates">
+                    {dueDates.map((item) => (
+                      <DueDateItem key={`due-${item.loanId}`} item={item} />
                     ))}
                   </div>
                 ) : (
                   <div className="text-center py-6 text-gray-500">
-                    <Calendar className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+                    <Calendar className="w-10 h-10 text-gray-300 mx-auto mb-2" aria-hidden="true" />
                     <p className="text-sm">No upcoming due dates</p>
                   </div>
                 )}
               </div>
             </div>
-          </div>
+          </section>
         </div>
 
         {/* Quick Actions */}
-        <div className="mt-8">
+        {/* <section aria-labelledby="quick-actions-heading" className="mt-8">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <button className="flex items-center justify-center px-4 py-3 bg-lavender-50 hover:bg-lavender-100 text-lavender-700 rounded-lg transition-colors border border-lavender-200">
-                <Book className="w-5 h-5 mr-2" />
+            <h2 id="quick-actions-heading" className="text-lg font-semibold text-gray-900 mb-4">
+              Quick Actions
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" role="group">
+              <button className="flex items-center justify-center px-4 py-3 bg-lavender-50 hover:bg-lavender-100 text-lavender-700 rounded-lg transition-colors border border-lavender-200 focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:ring-offset-2">
+                <Book className="w-5 h-5 mr-2" aria-hidden="true" />
                 Browse Library
               </button>
-              <button className="flex items-center justify-center px-4 py-3 bg-lavender-50 hover:bg-lavender-100 text-lavender-700 rounded-lg transition-colors border border-lavender-200">
-                <Calendar className="w-5 h-5 mr-2" />
+              <button className="flex items-center justify-center px-4 py-3 bg-lavender-50 hover:bg-lavender-100 text-lavender-700 rounded-lg transition-colors border border-lavender-200 focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:ring-offset-2">
+                <Calendar className="w-5 h-5 mr-2" aria-hidden="true" />
                 View Requests
               </button>
-              <button className="flex items-center justify-center px-4 py-3 bg-lavender-50 hover:bg-lavender-100 text-lavender-700 rounded-lg transition-colors border border-lavender-200">
-                <ArrowLeftRight className="w-5 h-5 mr-2" />
+              <button className="flex items-center justify-center px-4 py-3 bg-lavender-50 hover:bg-lavender-100 text-lavender-700 rounded-lg transition-colors border border-lavender-200 focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:ring-offset-2">
+                <ArrowLeftRight className="w-5 h-5 mr-2" aria-hidden="true" />
                 Manage Loans
               </button>
-              <button className="flex items-center justify-center px-4 py-3 bg-lavender-50 hover:bg-lavender-100 text-lavender-700 rounded-lg transition-colors border border-lavender-200">
-                <User className="w-5 h-5 mr-2" />
+              <button className="flex items-center justify-center px-4 py-3 bg-lavender-50 hover:bg-lavender-100 text-lavender-700 rounded-lg transition-colors border border-lavender-200 focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:ring-offset-2">
+                <User className="w-5 h-5 mr-2" aria-hidden="true" />
                 Profile Settings
               </button>
             </div>
           </div>
-        </div>
+        </section> */}
       </div>
     </div>
   );

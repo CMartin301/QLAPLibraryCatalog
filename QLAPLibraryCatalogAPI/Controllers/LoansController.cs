@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using QLAPLibraryCatalogAPI.Models.DTOs;
 using QLAPLibraryCatalogAPI.Services;
@@ -5,19 +7,32 @@ using QLAPLibraryCatalogAPI.Services;
 namespace QLAPLibraryCatalogAPI.Controllers
 {
     /// <summary>
-    /// Controller for all borrow request functions
+    /// Controller for all loan functions
     /// </summary>
+    [Authorize] 
     [ApiController]
     [Route("api/Loan")]
     public class LoansController : ControllerBase
     {
         private readonly ILoansService _loansService;
-        /// <summary>
-        /// Constructor
-        /// </summary>
+        /// <summary> Constructor </summary>
         public LoansController(ILoansService LoansService)
         {
             _loansService = LoansService;
+        }
+        /// <summary>
+        /// Returns userID from authentication scheme/ JWT
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
+        [NonAction]
+        private int GetUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim))
+                throw new UnauthorizedAccessException("User ID claim not found in token.");
+            
+            return int.Parse(userIdClaim);
         }
         #region Get Loans without Details
         /// <summary>
@@ -41,10 +56,11 @@ namespace QLAPLibraryCatalogAPI.Controllers
         /// Gets all loans where the user is the borrower without details
         /// </summary>
         [HttpGet("User/Borrowed")]
-        public async Task<IActionResult> GetLoansBorrowedByUser(int userId)
+        public async Task<IActionResult> GetLoansBorrowedByUser()
         {
             try
             {
+                var userId = GetUserId();
                 var items = await _loansService.GetLoansBorrowedByUserAsync(userId);
                 return Ok(items);
             }
@@ -58,10 +74,11 @@ namespace QLAPLibraryCatalogAPI.Controllers
         /// Gets all loans where the user owns the media (lender) without details
         /// </summary>
         [HttpGet("User/Lent")]
-        public async Task<IActionResult> GetLoansOfUserMedia(int userId)
+        public async Task<IActionResult> GetLoansOfUserMedia()
         {
             try
             {
+                var userId = GetUserId();
                 var items = await _loansService.GetLoansOfUserMediaAsync(userId);
                 return Ok(items);
             }
@@ -99,10 +116,11 @@ namespace QLAPLibraryCatalogAPI.Controllers
         /// Gets all loans where the user is the borrower with full details for display
         /// </summary>
         [HttpGet("User/Borrowed/Details")]
-        public async Task<IActionResult> GetLoansBorrowedByUserWithDetails(int userId)
+        public async Task<IActionResult> GetLoansBorrowedByUserWithDetails()
         {
             try
             {
+                var userId = GetUserId();
                 var items = await _loansService.GetLoansBorrowedByUserWithDetailsAsync(userId);
                 return Ok(items);
             }
@@ -116,10 +134,11 @@ namespace QLAPLibraryCatalogAPI.Controllers
         /// Gets all loans where the user owns the media (lender) with full details for display
         /// </summary>
         [HttpGet("User/Lent/Details")]
-        public async Task<IActionResult> GetLoansOfUserMediaWithDetails(int userId)
+        public async Task<IActionResult> GetLoansOfUserMediaWithDetails()
         {
             try
             {
+                var userId = GetUserId();
                 var items = await _loansService.GetLoansOfUserMediaWithDetailsAsync(userId);
                 return Ok(items);
             }
@@ -159,7 +178,7 @@ namespace QLAPLibraryCatalogAPI.Controllers
         /// <param name="loanId"></param>
         /// <param name="newDueDate"></param>
         /// <returns></returns>
-        [HttpPut("{loanId}")]
+        [HttpPut("{loanId}/Extend")]
         public async Task<IActionResult> ExtendLoanDueDate(int loanId, [FromBody] DateOnly? newDueDate)
         {
             try

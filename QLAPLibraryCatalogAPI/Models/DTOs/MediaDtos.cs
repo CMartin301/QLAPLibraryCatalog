@@ -72,6 +72,8 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
         public bool? IsAvailable { get; set; }
         public int? MaxLoanDays { get; set; }
         public bool? RequiresApproval { get; set; }
+        public string? CurrentLocationZoneName { get; set; }
+        public string? HomeLocationZoneName { get; set; }
         public MediaDto Media { get; set; } = null!;
     }
 

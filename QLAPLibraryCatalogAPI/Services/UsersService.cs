@@ -5,8 +5,10 @@ using QLAPLibraryCatalogAPI.Models.DTOs;
 
 namespace QLAPLibraryCatalogAPI.Services
 {
+    /// <summary> Interface </summary>
     public interface IUsersService
     {
+#pragma warning disable 1591
         Task<IEnumerable<UserDto>> GetAllUsersAsync();
         Task<UserDto?> GetUserByIdAsync(int userId);
         Task<UserDto?> GetUserByEmailAsync(string email);
@@ -14,87 +16,69 @@ namespace QLAPLibraryCatalogAPI.Services
         Task<UserPreferencesDto?> UpdateUserPreferencesAsync(int userId, UserPreferencesDto preferencesDto);
         Task<bool> DeactivateUserAsync(int userId);
         Task<bool> ReactivateUserAsync(int userId);
+#pragma warning restore 1591
     }
 
+    /// <summary>
+    /// Service/data layer operations on/access to users
+    /// </summary>
     public class UsersService : IUsersService
     {
         private readonly LibraryCatalogContext _context;
         private readonly IAuthService _authService;
-
+        /// <summary> Constructor </summary>
         public UsersService(LibraryCatalogContext context, IAuthService authService)
         {
             _context = context;
             _authService = authService;
         }
+        /// <summary>
+        /// Gets all users
+        /// </summary>
+        /// <returns></returns>
         public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
         {
             return await _context.Users
                 .Include(m => m.UserPreferences)
                 .Where(m => m.IsActive == true)
-                .Select(m => new UserDto
-                {
-                    UserId = m.UserId,
-                    Email = m.Email,
-                    Username = m.Username,
-                    UserPreferences = new UserPreferencesDto
-                    {
-                        UserId = m.UserId,
-                        DefaultLoanDays = m.UserPreferences.DefaultLoanDays,
-                        AutoApproveRequests = m.UserPreferences.AutoApproveRequests,
-                        EmailNotifications = m.UserPreferences.EmailNotifications,
-                        SmsNotifications = m.UserPreferences.SmsNotifications,
-                        NotificationSettings = m.UserPreferences.NotificationSettings,
-                    }
-                })
+                .Select(user => MapUser(user))
                 .ToListAsync();
         }
-
+        /// <summary>
+        /// Gets user by ID
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         public async Task<UserDto?> GetUserByIdAsync(int userId)
         {
             return await _context.Users
                 .Include(m => m.UserPreferences)
                 .Where(m => m.IsActive == true)
                 .Where(m => m.UserId == userId)
-                .Select(m => new UserDto
-                {
-                    UserId = m.UserId,
-                    Email = m.Email,
-                    Username = m.Username,
-                    UserPreferences = new UserPreferencesDto
-                    {
-                        UserId = m.UserId,
-                        DefaultLoanDays = m.UserPreferences.DefaultLoanDays,
-                        AutoApproveRequests = m.UserPreferences.AutoApproveRequests,
-                        EmailNotifications = m.UserPreferences.EmailNotifications,
-                        SmsNotifications = m.UserPreferences.SmsNotifications,
-                        NotificationSettings = m.UserPreferences.NotificationSettings,
-                    }
-                })
+                .Select(user => MapUser(user))
                 .FirstOrDefaultAsync();
         }
+        /// <summary>
+        /// Gets user by email
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
         public async Task<UserDto?> GetUserByEmailAsync(string email)
         {
             return await _context.Users
                 .Include(m => m.UserPreferences)
                 .Where(m => m.IsActive == true)
                 .Where(m => m.Email == email)
-                .Select(m => new UserDto
-                {
-                    UserId = m.UserId,
-                    Email = m.Email,
-                    Username = m.Username,
-                    UserPreferences = new UserPreferencesDto
-                    {
-                        UserId = m.UserId,
-                        DefaultLoanDays = m.UserPreferences.DefaultLoanDays,
-                        AutoApproveRequests = m.UserPreferences.AutoApproveRequests,
-                        EmailNotifications = m.UserPreferences.EmailNotifications,
-                        SmsNotifications = m.UserPreferences.SmsNotifications,
-                        NotificationSettings = m.UserPreferences.NotificationSettings,
-                    }
-                })
+                .Select(user => MapUser(user))
                 .FirstOrDefaultAsync();
         }
+        /// <summary>
+        /// Creates new user
+        /// </summary>
+        /// <param name="userDto"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="InvalidOperationException"></exception>
         public async Task<UserDto> CreateUserAsync(CreateUserDto userDto)
         {
             // Check if user already exists
@@ -138,7 +122,12 @@ namespace QLAPLibraryCatalogAPI.Services
 
             return await GetUserByIdAsync(user.UserId) ?? throw new InvalidOperationException("Failed to retrieve created user");
         }
-
+        /// <summary>
+        /// Updates user preferences
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="preferencesDto"></param>
+        /// <returns></returns>
         public async Task<UserPreferencesDto?> UpdateUserPreferencesAsync(int userId, UserPreferencesDto preferencesDto)
         {
             var user = await _context.Users
@@ -161,7 +150,7 @@ namespace QLAPLibraryCatalogAPI.Services
             var prefs = user.UserPreferences;
 
 
-        
+
             prefs.DefaultLoanDays = preferencesDto.DefaultLoanDays;
             prefs.AutoApproveRequests = preferencesDto.AutoApproveRequests;
             prefs.EmailNotifications = preferencesDto.EmailNotifications;
@@ -184,7 +173,11 @@ namespace QLAPLibraryCatalogAPI.Services
                 NotificationSettings = prefs.NotificationSettings
             };
         }
-
+        /// <summary>
+        /// Deactivates existing user
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
 
         public async Task<bool> DeactivateUserAsync(int userId)
         {
@@ -192,22 +185,49 @@ namespace QLAPLibraryCatalogAPI.Services
             if (existing == null) return false;
 
             existing.IsActive = false;
-            
+
             await _context.SaveChangesAsync();
-            
+
             return true;
         }
-        
+        /// <summary>
+        /// Reactivates existing, deactivated user
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         public async Task<bool> ReactivateUserAsync(int userId)
         {
             var existing = await _context.Users.FindAsync(userId);
             if (existing == null) return false;
 
             existing.IsActive = true;
-            
+
             await _context.SaveChangesAsync();
-            
+
             return true;
         }
+        #region Mapping Methods
+        /// <summary>
+        /// Maps a user into a userDto
+        /// </summary>
+        private static UserDto MapUser(User user)
+        {
+            return new UserDto
+            {
+                UserId = user.UserId,
+                Email = user.Email,
+                Username = user.Username,
+                UserPreferences = new UserPreferencesDto
+                {
+                    UserId = user.UserId,
+                    DefaultLoanDays = user.UserPreferences.DefaultLoanDays,
+                    AutoApproveRequests = user.UserPreferences.AutoApproveRequests,
+                    EmailNotifications = user.UserPreferences.EmailNotifications,
+                    SmsNotifications = user.UserPreferences.SmsNotifications,
+                    NotificationSettings = user.UserPreferences.NotificationSettings,
+                }
+            };
+        }
+        #endregion
     }
 }

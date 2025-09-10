@@ -35,6 +35,8 @@ interface DataTableProps<T> {
         onClick: () => void;
       }
     | null;
+  onRowClick?: (row: T) => void;
+  rowClassName?: string;
 }
 
 export function DataTable<T>({
@@ -47,6 +49,8 @@ export function DataTable<T>({
   error,
   onRefresh,
   actionButton,
+  onRowClick,
+  rowClassName,
 }: DataTableProps<T>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -67,6 +71,20 @@ export function DataTable<T>({
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
+
+  const getRowClassName = (baseClassName: string) => {
+    const classes = [baseClassName];
+    
+    if (onRowClick) {
+      classes.push("cursor-pointer");
+    }
+    
+    if (rowClassName) {
+      classes.push(rowClassName);
+    }
+    
+    return classes.join(" ");
+  };
 
   return (
     <div>
@@ -209,7 +227,16 @@ export function DataTable<T>({
               table.getRowModel().rows.map((row) => (
                 <tr
                   key={row.id}
-                  className="hover:bg-[var(--color-bg)] transition-colors"
+                  className={getRowClassName("hover:bg-[var(--color-bg)] transition-colors")}
+                  onClick={onRowClick ? () => onRowClick(row.original) : undefined}
+                  role={onRowClick ? "button" : undefined}
+                  tabIndex={onRowClick ? 0 : undefined}
+                  onKeyDown={onRowClick ? (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      onRowClick(row.original);
+                    }
+                  } : undefined}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="px-6 py-4 whitespace-nowrap">

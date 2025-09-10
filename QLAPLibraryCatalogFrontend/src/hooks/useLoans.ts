@@ -24,9 +24,9 @@ export const useLoans = (userID: number | null, loanTab: LoanTab) => {
       let fetchedLoans: LoanWithDetails[];
       
       if (loanTab === 'borrowed') {
-        fetchedLoans = await loanService.getLoansBorrowedByUserWithDetails(userID);
+        fetchedLoans = await loanService.getLoansBorrowedByUserWithDetails();
       } else {
-        fetchedLoans = await loanService.getLoansOfUserMediaWithDetails(userID);
+        fetchedLoans = await loanService.getLoansOfUserMediaWithDetails();
       }
       
       setLoans(fetchedLoans);

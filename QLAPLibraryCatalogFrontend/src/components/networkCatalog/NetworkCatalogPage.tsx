@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
-import MediaTable from '../media/MediaTable';
 import { Media } from '../../types/media';
 import { mediaService } from '../../services/mediaService';
+import { NetworkMediaTable } from '../media/networkMediaTable/NetworkMediaTable';
 
 const NetworkCatalogPage: React.FC = () => {
   const navigate = useNavigate();
@@ -11,7 +11,6 @@ const NetworkCatalogPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [media, setMedia] = useState<Media[]>([]);
 
-    const [saveMessage, setSaveMessage] = useState<string | null>(null);
   
   useEffect(() => {
     loadMedia();
@@ -30,12 +29,6 @@ const NetworkCatalogPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Add this handler function:
-  const handleSaveNewMedia = (message: string) => {
-    setSaveMessage(message);
-    setTimeout(() => setSaveMessage(null), 3000);
   };
 
   if (isLoading) {
@@ -57,21 +50,13 @@ const NetworkCatalogPage: React.FC = () => {
             </div>
         </div>
 
-      {/* Save Message */}
-      {saveMessage && (
-        <div className={`p-4 mb-4 rounded-lg border ${
-          saveMessage.includes('Failed') 
-            ? 'bg-red-50 border-red-200 text-red-700' 
-            : 'bg-green-50 border-green-200 text-green-700'
-        }`}>
-          {saveMessage}
-        </div>
-      )}
-        <MediaTable 
-          media={media} 
-          onRefresh={loadMedia}
-          onSaveNewMedia={handleSaveNewMedia}
-        />
+<NetworkMediaTable 
+  media={media} 
+  onRefresh={loadMedia}
+  mode='catalog'
+  loading={isLoading}
+  error={error}
+/>
 
     </div>
   );

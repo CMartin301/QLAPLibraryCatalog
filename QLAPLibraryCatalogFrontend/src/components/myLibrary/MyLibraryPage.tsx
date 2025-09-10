@@ -3,13 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 import MediaTable from '../media/MediaTable';
-import { Media } from '../../types/media';
-import { mediaService } from '../../services/mediaService';
-import { BorrowRequestsTable } from '../borrowing/BorrowRequestsTable';
-import { BorrowRequestDto } from '../../types/borrowRequests';
-import { borrowRequestService } from '../../services/borrowRequestService';
 import { useBorrowRequests } from '../../hooks/useBorrowRequests';
 import { useMedia } from '../../hooks/useMedia';
+import ReceivedBorrowRequestsTable from '../borrowing/borrowRequests/ReceivedBorrowRequestsTable';
+import { UserMediaTable } from '../media/userMediaTable/UserMediaTable';
 
 
 const MyLibraryPage: React.FC = () => {
@@ -17,7 +14,7 @@ const MyLibraryPage: React.FC = () => {
   // const [isLoading, setIsLoading] = useState(true);
   // const [error, setError] = useState<string | null>(null);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'myCollection' | 'addToCollection' | 'borrowRequests' >('myCollection');
+  // const [activeTab, setActiveTab] = useState<'myCollection' | 'addToCollection' | 'borrowRequests' >('myCollection');
    const { 
     media: userMedia, 
     loading: userMediaLoading, 
@@ -31,12 +28,12 @@ const MyLibraryPage: React.FC = () => {
     error: allMediaError, 
     refetch: refetchAllMedia 
   } = useMedia(null, true);
-  const { 
-    requests: borrowRequests, 
-    loading: requestsLoading, 
-    error: requestsError, 
-    refetch: refetchBorrowRequests 
-  } = useBorrowRequests(userID, 'received');
+  // const { 
+  //   requests: borrowRequests, 
+  //   loading: requestsLoading, 
+  //   error: requestsError, 
+  //   refetch: refetchBorrowRequests 
+  // } = useBorrowRequests(userID, 'received');
 const isLoading = userMediaLoading || allMediaLoading;
 const error = userMediaError || allMediaError;
 
@@ -66,9 +63,9 @@ const handleRefresh = () => {
     );
   }
 
-  const handleSwitchToAddTab = () => {
-    setActiveTab('addToCollection');
-  };
+  // const handleSwitchToAddTab = () => {
+  //   setActiveTab('addToCollection');
+  // };
 
   return (
     <div className="container-fluid py-4 bg-pattern">
@@ -100,7 +97,7 @@ const handleRefresh = () => {
       )}
 
       {/* Tab Navigation */}
-      <div className="row mb-4">
+      {/* <div className="row mb-4">
         <div className="col">
           <div className="flex border-b border-gray-200">
             <button
@@ -144,12 +141,19 @@ const handleRefresh = () => {
             </button>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Tab Content */}
       <div className="row">
         <div className="col">
-          {activeTab === 'myCollection' ? (
+            <UserMediaTable 
+              media={userMedia} 
+              onRefresh={refetchUserMedia}
+              onSaveMessage={handleSaveMessage}
+              loading={userMediaLoading}
+              error={userMediaError}
+            />
+          {/* {activeTab === 'myCollection' ? (
             <MediaTable 
               media={userMedia} 
               onRefresh={refetchUserMedia}
@@ -169,14 +173,14 @@ const handleRefresh = () => {
               error={allMediaError}
             />
           ) : (
-            <BorrowRequestsTable 
+
+            <ReceivedBorrowRequestsTable
               requests={borrowRequests}
-              userRole={'lender'}
               onRefresh={refetchBorrowRequests}
-              error={requestsError}
               loading={requestsLoading}
+              error={requestsError}
             />
-          )}
+          )} */}
 
         </div>
       </div>

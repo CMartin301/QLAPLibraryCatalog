@@ -12,7 +12,7 @@ import {
   PaginationState,
   ColumnDef,
 } from '@tanstack/react-table';
-import { Search, Plus, Filter, X } from 'lucide-react';
+import { Search, Plus, Filter, X, Eye } from 'lucide-react';
 import { Media, MediaFormData, CreateMediaRequest, CreateMediaCopyRequest, MediaCopy } from '../../types/media';
 import { AddMediaForm } from './AddMediaForm';
 import { Modal } from '../shared/Modal';
@@ -20,8 +20,9 @@ import { mediaService } from '../../services/mediaService';
 import { useModalScrollLock } from '../../hooks/useModalScrollLock';
 import { AddMediaCopyForm } from './AddMediaCopyForm';
 import useAuth from '../../hooks/useAuth';
-import { AddBorrowRequestForm } from '../borrowing/AddBorrowRequestForm';
 import { DataTable } from '../shared/DataTable';
+import { MediaModal } from './MediaModal';
+import { AddBorrowRequestForm } from '../borrowing/borrowRequests/AddBorrowRequestForm';
 
 
 
@@ -58,6 +59,10 @@ export function MediaTable({ media = [], onRefresh, onSaveNewMedia, onSwitchToAd
 const [selectedMediaForBorrow, setSelectedMediaForBorrow] = useState<Media | null>(null);
 const [selectedCopyForBorrow, setSelectedCopyForBorrow] = useState<number | null>(null);
 
+
+  const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
+  const [selectedMediaForDetail, setSelectedMediaForDetail] = useState<Media | null>(null);
+
 useModalScrollLock(isModalOpen || isCopyModalOpen || isBorrowModalOpen);
 
   const columnHelper = createColumnHelper<Media>();
@@ -71,10 +76,27 @@ useModalScrollLock(isModalOpen || isCopyModalOpen || isBorrowModalOpen);
       cell: info => {
         const row = info.row.original;
         return (
-          <div className="flex flex-col min-w-0">
-            <p className="font-medium text-gray-900 truncate">{row.title}</p>
-            <p className="text-sm text-gray-500 truncate">{row.creator || "Unknown author"}</p>
-          </div>
+            <div 
+              className="flex flex-col min-w-0 cursor-pointer hover:bg-gray-50 p-2 -m-2 rounded transition-colors"
+              onClick={() => {
+                setSelectedMediaForDetail(row);
+                setIsMediaModalOpen(true);
+              }}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  setSelectedMediaForDetail(row);
+                  setIsMediaModalOpen(true);
+                }
+              }}
+            >
+              <p className="font-medium text-gray-900 truncate flex items-center gap-2">
+                {row.title}
+                <Eye size={14} className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </p>
+              <p className="text-sm text-gray-500 truncate">{row.creator || "Unknown author"}</p>
+            </div>
         );
       },
       enableSorting: true,
@@ -463,6 +485,16 @@ const handleCloseBorrowModal = () => {
     />
   )}
 </Modal>
+      {/* Media Detail Modal */}
+      <MediaModal
+        media={selectedMediaForDetail}
+        isOpen={isMediaModalOpen}
+        onClose={() => {
+          setIsMediaModalOpen(false);
+          setSelectedMediaForDetail(null);
+        }}
+        showCopies={mode !== 'myLibrary'} // Show copies except in user's own library
+      />
     </div>
   );
 }
