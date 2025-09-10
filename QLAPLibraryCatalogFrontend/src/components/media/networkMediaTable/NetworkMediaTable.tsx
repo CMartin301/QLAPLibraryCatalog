@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Media, CreateMediaRequest, MediaFormData, CreateMediaCopyRequest } from '../../../types/media';
 import { TableContainer } from '../../shared/TableContainer';
 import { Modal } from '../../shared/Modal';
@@ -9,7 +9,7 @@ import { MediaModal } from '../MediaModal';
 import { mediaService } from '../../../services/mediaService';
 import useAuth from '../../../hooks/useAuth';
 import { useTableActions } from '../../../hooks/useTableActions';
-import { getNetworkMediaColumns } from './networkMediaColumns';
+import { useNetworkMediaColumns } from './networkMediaColumns';
 
 interface NetworkMediaTableProps {
   media: Media[];
@@ -139,11 +139,14 @@ const handleBorrowRequestSubmit = async () => {
     onClick: () => setIsAddMediaModalOpen(true)
   } : null;
 
-  const columns = useMemo(() => getNetworkMediaColumns(mode, {
-    onAddToCollection: handleAddToCollection,
-    onRequestItem: handleRequestItem,
+  const columns = useNetworkMediaColumns({
+    handlers: {
+      onAddToCollection: handleAddToCollection,
+      onRequestItem: handleRequestItem
+    },
     addingToCopyMediaId
-  }), [mode, addingToCopyMediaId]);
+  });
+
   return (
     <>
       <TableContainer
@@ -176,11 +179,11 @@ const handleBorrowRequestSubmit = async () => {
         onClose={() => setIsAddMediaModalOpen(false)}
         title="Add New Media"
       >
-<AddMediaForm 
-  onSubmit={handleAddMedia}
-  isSubmitting={actionLoading}
-  submitError={null}
-/>
+        <AddMediaForm 
+          onSubmit={handleAddMedia}
+          isSubmitting={actionLoading}
+          submitError={null}
+        />
       </Modal>
 
       {/* Add Copy Modal */}
@@ -193,13 +196,12 @@ const handleBorrowRequestSubmit = async () => {
         }}
         title={selectedMediaForCopy ? `Add "${selectedMediaForCopy.title}" to Collection` : 'Add to Collection'}
       >
-<AddMediaCopyForm
-  onSubmit={handleAddMediaCopy}
-  isSubmitting={actionLoading}
-  submitError={null}
-  preselectedMedia={selectedMediaForCopy || undefined}
-/>
-
+        <AddMediaCopyForm
+          onSubmit={handleAddMediaCopy}
+          isSubmitting={actionLoading}
+          submitError={null}
+          preselectedMedia={selectedMediaForCopy || undefined}
+        />
       </Modal>
 
       {/* Borrow Request Modal */}
@@ -213,13 +215,13 @@ const handleBorrowRequestSubmit = async () => {
         title={selectedMedia ? `Request "${selectedMedia.title}"` : 'Request Item'}
       >
         {selectedCopyForBorrow && userID && (
-<AddBorrowRequestForm
-  copyId={selectedCopyForBorrow}
-  borrowerId={userID}
-  onSubmit={handleBorrowRequestSubmit}
-  isSubmitting={actionLoading}
-  submitError={null}
-/>
+          <AddBorrowRequestForm
+            copyId={selectedCopyForBorrow}
+            borrowerId={userID}
+            onSubmit={handleBorrowRequestSubmit}
+            isSubmitting={actionLoading}
+            submitError={null}
+          />
         )}
       </Modal>
     </>
