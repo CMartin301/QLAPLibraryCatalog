@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 import { Media } from '../../types/media';
 import { mediaService } from '../../services/mediaService';
-import { CatalogMediaTable } from '../media/CatalogMediaTable';
+import { NetworkMediaTable } from '../media/networkMediaTable/NetworkMediaTable';
 
 const NetworkCatalogPage: React.FC = () => {
   const navigate = useNavigate();
@@ -50,7 +50,7 @@ const NetworkCatalogPage: React.FC = () => {
             </div>
         </div>
 
-<CatalogMediaTable 
+<NetworkMediaTable 
   media={media} 
   onRefresh={loadMedia}
   mode='catalog'
