@@ -4,7 +4,7 @@ import { LoanWithDetails } from "../types/loans";
 
 export interface StatusConfig {
   text: string;
-  color: "gray" | "red" | "yellow" | "green" | "blue"; // semantic tokens
+  color: "gray" | "red" | "yellow" | "green" | "blue" | "purple";
 }
 
 // Loan statuses

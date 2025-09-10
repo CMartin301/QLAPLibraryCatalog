@@ -7,6 +7,7 @@ const colorMap = {
   yellow: "bg-yellow-100 text-yellow-800",
   green: "bg-green-100 text-green-800",
   blue: "bg-blue-100 text-blue-800",
+  purple: "bg-lavender-100 text-lavender-500",
 };
 
 export function StatusBadge({ config }: { config: StatusConfig }) {

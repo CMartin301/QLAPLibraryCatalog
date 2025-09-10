@@ -11,6 +11,7 @@ import { MediaModal } from './MediaModal';
 import { mediaService } from '../../services/mediaService';
 import useAuth from '../../hooks/useAuth';
 import { useTableActions } from '../../hooks/useTableActions';
+import { StatusBadge } from '../shared/StatusBadge';
 
 interface CatalogMediaTableProps {
   media: Media[];
@@ -75,41 +76,38 @@ export function CatalogMediaTable({
       enableSorting: true,
       size: 120,
     }),
+// Genre
+columnHelper.accessor(row => row.genre ?? "Unknown", {
+  id: "genre",
+  header: "Genre",
+  cell: info => {
+    const config = {
+      text: info.getValue(),
+      color: 'purple' as const
+    };
+    return <StatusBadge config={config} />;
+  },
+  enableSorting: true,
+  size: 140,
+}),
 
-    // Genre
-    columnHelper.accessor(row => row.genre ?? "Unknown", {
-      id: "genre",
-      header: "Genre",
-      cell: info => (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-lavender-100 text-lavender-500">
-          {info.getValue()}
-        </span>
-      ),
-      enableSorting: true,
-      size: 140,
-    }),
-
-    // Availability
-    columnHelper.accessor(row => row.copies ?? [], {
-      id: "availability",
-      header: "Availability",
-      cell: info => {
-        const copies = info.getValue();
-        const hasAvailableCopies = copies.some((c: MediaCopy) => c.isAvailable);
-        
-        return (
-          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-            hasAvailableCopies 
-              ? 'bg-green-100 text-green-800' 
-              : 'bg-red-100 text-red-800'
-          }`}>
-            {hasAvailableCopies ? 'Available' : 'Not Available'}
-          </span>
-        );
-      },
-      enableSorting: false,
-      size: 120,
-    }),
+// Availability
+columnHelper.accessor(row => row.copies ?? [], {
+  id: "availability",
+  header: "Availability",
+  cell: info => {
+    const copies = info.getValue();
+    const hasAvailableCopies = copies.some((c: MediaCopy) => c.isAvailable);
+    
+    const config = {
+      text: hasAvailableCopies ? 'Available' : 'Not Available',
+      color: hasAvailableCopies ? 'green' as const : 'red' as const
+    };
+    return <StatusBadge config={config} />;
+  },
+  enableSorting: false,
+  size: 120,
+}),
 
     // Actions
     columnHelper.display({
