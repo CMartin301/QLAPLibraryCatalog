@@ -1,8 +1,9 @@
 import { useForm, SubmitHandler } from "react-hook-form";
 import { CreateBorrowRequestDto } from "../../../types/borrowRequests";
 import { borrowRequestService } from "../../../services/borrowRequestService";
-import { MediaCopy } from "../../../types/media";
+import { MediaCopy, MediaCopyDisplay } from "../../../types/media";
 import { CopyDisplay } from "../../shared/CopyDisplay";
+import { useEffect } from "react";
 
 interface BorrowRequestFormData {
   borrowerId: number;
@@ -15,8 +16,8 @@ interface BorrowRequestFormData {
 interface AddBorrowRequestFormProps {
   copyId: number | undefined; 
   borrowerId: number;
-  availableCopies: MediaCopy[];  // Add this
-  onCopySelect: (copyId: number) => void;  // Add this
+  availableCopies: MediaCopyDisplay[];  
+  onCopySelect: (copyId: number) => void; 
   onSubmit: (data: BorrowRequestFormData) => void;
   isSubmitting?: boolean;
   submitError?: string | null;
@@ -31,18 +32,26 @@ export function AddBorrowRequestForm({
   isSubmitting = false, 
   submitError 
 }: AddBorrowRequestFormProps) {
+
   const {
     register,
     handleSubmit,
     formState: { errors },
-    setError,  // Add this
-    clearErrors,  // Add this
+    setError,  
+    clearErrors,  
+    setValue,
   } = useForm<BorrowRequestFormData>({
     defaultValues: {
       borrowerId,
       copyId: copyId,
     }
   });
+
+    useEffect(() => {
+    if (copyId !== undefined) {
+      setValue("copyId", copyId);
+    }
+  }, [copyId, setValue]);
 
   const submitHandler: SubmitHandler<BorrowRequestFormData> = async (data) => {
     if (!copyId) {
@@ -114,7 +123,7 @@ export function AddBorrowRequestForm({
       )}
       {/* Hidden fields for IDs */}
       <input type="hidden" {...register("borrowerId", { valueAsNumber: true })} />
-      <input type="hidden" {...register("copyId", { valueAsNumber: true })} />
+      {/* <input type="hidden" {...register("copyId", { valueAsNumber: true })} /> */}
 
       {/* Date Range */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

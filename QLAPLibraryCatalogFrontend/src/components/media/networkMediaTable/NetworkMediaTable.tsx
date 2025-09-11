@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Media, CreateMediaRequest, MediaFormData, CreateMediaCopyRequest } from '../../../types/media';
+import { Media, CreateMediaRequest, MediaFormData, CreateMediaCopyRequest, MediaCopyDisplay } from '../../../types/media';
 import { TableContainer } from '../../shared/TableContainer';
 import { Modal } from '../../shared/Modal';
 import { AddMediaForm } from '../AddMediaForm';
@@ -35,8 +35,12 @@ export function NetworkMediaTable({
   const [isAddMediaModalOpen, setIsAddMediaModalOpen] = useState(false);
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
   const [selectedMediaForCopy, setSelectedMediaForCopy] = useState<Media | null>(null);
+
   const [isBorrowModalOpen, setIsBorrowModalOpen] = useState(false);
   const [selectedCopyForBorrow, setSelectedCopyForBorrow] = useState<number | undefined>(undefined);
+    const [mediaCopies, setMediaCopies] = useState<MediaCopyDisplay[]>([]);
+  // const [requestModalData, setRequestModalData] = useState<number | undefined>(undefined);
+
   const [addingToCopyMediaId, setAddingToCopyMediaId] = useState<number | null>(null);
 
   const handleRowClick = (media: Media) => {
@@ -50,7 +54,7 @@ export function NetworkMediaTable({
     setIsCopyModalOpen(true);
   };
 
-const handleRequestItem = (mediaItem: Media) => {
+const handleRequestItem = async (mediaItem: Media) => {
   const availableCopies = mediaItem.copies?.filter(copy => copy.isAvailable) || [];
   
   if (availableCopies.length === 0) {
@@ -60,10 +64,20 @@ const handleRequestItem = (mediaItem: Media) => {
     );
     return;
   }
+
+    try {
+    const enrichedCopies = await mediaService.getMediaCopiesByMediaID(mediaItem.mediaId);
+    setMediaCopies(enrichedCopies);
+    setSelectedMedia(mediaItem);
+    setSelectedCopyForBorrow(undefined);
+    setIsBorrowModalOpen(true);
+  } catch (error) {
+    // Handle error
+  }
   
-  setSelectedMedia(mediaItem);
-  setSelectedCopyForBorrow(undefined);
-  setIsBorrowModalOpen(true);
+  // setSelectedMedia(mediaItem);
+  // setSelectedCopyForBorrow(undefined);
+  // setIsBorrowModalOpen(true);
 };
 
   const handleAddMedia = async (data: MediaFormData) => {
@@ -220,7 +234,7 @@ const handleBorrowRequestSubmit = async () => {
           <AddBorrowRequestForm
             copyId={selectedCopyForBorrow}
             borrowerId={userID}
-            availableCopies={selectedMedia?.copies?.filter(copy => copy.isAvailable) || []}
+            availableCopies={mediaCopies}
             onCopySelect={(copyId) => setSelectedCopyForBorrow(copyId)}
             onSubmit={handleBorrowRequestSubmit}
             isSubmitting={actionLoading}
