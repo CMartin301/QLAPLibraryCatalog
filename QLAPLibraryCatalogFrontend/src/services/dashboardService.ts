@@ -1,5 +1,5 @@
 
-import { DashboardStats, RecentActivityItem, UpcomingDueDateItem } from "../types/dashboard";
+import { DashboardStats, RecentActivityDto, RecentActivityItem, UpcomingDueDateItem } from "../types/dashboard";
 import api from "./apiService";
 
 export const dashboardService = {
@@ -8,8 +8,8 @@ export const dashboardService = {
     return response.data;
   },
 
-  async getRecentActivity(count = 5): Promise<RecentActivityItem[]> {
-    const response = await api.get<RecentActivityItem[]>(`/api/Dashboard/RecentActivity?count=${count}`);
+  async getRecentActivity(count = 5): Promise<RecentActivityDto[]> {
+    const response = await api.get<RecentActivityDto[]>(`/api/Dashboard/RecentActivity?count=${count}`);
     return response.data;
   },
 

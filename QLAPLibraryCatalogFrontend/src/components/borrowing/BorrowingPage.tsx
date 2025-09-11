@@ -7,8 +7,8 @@ import { useLoans } from '../../hooks/useLoans';
 import { useBorrowRequests } from '../../hooks/useBorrowRequests';
 import BorrowedLoansTable from './loans/BorrowedLoansTable';
 import LentLoansTable from './loans/LentLoansTable';
-import SentBorrowRequestsTable from './borrowRequests/SentBorrowRequestsTable';
-import ReceivedBorrowRequestsTable from './borrowRequests/ReceivedBorrowRequestsTable';
+import SentBorrowRequestsTable from './borrowRequests/sentBorrowRequests/SentBorrowRequestsTable';
+import { ReceivedBorrowRequestsTable } from './borrowRequests/receivedBorrowRequests/ReceivedBorrowRequestsTable';
 
 const BorrowingDashboard: React.FC = () => {
   const { userID } = useAuth();

@@ -6,11 +6,12 @@ public class DashboardStatsDto
     public int OverdueItems { get; set; }
 }
 
-public class RecentActivityDto
+public class ActivityDto
 {
-    public int LoanId { get; set; }
+    // public int LoanId { get; set; }
     public string MediaTitle { get; set; } = string.Empty;
     public string ActivityType { get; set; } = string.Empty;
+    // public string Description { get; set; } = string.Empty;
     public DateTime? ActivityDate { get; set; } // changed to nullable
 }
 

@@ -1,26 +1,30 @@
 import { useMemo, useState } from "react";
 import { createColumnHelper } from "@tanstack/react-table";
-import { BorrowRequestDto } from "../../../types/borrowRequests";
-import { borrowRequestService } from "../../../services/borrowRequestService";
-import { TableContainer } from "../../shared/TableContainer";
-import { useTableActions } from "../../../hooks/useTableActions";
-import { getBorrowRequestStatusDisplay } from "../../../utilities/statusDisplayHelpers";
-import { StatusBadge } from "../../shared/StatusBadge";
-import BorrowRequestModal from "./BorrowRequestModal";
+import { BorrowRequestDto } from "../../../../types/borrowRequests";
+import { borrowRequestService } from "../../../../services/borrowRequestService";
+import { TableContainer } from "../../../shared/TableContainer";
+import { useTableActions } from "../../../../hooks/useTableActions";
+import useAuth from "../../../../hooks/useAuth";
+import { getBorrowRequestStatusDisplay } from "../../../../utilities/statusDisplayHelpers";
+import { StatusBadge } from "../../../shared/StatusBadge";
+import BorrowRequestModal from "../BorrowRequestModal";
 
-interface ReceivedBorrowRequestsTableProps {
+interface SentBorrowRequestsTableProps {
   requests: BorrowRequestDto[];
   onRefresh: () => void;
   error?: string | null;
   loading?: boolean;
-} 
+}
 
-export function ReceivedBorrowRequestsTable({ 
+// type BorrowStatus = 'pending' | 'approved' | 'denied' | 'cancelled';
+
+export function SentBorrowRequestsTable({ 
   requests, 
   onRefresh, 
   error, 
   loading 
-}: ReceivedBorrowRequestsTableProps) {
+}: SentBorrowRequestsTableProps) {
+  const { userID } = useAuth();
   const { executeAction, isLoading } = useTableActions();
   
   // Modal state
@@ -29,24 +33,15 @@ export function ReceivedBorrowRequestsTable({
 
   const columnHelper = createColumnHelper<BorrowRequestDto>();
 
-  const handleApprove = async (requestId: number): Promise<void> => {
+  const handleCancel = async (requestId: number): Promise<void> => {
+    if (!userID) return;
+    
     return executeAction(
-      () => borrowRequestService.approveBorrowRequest(requestId),
+      () => borrowRequestService.cancelBorrowRequest(requestId, userID),
       {
         onSuccess: onRefresh,
-        successMessage: "Request approved successfully",
-        errorMessage: "Failed to approve request",
-      }
-    );
-  };
-
-  const handleDeny = async (requestId: number): Promise<void> => {
-    return executeAction(
-      () => borrowRequestService.denyBorrowRequest(requestId, 'Request denied'),
-      {
-        onSuccess: onRefresh,
-        successMessage: "Request denied",
-        errorMessage: "Failed to deny request",
+        successMessage: "Request cancelled successfully",
+        errorMessage: "Failed to cancel request",
       }
     );
   };
@@ -60,6 +55,16 @@ export function ReceivedBorrowRequestsTable({
     setIsModalOpen(false);
     setSelectedRequest(null);
   };
+
+  // const getStatusDisplay = (status: BorrowStatus) => {
+  //   const statusConfig = {
+  //     pending: { bg: "bg-yellow-100", text: "text-yellow-800", label: "Pending" },
+  //     approved: { bg: "bg-green-100", text: "text-green-800", label: "Approved" },
+  //     denied: { bg: "bg-red-100", text: "text-red-800", label: "Denied" },
+  //     cancelled: { bg: "bg-gray-100", text: "text-gray-800", label: "Cancelled" },
+  //   };
+  //   return statusConfig[status] || statusConfig.pending;
+  // };
 
   const columns = useMemo(
     () => [
@@ -85,8 +90,8 @@ export function ReceivedBorrowRequestsTable({
         size: 260,
       }),
 
-      columnHelper.accessor("borrowerUsername", {
-        header: "Borrower",
+      columnHelper.accessor("ownerUsername", {
+        header: "Owner",
         cell: (info) => (
           <span className="text-sm text-gray-900">{info.getValue()}</span>
         ),
@@ -119,40 +124,30 @@ export function ReceivedBorrowRequestsTable({
       columnHelper.display({
         id: "actions",
         header: "Actions",
-        size: 220,
+        size: 180,
         cell: (info) => {
           const request = info.row.original;
 
           if (request.status === "pending") {
             return (
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent row click
-                    handleApprove(request.requestId);
-                  }}
-                  disabled={isLoading}
-                  className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isLoading ? "Processing..." : "Approve"}
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent row click
-                    handleDeny(request.requestId);
-                  }}
-                  disabled={isLoading}
-                  className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Deny
-                </button>
-              </div>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent row click
+                  handleCancel(request.requestId);
+                }}
+                disabled={isLoading}
+                className="px-3 py-1 text-sm border border-gray-300 text-gray-700 bg-white rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lavender-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? "Processing..." : "Cancel"}
+              </button>
             );
           }
 
           return (
             <span className="text-xs text-gray-400">
-              No actions
+              {request.status === "approved" 
+                ? "Ready to pickup" 
+                : "No actions"}
             </span>
           );
         },
@@ -169,7 +164,7 @@ export function ReceivedBorrowRequestsTable({
         loading={loading || isLoading}
         error={error}
         onRefresh={onRefresh}
-        emptyMessage="No received requests found"
+        emptyMessage="No sent requests found"
         onRowClick={handleRowClick}
         rowClassName="cursor-pointer"
       />
@@ -183,4 +178,4 @@ export function ReceivedBorrowRequestsTable({
   );
 }
 
-export default ReceivedBorrowRequestsTable;
+export default SentBorrowRequestsTable;

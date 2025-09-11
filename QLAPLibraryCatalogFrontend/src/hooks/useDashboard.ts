@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { dashboardService } from "../services/dashboardService";
-import { DashboardStats, RecentActivityItem, UpcomingDueDateItem } from "../types/dashboard";
+import { DashboardStats, RecentActivityDto, RecentActivityItem, UpcomingDueDateItem } from "../types/dashboard";
 
 export const useDashboardStats = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -30,7 +30,7 @@ export const useDashboardStats = () => {
 };
 
 export const useRecentActivity = (count = 5) => {
-  const [activity, setActivity] = useState<RecentActivityItem[]>([]);
+  const [activity, setActivity] = useState<RecentActivityDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -39,6 +39,7 @@ export const useRecentActivity = (count = 5) => {
       setLoading(true);
       setError(null);
       const data = await dashboardService.getRecentActivity(count);
+      console.log(data);
       setActivity(data);
     } catch (err) {
       console.error("Failed to fetch recent activity:", err);
