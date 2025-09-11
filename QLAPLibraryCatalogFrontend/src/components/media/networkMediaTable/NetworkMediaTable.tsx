@@ -36,7 +36,7 @@ export function NetworkMediaTable({
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
   const [selectedMediaForCopy, setSelectedMediaForCopy] = useState<Media | null>(null);
   const [isBorrowModalOpen, setIsBorrowModalOpen] = useState(false);
-  const [selectedCopyForBorrow, setSelectedCopyForBorrow] = useState<number | null>(null);
+  const [selectedCopyForBorrow, setSelectedCopyForBorrow] = useState<number | undefined>(undefined);
   const [addingToCopyMediaId, setAddingToCopyMediaId] = useState<number | null>(null);
 
   const handleRowClick = (media: Media) => {
@@ -62,7 +62,7 @@ const handleRequestItem = (mediaItem: Media) => {
   }
   
   setSelectedMedia(mediaItem);
-  setSelectedCopyForBorrow(availableCopies[0].copyId);
+  setSelectedCopyForBorrow(undefined);
   setIsBorrowModalOpen(true);
 };
 
@@ -126,7 +126,7 @@ const handleBorrowRequestSubmit = async () => {
       onSuccess: () => {
         setIsBorrowModalOpen(false);
         setSelectedMedia(null);
-        setSelectedCopyForBorrow(null);
+        setSelectedCopyForBorrow(undefined);
         onRefresh();
       },
       successMessage: 'Borrow request submitted successfully!'
@@ -210,14 +210,18 @@ const handleBorrowRequestSubmit = async () => {
         onClose={() => {
           setIsBorrowModalOpen(false);
           setSelectedMedia(null);
-          setSelectedCopyForBorrow(null);
+          setSelectedCopyForBorrow(undefined);
         }}
         title={selectedMedia ? `Request "${selectedMedia.title}"` : 'Request Item'}
+        description="Choose a copy and set your preferred loan dates"  // Add this line
+        size="lg" 
       >
-        {selectedCopyForBorrow && userID && (
+        { userID && (
           <AddBorrowRequestForm
             copyId={selectedCopyForBorrow}
             borrowerId={userID}
+            availableCopies={selectedMedia?.copies?.filter(copy => copy.isAvailable) || []}
+            onCopySelect={(copyId) => setSelectedCopyForBorrow(copyId)}
             onSubmit={handleBorrowRequestSubmit}
             isSubmitting={actionLoading}
             submitError={null}

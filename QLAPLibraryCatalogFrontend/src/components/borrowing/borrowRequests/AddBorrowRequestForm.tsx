@@ -1,6 +1,8 @@
 import { useForm, SubmitHandler } from "react-hook-form";
 import { CreateBorrowRequestDto } from "../../../types/borrowRequests";
 import { borrowRequestService } from "../../../services/borrowRequestService";
+import { MediaCopy } from "../../../types/media";
+import { CopyDisplay } from "../../shared/CopyDisplay";
 
 interface BorrowRequestFormData {
   borrowerId: number;
@@ -11,8 +13,10 @@ interface BorrowRequestFormData {
 }
 
 interface AddBorrowRequestFormProps {
-  copyId: number;
+  copyId: number | undefined; 
   borrowerId: number;
+  availableCopies: MediaCopy[];  // Add this
+  onCopySelect: (copyId: number) => void;  // Add this
   onSubmit: (data: BorrowRequestFormData) => void;
   isSubmitting?: boolean;
   submitError?: string | null;
@@ -21,6 +25,8 @@ interface AddBorrowRequestFormProps {
 export function AddBorrowRequestForm({ 
   copyId, 
   borrowerId, 
+  availableCopies,
+  onCopySelect,
   onSubmit, 
   isSubmitting = false, 
   submitError 
@@ -29,19 +35,29 @@ export function AddBorrowRequestForm({
     register,
     handleSubmit,
     formState: { errors },
+    setError,  // Add this
+    clearErrors,  // Add this
   } = useForm<BorrowRequestFormData>({
     defaultValues: {
       borrowerId,
-      copyId,
+      copyId: copyId,
     }
   });
 
   const submitHandler: SubmitHandler<BorrowRequestFormData> = async (data) => {
+    if (!copyId) {
+      setError('copyId', { 
+        type: 'required', 
+        message: 'Please select a copy before submitting' 
+      });
+      return;
+    }
+
     try {
       // Convert form data to API format
       const requestData: CreateBorrowRequestDto = {
         borrowerId: data.borrowerId,
-        copyId: data.copyId,
+        copyId: copyId,
         message: data.message || undefined,
         requestedStartDate: data.requestedStartDate || undefined,
         requestedEndDate: data.requestedEndDate || undefined,
@@ -65,7 +81,37 @@ export function AddBorrowRequestForm({
           <p className="text-red-700 text-sm">{submitError}</p>
         </div>
       )}
-
+      {/* Copy Selection - Add this section */}
+      {availableCopies.length > 0 && (
+        <div className="space-y-3">
+          <label className="block text-sm font-medium text-gray-700">
+            Choose a Copy <span className="text-red-500">*</span>
+          </label>
+          <div className="grid grid-cols-1 gap-3">
+            {availableCopies.map((copy) => (
+              <CopyDisplay
+                key={copy.copyId}
+                copy={copy}
+                variant="selection"
+                selected={copyId === copy.copyId}
+                onClick={() => {
+                  onCopySelect(copy.copyId);
+                  clearErrors('copyId');
+                }}
+                showSelection={true}
+              />
+            ))}
+          </div>
+          {!copyId && availableCopies.length > 0 && (
+            <div className="flex items-center gap-2 text-red-500 text-sm">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              <span>Please select a copy to continue</span>
+            </div>
+          )}
+        </div>
+      )}
       {/* Hidden fields for IDs */}
       <input type="hidden" {...register("borrowerId", { valueAsNumber: true })} />
       <input type="hidden" {...register("copyId", { valueAsNumber: true })} />
@@ -163,7 +209,7 @@ export function AddBorrowRequestForm({
       <div className="flex justify-end pt-2">
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || !copyId}
           className="py-2 px-4 bg-lavender-400 hover:bg-lavender-500 disabled:bg-gray-300 
                      disabled:cursor-not-allowed text-white rounded-lg transition-all duration-200
                      focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:ring-offset-2"
