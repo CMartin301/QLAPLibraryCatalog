@@ -73,6 +73,22 @@ export interface MediaCopy {
   isAvailable: boolean;
   notes?: string;
 }
+export interface MediaCopyDisplay {
+  copyId: number;
+  condition: string;
+  maxLoanDays: number;
+  requiresApproval: boolean;
+  isAvailable: boolean;
+  notes?: string;
+  
+  // Media fields (following your existing pattern)
+  mediaTitle: string;
+  mediaCreator?: string;
+  
+  // Owner fields (following your BorrowRequestDto pattern)
+  ownerUsername: string;
+  ownerUserId: number;
+}
 
 export interface CreateMediaCopyRequest {
   userId: number;

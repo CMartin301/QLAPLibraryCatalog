@@ -74,7 +74,22 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
         public bool? RequiresApproval { get; set; }
         public string? CurrentLocationZoneName { get; set; }
         public string? HomeLocationZoneName { get; set; }
-        public MediaDto Media { get; set; } = null!;
+
+        public string? MediaTitle { get; set; }
+        public string? MediaCreator { get; set; }
+        public string? OwnerUsername { get; set; }
+        public int? OwnerUserId { get; set; }
+
+
+//   // Media fields (following your existing pattern)
+        //   mediaTitle: string;
+        //   mediaCreator?: string;
+
+        //   // Owner fields (following your BorrowRequestDto pattern)
+        //   ownerUsername: string;
+        //   ownerUserId: number;
+
+        // public MediaDto Media { get; set; } = null!;
     }
 
     public class CreateMediaCopyDto

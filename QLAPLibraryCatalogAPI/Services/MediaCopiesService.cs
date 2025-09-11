@@ -10,6 +10,7 @@ namespace QLAPLibraryCatalogAPI.Services
     {
 #pragma warning disable 1591
         Task<IEnumerable<MediaCopyDto>> GetAllMediaCopiesAsync();
+        Task<IEnumerable<MediaCopyDto>> GetMediaCopiesByMediaIDAsync(int mediaId);
         Task<MediaCopyDto?> GetMediaCopyByIdAsync(int mediaCopyId);
         Task<MediaCopyDto> CreateMediaCopyAsync(CreateMediaCopyDto createMediaCopyDto);
         // Task<MediaDto?> UpdateMediaAsync(int id, CreateMediaDto updateMediaDto);
@@ -36,6 +37,21 @@ namespace QLAPLibraryCatalogAPI.Services
         {
             var query = _context.MediaCopies
                 .Include(m => m.Media)
+                .Include(m => m.User)
+                .AsQueryable();
+
+            return await query.Select(mediaCopy => MapMediaCopy(mediaCopy)).ToListAsync();
+        }
+        /// <summary>
+        /// Gets copies of some media 
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IEnumerable<MediaCopyDto>> GetMediaCopiesByMediaIDAsync(int mediaId)
+        {
+            var query = _context.MediaCopies
+                .Include(m => m.Media)
+                .Include(m => m.User)
+                .Where(m => m.MediaId == mediaId)
                 .AsQueryable();
 
             return await query.Select(mediaCopy => MapMediaCopy(mediaCopy)).ToListAsync();
@@ -49,6 +65,7 @@ namespace QLAPLibraryCatalogAPI.Services
         {
             var mediaCopy = await _context.MediaCopies
                 .Include(m => m.Media)
+                .Include(m => m.User)
                 .FirstOrDefaultAsync(m => m.CopyId == mediaCopyId);
 
             return mediaCopy == null ? null : MapMediaCopy(mediaCopy);
@@ -96,25 +113,29 @@ namespace QLAPLibraryCatalogAPI.Services
                 IsAvailable = mediaCopy.IsAvailable,
                 MaxLoanDays = mediaCopy.MaxLoanDays,
                 RequiresApproval = mediaCopy.RequiresApproval,
-                Media = new MediaDto
-                {
-                    MediaId = mediaCopy.MediaId,
-                    MediaTypeId = mediaCopy.Media.MediaTypeId,
-                    Title = mediaCopy.Media.Title,
-                    Subtitle = mediaCopy.Media.Subtitle,
-                    Creator = mediaCopy.Media.Creator,
-                    Publisher = mediaCopy.Media.Publisher,
-                    PublicationDate = mediaCopy.Media.PublicationDate,
-                    Language = mediaCopy.Media.Language,
-                    Genre = mediaCopy.Media.Genre,
-                    Description = mediaCopy.Media.Description,
-                    CoverImageUrl = mediaCopy.Media.CoverImageUrl,
-                    Isbn10 = mediaCopy.Media.Isbn10,
-                    Isbn13 = mediaCopy.Media.Isbn13,
-                    PageCount = mediaCopy.Media.PageCount,
-                    IssueNumber = mediaCopy.Media.IssueNumber,
-                    Volume = mediaCopy.Media.Volume,
-                }
+                MediaTitle = mediaCopy.Media.Title,
+                MediaCreator = mediaCopy.Media.Creator,
+                OwnerUsername = mediaCopy.User.Username,
+                OwnerUserId = mediaCopy.User.UserId,
+                // Media = new MediaDto
+                // {
+                //     MediaId = mediaCopy.MediaId,
+                //     MediaTypeId = mediaCopy.Media.MediaTypeId,
+                //     Title = mediaCopy.Media.Title,
+                //     Subtitle = mediaCopy.Media.Subtitle,
+                //     Creator = mediaCopy.Media.Creator,
+                //     Publisher = mediaCopy.Media.Publisher,
+                //     PublicationDate = mediaCopy.Media.PublicationDate,
+                //     Language = mediaCopy.Media.Language,
+                //     Genre = mediaCopy.Media.Genre,
+                //     Description = mediaCopy.Media.Description,
+                //     CoverImageUrl = mediaCopy.Media.CoverImageUrl,
+                //     Isbn10 = mediaCopy.Media.Isbn10,
+                //     Isbn13 = mediaCopy.Media.Isbn13,
+                //     PageCount = mediaCopy.Media.PageCount,
+                //     IssueNumber = mediaCopy.Media.IssueNumber,
+                //     Volume = mediaCopy.Media.Volume,
+                // }
             };
         }
         #endregion
