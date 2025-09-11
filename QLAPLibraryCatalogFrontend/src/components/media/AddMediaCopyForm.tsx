@@ -1,7 +1,7 @@
-import React from 'react';
 import { useForm } from 'react-hook-form';
 import { CreateMediaCopyRequest, Media } from '../../types/media';
 import useAuth from '../../hooks/useAuth';
+import Button from '../shared/Button';
 
 interface AddMediaCopyFormProps {
   onSubmit: (data: CreateMediaCopyRequest) => void;
@@ -121,15 +121,15 @@ export function AddMediaCopyForm({ onSubmit, isSubmitting, submitError, preselec
           </div>
         )}
 
-        <button
+        <Button
           type="submit"
-          disabled={isSubmitting}
-          className="w-full py-3 px-4 bg-lavender-500 hover:bg-lavender-600 disabled:bg-gray-400 disabled:cursor-not-allowed
-                   text-white font-medium rounded-lg shadow-sm transition-colors duration-200
-                   focus:ring-2 focus:ring-lavender-500 focus:ring-offset-2"
+          variant="primary"
+          size="lg"
+          loading={isSubmitting}
+          className="w-full"
         >
           {isSubmitting ? 'Adding to Collection...' : 'Add to My Collection'}
-        </button>
+        </Button>
       </form>
     </div>
   );

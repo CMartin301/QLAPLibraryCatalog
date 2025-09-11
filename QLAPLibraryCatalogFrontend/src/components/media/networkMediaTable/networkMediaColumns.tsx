@@ -3,6 +3,7 @@ import { createColumnHelper, ColumnDef } from '@tanstack/react-table';
 import { Plus } from 'lucide-react';
 import { Media, MediaCopy } from '../../../types/media';
 import { StatusBadge } from '../../shared/StatusBadge';
+import Button from '../../shared/Button';
 
 const columnHelper = createColumnHelper<Media>();
 
@@ -89,37 +90,41 @@ export function useNetworkMediaColumns({
     // Actions
     columnHelper.display({
       id: "actions",
-      header: "Actions",
-      size: 180,
+      header: "",
+      size: 120,
       cell: info => {
         const mediaItem = info.row.original;
         const isAdding = addingToCopyMediaId === mediaItem.mediaId;
 
           return (
-           <> 
-                <button
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onAddToCollection(mediaItem);
-                    }}
-                    disabled={isAdding}
-                    aria-label={`Add ${mediaItem.title} to collection`}
-                    className="inline-flex items-center px-3 py-1 text-xs font-medium rounded bg-lavender-400 text-white hover:bg-lavender-500 disabled:bg-gray-300 transition-colors gap-1"
-                >
-                    <Plus size={14} />
-                    {isAdding ? "Adding..." : "Add to Collection"}
-                </button>
-                <button
-                    onClick={(e) => {
-                    e.stopPropagation();
-                    onRequestItem(mediaItem);
-                    }}
-                    aria-label={`Request ${mediaItem.title}`}
-                    className="inline-flex items-center px-3 py-1 text-xs font-medium rounded bg-lavender-400 text-white hover:bg-lavender-500 transition-colors gap-1"
-                >
-                    Request Item
-                </button>
-            </>
+            <div className="flex flex-col gap-1">
+              <Button
+                variant="primary"
+                size="sm"
+                icon={Plus}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAddToCollection(mediaItem);
+                }}
+                disabled={isAdding}
+                loading={isAdding}
+                aria-label={`Add ${mediaItem.title} to collection`}
+              >
+                {isAdding ? "Adding..." : "Add to Collection"}
+              </Button>
+              
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRequestItem(mediaItem);
+                }}
+                aria-label={`Request ${mediaItem.title}`}
+              >
+                Request Item
+              </Button>
+            </div>
           );
         
       },

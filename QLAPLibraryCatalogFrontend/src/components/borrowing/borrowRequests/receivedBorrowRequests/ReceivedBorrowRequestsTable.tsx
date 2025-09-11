@@ -7,6 +7,7 @@ import { getBorrowRequestStatusDisplay } from "../../../../utilities/statusDispl
 import { StatusBadge } from "../../../shared/StatusBadge";
 import { TableContainer } from "../../../shared/TableContainer";
 import BorrowRequestModal from "../BorrowRequestModal";
+import Button from "../../../shared/Button";
 
 interface ReceivedBorrowRequestsTableProps {
   requests: BorrowRequestDto[];
@@ -126,26 +127,28 @@ export function ReceivedBorrowRequestsTable({
           if (request.status === "pending") {
             return (
               <div className="flex items-center space-x-2">
-                <button
+                <Button
+                  variant="success"
+                  size="sm"
                   onClick={(e) => {
-                    e.stopPropagation(); // Prevent row click
-                    handleApprove(request.requestId);
-                  }}
-                  disabled={isLoading}
-                  className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    e.stopPropagation(); // Prevent row click
+                                    handleApprove(request.requestId);
+                                  }}
+                  loading={isLoading}
                 >
                   {isLoading ? "Processing..." : "Approve"}
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="danger"
+                  size="sm"
                   onClick={(e) => {
                     e.stopPropagation(); // Prevent row click
                     handleDeny(request.requestId);
                   }}
-                  disabled={isLoading}
-                  className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  loading={isLoading}
                 >
                   Deny
-                </button>
+                </Button>
               </div>
             );
           }
