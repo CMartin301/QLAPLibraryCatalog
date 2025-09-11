@@ -55,6 +55,7 @@ export function NetworkMediaTable({
   };
 
 const handleRequestItem = async (mediaItem: Media) => {
+  
   const availableCopies = mediaItem.copies?.filter(copy => copy.isAvailable) || [];
   
   if (availableCopies.length === 0) {
@@ -67,12 +68,13 @@ const handleRequestItem = async (mediaItem: Media) => {
 
     try {
     const enrichedCopies = await mediaService.getMediaCopiesByMediaID(mediaItem.mediaId);
-    setMediaCopies(enrichedCopies);
+    const availableEnrichedCopies = enrichedCopies.filter(copy => copy.isAvailable);
+    setMediaCopies(availableEnrichedCopies);
     setSelectedMedia(mediaItem);
     setSelectedCopyForBorrow(undefined);
     setIsBorrowModalOpen(true);
   } catch (error) {
-    // Handle error
+    console.error('Error loading enriched copies:', error);
   }
   
   // setSelectedMedia(mediaItem);
@@ -183,6 +185,7 @@ const handleBorrowRequestSubmit = async () => {
         onClose={() => {
           setIsMediaModalOpen(false);
           setSelectedMedia(null);
+          setSelectedCopyForBorrow(undefined);
         }}
         showCopies={true}
       />
@@ -235,7 +238,7 @@ const handleBorrowRequestSubmit = async () => {
             copyId={selectedCopyForBorrow}
             borrowerId={userID}
             availableCopies={mediaCopies}
-            onCopySelect={(copyId) => setSelectedCopyForBorrow(copyId)}
+            onCopySelect={(copyId) => {setSelectedCopyForBorrow(copyId);}}
             onSubmit={handleBorrowRequestSubmit}
             isSubmitting={actionLoading}
             submitError={null}

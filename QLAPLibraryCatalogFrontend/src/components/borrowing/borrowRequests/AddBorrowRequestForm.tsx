@@ -1,13 +1,13 @@
 import { useForm, SubmitHandler } from "react-hook-form";
 import { CreateBorrowRequestDto } from "../../../types/borrowRequests";
 import { borrowRequestService } from "../../../services/borrowRequestService";
-import { MediaCopy, MediaCopyDisplay } from "../../../types/media";
+import { MediaCopyDisplay } from "../../../types/media";
 import { CopyDisplay } from "../../shared/CopyDisplay";
-import { useEffect } from "react";
+import { ChevronUp, ChevronDown, AlertCircle } from "lucide-react";
+import { useState } from "react";
 
 interface BorrowRequestFormData {
   borrowerId: number;
-  copyId: number;
   message?: string;
   requestedStartDate?: string;
   requestedEndDate?: string;
@@ -32,30 +32,23 @@ export function AddBorrowRequestForm({
   isSubmitting = false, 
   submitError 
 }: AddBorrowRequestFormProps) {
-
+const [isCopySelectionExpanded, setIsCopySelectionExpanded] = useState(true);
   const {
     register,
     handleSubmit,
     formState: { errors },
     setError,  
-    clearErrors,  
-    setValue,
+    clearErrors,
   } = useForm<BorrowRequestFormData>({
     defaultValues: {
       borrowerId,
-      copyId: copyId,
     }
   });
 
-    useEffect(() => {
-    if (copyId !== undefined) {
-      setValue("copyId", copyId);
-    }
-  }, [copyId, setValue]);
-
   const submitHandler: SubmitHandler<BorrowRequestFormData> = async (data) => {
+    // Validate copyId before submission
     if (!copyId) {
-      setError('copyId', { 
+      setError('root', { 
         type: 'required', 
         message: 'Please select a copy before submitting' 
       });
@@ -66,7 +59,7 @@ export function AddBorrowRequestForm({
       // Convert form data to API format
       const requestData: CreateBorrowRequestDto = {
         borrowerId: data.borrowerId,
-        copyId: copyId,
+        copyId: copyId, // Use the copyId from props
         message: data.message || undefined,
         requestedStartDate: data.requestedStartDate || undefined,
         requestedEndDate: data.requestedEndDate || undefined,
@@ -90,40 +83,71 @@ export function AddBorrowRequestForm({
           <p className="text-red-700 text-sm">{submitError}</p>
         </div>
       )}
-      {/* Copy Selection - Add this section */}
-      {availableCopies.length > 0 && (
-        <div className="space-y-3">
-          <label className="block text-sm font-medium text-gray-700">
-            Choose a Copy <span className="text-red-500">*</span>
-          </label>
-          <div className="grid grid-cols-1 gap-3">
-            {availableCopies.map((copy) => (
-              <CopyDisplay
-                key={copy.copyId}
-                copy={copy}
-                variant="selection"
-                selected={copyId === copy.copyId}
-                onClick={() => {
-                  onCopySelect(copy.copyId);
-                  clearErrors('copyId');
-                }}
-                showSelection={true}
-              />
-            ))}
-          </div>
-          {!copyId && availableCopies.length > 0 && (
-            <div className="flex items-center gap-2 text-red-500 text-sm">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-              <span>Please select a copy to continue</span>
-            </div>
-          )}
+
+      {/* Root-level form errors (like copy selection) */}
+      {errors.root && (
+        <div className="p-3 bg-red-50 border border-red-200 rounded-lg" role="alert">
+          <p className="text-red-700 text-sm">{errors.root.message}</p>
         </div>
       )}
-      {/* Hidden fields for IDs */}
+{/* Copy Selection */}
+{availableCopies.length > 0 && (
+  <div className="space-y-3">
+    {/* Header with toggle */}
+    <div className="flex items-center justify-between">
+      <label className="block text-sm font-medium text-gray-700">
+        Choose a Copy <span className="text-red-500">*</span>
+      </label>
+      
+      {copyId && (
+        <button
+          type="button"
+          onClick={() => setIsCopySelectionExpanded(!isCopySelectionExpanded)}
+          className="flex items-center gap-1 text-sm text-lavender-600 hover:text-lavender-700 
+                     focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:ring-offset-1 rounded-md px-2 py-1"
+          aria-expanded={isCopySelectionExpanded}
+        >
+          {isCopySelectionExpanded ? (
+            <><ChevronUp className="w-4 h-4" />Hide Options</>
+          ) : (
+            <><ChevronDown className="w-4 h-4" />Change Selection</>
+          )}
+        </button>
+      )}
+    </div>
+
+    {/* Copy display */}
+    <div className="grid grid-cols-1 gap-3">
+      {(isCopySelectionExpanded || !copyId ? availableCopies : availableCopies.filter(c => c.copyId === copyId))
+        .map((copy) => (
+          <CopyDisplay
+            key={copy.copyId}
+            copy={copy}
+            variant={"selection"}
+            selected={copyId === copy.copyId}
+            onClick={!isCopySelectionExpanded && copyId ? undefined : () => {
+              onCopySelect(copy.copyId);
+              clearErrors('root');
+              setIsCopySelectionExpanded(false);
+            }}
+            showSelection={true}
+            className={copyId === copy.copyId && !isCopySelectionExpanded ? "border-lavender-200 bg-lavender-50" : ""}
+          />
+        ))}
+    </div>
+
+    {/* Error message */}
+    {!copyId && (
+      <div className="flex items-center gap-2 text-red-500 text-sm">
+        <AlertCircle className="w-4 h-4" />
+        <span>Please select a copy to continue</span>
+      </div>
+    )}
+  </div>
+)}
+
+      {/* Hidden field for borrowerId only */}
       <input type="hidden" {...register("borrowerId", { valueAsNumber: true })} />
-      {/* <input type="hidden" {...register("copyId", { valueAsNumber: true })} /> */}
 
       {/* Date Range */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -147,8 +171,8 @@ export function AddBorrowRequestForm({
             })}
             aria-describedby={errors.requestedStartDate ? "startDate-error" : undefined}
             aria-invalid={errors.requestedStartDate ? "true" : "false"}
-            className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm
-                       focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm
+           focus:outline-none focus:border-2 focus:border-lavender-400"
           />
           {errors.requestedStartDate && (
             <p id="startDate-error" className="text-red-500 text-xs mt-1" role="alert">
@@ -178,8 +202,8 @@ export function AddBorrowRequestForm({
             })}
             aria-describedby={errors.requestedEndDate ? "endDate-error" : undefined}
             aria-invalid={errors.requestedEndDate ? "true" : "false"}
-            className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm
-                       focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm
+           focus:outline-none focus:border-2 focus:border-lavender-400"
           />
           {errors.requestedEndDate && (
             <p id="endDate-error" className="text-red-500 text-xs mt-1" role="alert">
@@ -203,9 +227,9 @@ export function AddBorrowRequestForm({
           })}
           aria-describedby={errors.message ? "message-error" : undefined}
           aria-invalid={errors.message ? "true" : "false"}
-          className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm
-                     focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]
-                     resize-y"
+          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm
+           focus:outline-none focus:border-2 focus:border-lavender-400
+           resize-y"
         />
         {errors.message && (
           <p id="message-error" className="text-red-500 text-xs mt-1" role="alert">
@@ -216,7 +240,23 @@ export function AddBorrowRequestForm({
 
       {/* Submit Button */}
       <div className="flex justify-end pt-2">
-        <button
+<button
+  type="submit"
+  disabled={isSubmitting || !copyId}
+  className="py-2 px-4 bg-lavender-400 hover:bg-lavender-500 disabled:bg-gray-300 
+             disabled:cursor-not-allowed text-white rounded-lg transition-all duration-200
+             focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:ring-offset-2
+             flex items-center gap-2" // Add flex for loading spinner
+>
+  {isSubmitting && (
+    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+      <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+  )}
+  {isSubmitting ? 'Submitting Request...' : 'Submit Borrow Request'}
+</button>
+        {/* <button
           type="submit"
           disabled={isSubmitting || !copyId}
           className="py-2 px-4 bg-lavender-400 hover:bg-lavender-500 disabled:bg-gray-300 
@@ -224,7 +264,7 @@ export function AddBorrowRequestForm({
                      focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:ring-offset-2"
         >
           {isSubmitting ? 'Submitting Request...' : 'Submit Borrow Request'}
-        </button>
+        </button> */}
       </div>
     </form>
   );
