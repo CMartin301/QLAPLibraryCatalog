@@ -2,6 +2,7 @@ import { useForm } from 'react-hook-form';
 import { CreateMediaCopyRequest, Media } from '../../types/media';
 import useAuth from '../../hooks/useAuth';
 import Button from '../shared/Button';
+import { MediaDisplay } from '../shared/MediaDisplay';
 
 interface AddMediaCopyFormProps {
   onSubmit: (data: CreateMediaCopyRequest) => void;
@@ -40,21 +41,7 @@ export function AddMediaCopyForm({ onSubmit, isSubmitting, submitError, preselec
   return (
     <div className="space-y-6">
       {/* Media Info Display */}
-      <div className="bg-gray-50 rounded-lg p-4 border">
-        <h3 className="font-semibold text-lg text-gray-900 mb-2">
-          {preselectedMedia.title}
-        </h3>
-        <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
-          <div><span className="font-medium">Author:</span> {preselectedMedia.creator || 'Unknown'}</div>
-          <div><span className="font-medium">Genre:</span> {preselectedMedia.genre || 'N/A'}</div>
-          {preselectedMedia.publisher && (
-            <div><span className="font-medium">Publisher:</span> {preselectedMedia.publisher}</div>
-          )}
-          {preselectedMedia.publicationDate && (
-            <div><span className="font-medium">Published:</span> {preselectedMedia.publicationDate}</div>
-          )}
-        </div>
-      </div>
+      <MediaDisplay media={preselectedMedia} variant="compact" />
 
       {/* Copy Details Form */}
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
