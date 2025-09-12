@@ -68,7 +68,9 @@ const handleRequestItem = async (mediaItem: Media) => {
 
     try {
     const enrichedCopies = await mediaService.getMediaCopiesByMediaID(mediaItem.mediaId);
-    const availableEnrichedCopies = enrichedCopies.filter(copy => copy.isAvailable);
+    const availableEnrichedCopies = enrichedCopies.filter(copy => copy.isAvailable) //only available copies
+                                                  .filter(copy => copy.ownerUserId != userID); //exclude copies owned byuser
+
     setMediaCopies(availableEnrichedCopies);
     setSelectedMedia(mediaItem);
     setSelectedCopyForBorrow(undefined);
