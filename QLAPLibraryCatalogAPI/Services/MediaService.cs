@@ -62,41 +62,44 @@ namespace QLAPLibraryCatalogAPI.Services
                 );
             }
 
-            if (includeCopies)
-            {
-                query = query.Include(m => m.MediaCopies);
-            }
+            // if (includeCopies)
+            // {
+            //     query = query.Include(m => m.MediaCopies);
+            // }
 
             return await query
-                .Select(user => MapMedia(user, includeCopies))
+                .Select(user => MapMedia(user))
                 .ToListAsync();
         }
-/// <summary>
-/// Gets media by ID
-/// </summary>
-/// <param name="mediaId"></param>
-/// <param name="includeCopies"></param>
-/// <returns></returns>
+        
+
+        /// <summary>
+        /// Gets media by ID
+        /// </summary>
+        /// <param name="mediaId"></param>
+        /// <param name="includeCopies"></param>
+        /// <returns></returns>
         public async Task<MediaDto?> GetMediaByIdAsync(int mediaId, bool includeCopies = false)
         {
             var query = _context.Media
                 .Include(m => m.MediaType)
                 .AsQueryable();
 
-            if (includeCopies)
-                query = query.Include(m => m.MediaCopies);
+            // if (includeCopies)
+            //     query = query.Include(m => m.MediaCopies);
 
             return await query
                 .Where(m => m.MediaId == mediaId)
-                .Select(user => MapMedia(user, includeCopies))
+                .Select(user => MapMedia(user))
                 .FirstOrDefaultAsync();
         }
-/// <summary>
-/// Creates new media object
-/// </summary>
-/// <param name="createMediaDto"></param>
-/// <returns></returns>
-/// <exception cref="InvalidOperationException"></exception>
+        
+        /// <summary>
+        /// Creates new media object
+        /// </summary>
+        /// <param name="createMediaDto"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public async Task<MediaDto> CreateMediaAsync(CreateMediaDto createMediaDto)
         {
             var media = new Media
@@ -125,12 +128,13 @@ namespace QLAPLibraryCatalogAPI.Services
 
             return await GetMediaByIdAsync(media.MediaId) ?? throw new InvalidOperationException("Failed to retrieve created media");
         }
-/// <summary>
-/// Updates existing media object
-/// </summary>
-/// <param name="mediaId"></param>
-/// <param name="updateMediaDto"></param>
-/// <returns></returns>
+        
+        /// <summary>
+        /// Updates existing media object
+        /// </summary>
+        /// <param name="mediaId"></param>
+        /// <param name="updateMediaDto"></param>
+        /// <returns></returns>
         public async Task<MediaDto?> UpdateMediaAsync(int mediaId, CreateMediaDto updateMediaDto)
         {
             var existingMedia = await _context.Media.FindAsync(mediaId);
@@ -157,11 +161,12 @@ namespace QLAPLibraryCatalogAPI.Services
 
             return await GetMediaByIdAsync(mediaId);
         }
-/// <summary>
-/// Deletes existing media object
-/// </summary>
-/// <param name="id"></param>
-/// <returns></returns>
+        
+        /// <summary>
+        /// Deletes existing media object
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public async Task<bool> DeleteMediaAsync(int id)
         {
             var media = await _context.Media.FindAsync(id);
@@ -172,63 +177,25 @@ namespace QLAPLibraryCatalogAPI.Services
 
             return true;
         }
-        
-/// <summary>
-/// Gets all media a user owns a copy of
-/// </summary>
-/// <param name="userId"></param>
-/// <param name="includeCopies"></param>
-/// <returns></returns>
+
+        /// <summary>
+        /// Gets all media a user owns a copy of
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="includeCopies"></param>
+        /// <returns></returns>
         public async Task<IEnumerable<MediaDto>> GetUserMediaAsync(int userId, bool includeCopies = false)
         {
             var query = _context.Media
                 .Include(m => m.MediaType)
                 .AsQueryable();
 
-            if (includeCopies)
-                query = query.Include(m => m.MediaCopies);
+            // if (includeCopies)
+            //     query = query.Include(m => m.MediaCopies);
 
             return await query
-                .Where(m => m.MediaCopies.Any(c => c.UserId == userId)) // ensure relation exists
-                .Select(m => new MediaDto
-                {
-                    MediaId = m.MediaId,
-                    MediaTypeId = m.MediaTypeId,
-                    Title = m.Title,
-                    Subtitle = m.Subtitle,
-                    Creator = m.Creator,
-                    Publisher = m.Publisher,
-                    PublicationDate = m.PublicationDate,
-                    Language = m.Language,
-                    Genre = m.Genre,
-                    Description = m.Description,
-                    CoverImageUrl = m.CoverImageUrl,
-                    Isbn10 = m.Isbn10,
-                    Isbn13 = m.Isbn13,
-                    PageCount = m.PageCount,
-                    IssueNumber = m.IssueNumber,
-                    Volume = m.Volume,
-                    MediaType = new MediaTypeDto
-                    {
-                        MediaTypeId = m.MediaType.MediaTypeId,
-                        Name = m.MediaType.Name,
-                        DisplayName = m.MediaType.DisplayName,
-                        Description = m.MediaType.Description
-                    },
-                    Copies = includeCopies
-                        ? m.MediaCopies
-                            .Where(c => c.UserId == userId) // only copies belonging to this user
-                            .Select(c => new MediaCopyDto
-                            {
-                                CopyId = c.CopyId,
-                                UserId = c.UserId,
-                                MediaId = c.MediaId,
-                                Condition = c.Condition,
-                                IsAvailable = c.IsAvailable,
-                                Notes = c.Notes
-                            }).ToList()
-                        : new List<MediaCopyDto>()
-                })
+                .Where(m => m.MediaCopies.Any(c => c.UserId == userId)) 
+                .Select(user => MapMedia(user))
                 .ToListAsync();
         }
 
@@ -236,12 +203,13 @@ namespace QLAPLibraryCatalogAPI.Services
         /// <summary>
         /// Maps a media into a media DTO
         /// </summary>
-        private static MediaDto MapMedia(Media m, bool includeCopies)
+        private static MediaDto MapMedia(Media m)
         {
             return new MediaDto
                 {
                     MediaId = m.MediaId,
                     MediaTypeId = m.MediaTypeId,
+                    MediaTypeName = m.MediaType.DisplayName,
                     Title = m.Title,
                     Subtitle = m.Subtitle,
                     Creator = m.Creator,
@@ -255,25 +223,7 @@ namespace QLAPLibraryCatalogAPI.Services
                     Isbn13 = m.Isbn13,
                     PageCount = m.PageCount,
                     IssueNumber = m.IssueNumber,
-                    Volume = m.Volume,
-                    MediaType = new MediaTypeDto
-                    {
-                        MediaTypeId = m.MediaType.MediaTypeId,
-                        Name = m.MediaType.Name,
-                        DisplayName = m.MediaType.DisplayName,
-                        Description = m.MediaType.Description
-                    },
-                    Copies = includeCopies
-                        ? m.MediaCopies.Select(c => new MediaCopyDto
-                        {
-                            CopyId = c.CopyId,
-                            UserId = c.UserId,
-                            MediaId = c.MediaId,
-                            Condition = c.Condition,
-                            IsAvailable = c.IsAvailable,
-                            Notes = c.Notes
-                        }).ToList()
-                        : new List<MediaCopyDto>()
+                    Volume = m.Volume
                 };
         }
         #endregion
