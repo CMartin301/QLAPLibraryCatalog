@@ -232,7 +232,7 @@ const handleBorrowRequestSubmit = async () => {
           setSelectedCopyForBorrow(undefined);
         }}
         title={selectedMedia ? `Request "${selectedMedia.title}"` : 'Request Item'}
-        description="Choose a copy and set your preferred loan dates"  // Add this line
+        description="Choose a copy and set your preferred loan dates" 
         size="lg" 
       >
         { userID && (

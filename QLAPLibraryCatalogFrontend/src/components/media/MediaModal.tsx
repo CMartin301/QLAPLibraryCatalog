@@ -85,6 +85,7 @@ export function MediaModal({ media, isOpen, onClose, showCopies = true }: MediaM
       isOpen={isOpen} 
       onClose={onClose}
       title={media.title}
+        size="lg" 
     >
       <div className="space-y-6">
         {/* Header with cover and basic info */}
