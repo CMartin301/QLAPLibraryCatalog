@@ -15,8 +15,6 @@ export function AddMediaCopyForm({ onSubmit, isSubmitting, submitError, preselec
   const { register, handleSubmit, reset } = useForm<CreateMediaCopyRequest>({
     defaultValues: {
       condition: 'Good',
-      maxLoanDays: 14,
-      requiresApproval: false,
     }
   });
   const { userID } = useAuth();
@@ -61,34 +59,6 @@ export function AddMediaCopyForm({ onSubmit, isSubmitting, submitError, preselec
           </select>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Maximum Loan Days <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="number"
-            min="1"
-            max="365"
-            {...register('maxLoanDays', { 
-              required: 'Max loan days is required',
-              min: { value: 1, message: 'Must be at least 1 day' },
-              max: { value: 365, message: 'Cannot exceed 365 days' }
-            })}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-lavender-500 focus:border-lavender-500"
-          />
-        </div>
-
-        <div className="flex items-center gap-3">
-          <input 
-            type="checkbox" 
-            id="requiresApproval"
-            {...register('requiresApproval')}
-            className="rounded border-gray-300 text-lavender-500 focus:ring-lavender-500"
-          />
-          <label htmlFor="requiresApproval" className="text-sm font-medium text-gray-700">
-            Requires approval before lending
-          </label>
-        </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">

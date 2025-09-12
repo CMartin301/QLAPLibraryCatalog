@@ -94,7 +94,6 @@ export interface CreateMediaCopyRequest {
   userId: number;
   mediaId: number;
   condition: string;
-  maxLoanDays: number;
-  requiresApproval: boolean;
+  homeLocationZoneId?: number;
   notes?: string;
 }
