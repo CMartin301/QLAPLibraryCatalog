@@ -10,6 +10,9 @@ import { mediaService } from '../../../services/mediaService';
 import useAuth from '../../../hooks/useAuth';
 import { useTableActions } from '../../../hooks/useTableActions';
 import { useNetworkMediaColumns } from './networkMediaColumns';
+import { createMediaFilterConfig } from '../../../config/mediaFilters';
+import { useFilters } from '../../../hooks/useFilters';
+import { FilterPanel } from '../../shared/filters/FilterPanel';
 
 interface NetworkMediaTableProps {
   media: MediaDto[];
@@ -42,6 +45,18 @@ export function NetworkMediaTable({
   // const [requestModalData, setRequestModalData] = useState<number | undefined>(undefined);
 
   const [addingToCopyMediaId, setAddingToCopyMediaId] = useState<number | null>(null);
+
+    const {
+    filteredData,
+    filters,
+    updateFilters,
+    activeFilterCount,
+    isFiltersOpen,
+    toggleFilters
+  } = useFilters({
+    data: media,
+    createFilterConfig: createMediaFilterConfig
+  });
 
   const handleRowClick = (media: MediaDto) => {
     setSelectedMedia(media);
@@ -165,8 +180,15 @@ const handleBorrowRequestSubmit = async () => {
 
   return (
     <>
+      <FilterPanel
+        filters={filters}
+        onFiltersChange={updateFilters}
+        isOpen={isFiltersOpen}
+        onToggle={toggleFilters}
+        className="mb-4"
+      />
       <TableContainer
-        data={media}
+        data={filteredData}
         columns={columns}
         loading={loading}
         error={error}
