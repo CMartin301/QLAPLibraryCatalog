@@ -1,4 +1,4 @@
-import { Media, CreateMediaRequest, MediaType, CreateMediaCopyRequest, MediaCopy, MediaCopyDisplay } from '../types/media';
+import { Media, CreateMediaRequest, MediaType, CreateMediaCopyRequest, MediaCopy, MediaCopyDto } from '../types/media';
 import api from './apiService';
 
 export const mediaService = {
@@ -30,8 +30,8 @@ export const mediaService = {
     const response = await api.get<MediaType[]>('/api/MediaTypes');
     return response.data;
   },
-  async getMediaCopiesByMediaID(mediaId: number): Promise<MediaCopyDisplay[]> {    
-    const response = await api.get<MediaCopyDisplay[]>(`/api/MediaCopy/Media/${mediaId}`);
+  async getMediaCopiesByMediaID(mediaId: number): Promise<MediaCopyDto[]> {    
+    const response = await api.get<MediaCopyDto[]>(`/api/MediaCopy/Media/${mediaId}`);
     return response.data;
   },
 };

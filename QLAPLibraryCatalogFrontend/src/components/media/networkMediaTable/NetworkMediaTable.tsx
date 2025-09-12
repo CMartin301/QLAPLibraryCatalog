@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Media, CreateMediaRequest, MediaFormData, CreateMediaCopyRequest, MediaCopyDisplay } from '../../../types/media';
+import { Media, CreateMediaRequest, MediaFormData, CreateMediaCopyRequest, MediaCopyDto } from '../../../types/media';
 import { TableContainer } from '../../shared/TableContainer';
 import { Modal } from '../../shared/Modal';
 import { AddMediaForm } from '../AddMediaForm';
@@ -38,7 +38,7 @@ export function NetworkMediaTable({
 
   const [isBorrowModalOpen, setIsBorrowModalOpen] = useState(false);
   const [selectedCopyForBorrow, setSelectedCopyForBorrow] = useState<number | undefined>(undefined);
-    const [mediaCopies, setMediaCopies] = useState<MediaCopyDisplay[]>([]);
+    const [mediaCopies, setMediaCopies] = useState<MediaCopyDto[]>([]);
   // const [requestModalData, setRequestModalData] = useState<number | undefined>(undefined);
 
   const [addingToCopyMediaId, setAddingToCopyMediaId] = useState<number | null>(null);

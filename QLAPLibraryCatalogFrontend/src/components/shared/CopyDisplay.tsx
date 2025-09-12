@@ -1,9 +1,9 @@
 import React from 'react';
-import { MediaCopyDisplay } from '../../types/media';
-import { User, Book, CircleCheck, Check } from 'lucide-react';
+import { MediaCopyDto } from '../../types/media';
+import { User, Book, Check, MapPin, Home } from 'lucide-react';
 
 interface CopyDisplayProps {
-  copy: MediaCopyDisplay;
+  copy: MediaCopyDto;
   variant?: 'card' | 'selection' | 'compact' | 'list';
   selected?: boolean;
   onClick?: () => void;
@@ -31,10 +31,10 @@ export function CopyDisplay({
   };
 
   const layoutStyles = {
-    card: 'space-y-2',
-    selection: 'space-y-2',
-    compact: 'space-y-1',
-    list: 'flex flex-col'
+    card: 'space-y-3',
+    selection: 'space-y-3',
+    compact: 'space-y-2',
+    list: 'flex flex-col space-y-2'
   };
 
   const handleClick = () => {
@@ -58,21 +58,21 @@ export function CopyDisplay({
       aria-label={onClick ? `Select ${copy.mediaTitle}` : undefined}
     >
       <div className={layoutStyles[variant]}>
-        {/* Row: title/creator (left), availability/owner (middle), selection (right) */}
+        {/* Top row: Media info and selection indicator */}
         <div className="flex items-start justify-between gap-4">
           {/* Left: media info */}
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
-              <Book className="w-4 h-4 text-lavender-500" aria-hidden="true" />
-              {copy.mediaTitle}
+              <Book className="w-4 h-4 text-lavender-500 flex-shrink-0" aria-hidden="true" />
+              <span className="truncate">{copy.mediaTitle}</span>
             </h3>
             {copy.mediaCreator && (
-              <p className="text-sm text-gray-600">by {copy.mediaCreator}</p>
+              <p className="text-sm text-gray-600 mt-1 truncate">by {copy.mediaCreator}</p>
             )}
           </div>
-
-          {/* Middle: availability + owner */}
-          <div className="flex flex-col items-start gap-1 flex-shrink-0">
+          {/* Right: Availability and Owner stacked */}
+          <div className="flex flex-col items-end gap-1 flex-shrink-0">
+            {/* Availability badge */}
             <span
               className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                 copy.isAvailable
@@ -83,22 +83,44 @@ export function CopyDisplay({
               {copy.isAvailable ? 'Available' : 'On Loan'}
             </span>
 
+            {/* Owner info */}
             <div className="flex items-center text-sm text-gray-700 gap-1">
               <User className="w-4 h-4 text-gray-500" aria-hidden="true" />
-              {copy.ownerUsername}
+              <span>{copy.ownerUsername}</span>
             </div>
           </div>
 
           {/* Right: selection indicator */}
           {showSelection && selected && (
-            <div className="ml-2 w-6 h-6 bg-lavender-400 rounded-full flex items-center justify-center">
-  <Check className="w-4 h-4 text-white" />
-</div>
+            <div className="ml-2 w-6 h-6 bg-lavender-400 rounded-full flex items-center justify-center flex-shrink-0">
+              <Check className="w-4 h-4 text-white" />
+            </div>
           )}
         </div>
+{/* Status row: Location badges (left), Availability + Owner (right) */}
+<div className="flex items-start justify-between gap-4">
+  {/* Left: Location badges */}
+  <div className="flex flex-wrap items-center gap-2">
+    {copy.currentLocationZoneName && (
+      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 gap-1">
+        <MapPin className="w-3 h-3" aria-hidden="true" />
+        <span className="hidden sm:inline">Current:</span>
+        <span>{copy.currentLocationZoneName}</span>
+      </span>
+    )}
+    {copy.homeLocationZoneName && copy.homeLocationZoneName !== copy.currentLocationZoneName && (
+      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600 gap-1">
+        <Home className="w-3 h-3" aria-hidden="true" />
+        <span className="hidden sm:inline">Home:</span>
+        <span>{copy.homeLocationZoneName}</span>
+      </span>
+    )}
+  </div>
 
-        {/* Notes (if present) */}
-        {copy.notes && (
+</div>
+
+        {/* Notes row (if present) */}
+        {copy.notes && copy.notes.trim() !== '' && (
           <div
             className={`p-2 bg-gray-50 rounded text-xs text-gray-600 ${
               variant === 'list' ? 'mt-1' : 'mt-2'

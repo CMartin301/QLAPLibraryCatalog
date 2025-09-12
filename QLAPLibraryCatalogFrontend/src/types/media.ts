@@ -73,13 +73,13 @@ export interface MediaCopy {
   isAvailable: boolean;
   notes?: string;
 }
-export interface MediaCopyDisplay {
+export interface MediaCopyDto {
   copyId: number;
   condition: string;
-  maxLoanDays: number;
-  requiresApproval: boolean;
   isAvailable: boolean;
   notes?: string;
+  currentLocationZoneName?: string;
+  homeLocationZoneName?: string;
   
   // Media fields (following your existing pattern)
   mediaTitle: string;

@@ -3,7 +3,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { ChevronDown, ChevronUp, AlertCircle } from 'lucide-react';
 import { CreateBorrowRequestDto } from "../../../types/borrowRequests";
 import { borrowRequestService } from "../../../services/borrowRequestService";
-import { MediaCopyDisplay } from "../../../types/media";
+import { MediaCopyDto } from "../../../types/media";
 import { CopyDisplay } from "../../shared/CopyDisplay";
 import { ErrorAlert, FormFieldError, SubmitError } from '../../shared/ErrorAlert';
 
@@ -17,7 +17,7 @@ interface BorrowRequestFormData {
 interface AddBorrowRequestFormProps {
   copyId: number | undefined; 
   borrowerId: number;
-  availableCopies: MediaCopyDisplay[];  
+  availableCopies: MediaCopyDto[];  
   onCopySelect: (copyId: number) => void; 
   onSubmit: (data: BorrowRequestFormData) => void;
   isSubmitting?: boolean;
@@ -34,7 +34,7 @@ export function AddBorrowRequestForm({
   submitError 
 }: AddBorrowRequestFormProps) {
   const [isCopySelectionExpanded, setIsCopySelectionExpanded] = useState(true);
-
+  
   const {
     register,
     handleSubmit,
@@ -57,15 +57,15 @@ export function AddBorrowRequestForm({
       return;
     }
 
-    // Enterprise safety check - verify the copy is still available
-    const selectedCopy = availableCopies.find(c => c.copyId === copyId);
-    if (!selectedCopy?.isAvailable) {
-      setError('root', {
-        type: 'validation',
-        message: 'Selected copy is no longer available. Please choose another.'
-      });
-      return;
-    }
+    // // Enterprise safety check - verify the copy is still available
+    // const selectedCopy = availableCopies.find(c => c.copyId === copyId);
+    // if (!selectedCopy?.isAvailable) {
+    //   setError('root', {
+    //     type: 'validation',
+    //     message: 'Selected copy is no longer available. Please choose another.'
+    //   });
+    //   return;
+    // }
 
     try {
       // Convert form data to API format
@@ -280,9 +280,6 @@ export function AddBorrowRequestForm({
                      focus:outline-none focus:border-2 focus:border-lavender-400
                      resize-y"
         />
-        <div id="message-help" className="text-xs text-gray-500 mt-1">
-          Optional message to the copy owner
-        </div>
         <FormFieldError 
           message={errors.message?.message} 
           fieldId="message" 
