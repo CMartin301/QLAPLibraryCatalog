@@ -97,8 +97,7 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
         public string? Condition { get; set; }
         public string? Notes { get; set; }
         public bool? IsAvailable { get; set; }
-        public int? MaxLoanDays { get; set; }
-        public bool? RequiresApproval { get; set; }
+        public int? HomeLocationZoneId { get; set; }
         
     }
 }

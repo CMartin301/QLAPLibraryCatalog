@@ -91,6 +91,8 @@ namespace QLAPLibraryCatalogAPI.Services
                 Condition = createMediaCopyDto.Condition,
                 Notes = createMediaCopyDto.Notes,
                 IsAvailable = createMediaCopyDto.IsAvailable,
+                CurrentLocationZoneId = createMediaCopyDto.HomeLocationZoneId,
+                HomeLocationZoneId = createMediaCopyDto.HomeLocationZoneId,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
