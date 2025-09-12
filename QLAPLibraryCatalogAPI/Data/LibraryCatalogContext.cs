@@ -133,14 +133,8 @@ public partial class LibraryCatalogContext : DbContext
             entity.Property(e => e.IsAvailable)
                 .HasDefaultValue(true)
                 .HasColumnName("is_available");
-            entity.Property(e => e.MaxLoanDays)
-                .HasDefaultValue(14)
-                .HasColumnName("max_loan_days");
             entity.Property(e => e.MediaId).HasColumnName("media_id");
             entity.Property(e => e.Notes).HasColumnName("notes");
-            entity.Property(e => e.RequiresApproval)
-                .HasDefaultValue(true)
-                .HasColumnName("requires_approval");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("updated_at");

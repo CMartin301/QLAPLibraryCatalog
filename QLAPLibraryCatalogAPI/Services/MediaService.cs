@@ -224,8 +224,6 @@ namespace QLAPLibraryCatalogAPI.Services
                                 UserId = c.UserId,
                                 MediaId = c.MediaId,
                                 Condition = c.Condition,
-                                MaxLoanDays = c.MaxLoanDays,
-                                RequiresApproval = c.RequiresApproval,
                                 IsAvailable = c.IsAvailable,
                                 Notes = c.Notes
                             }).ToList()
@@ -272,8 +270,6 @@ namespace QLAPLibraryCatalogAPI.Services
                             UserId = c.UserId,
                             MediaId = c.MediaId,
                             Condition = c.Condition,
-                            MaxLoanDays = c.MaxLoanDays,
-                            RequiresApproval = c.RequiresApproval,
                             IsAvailable = c.IsAvailable,
                             Notes = c.Notes
                         }).ToList()

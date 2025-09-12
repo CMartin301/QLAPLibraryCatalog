@@ -37,6 +37,8 @@ namespace QLAPLibraryCatalogAPI.Services
         {
             var query = _context.MediaCopies
                 .Include(m => m.Media)
+                .Include(m => m.CurrentLocationZone)
+                .Include(m => m.HomeLocationZone)
                 .Include(m => m.User)
                 .AsQueryable();
 
@@ -50,6 +52,8 @@ namespace QLAPLibraryCatalogAPI.Services
         {
             var query = _context.MediaCopies
                 .Include(m => m.Media)
+                .Include(m => m.CurrentLocationZone)
+                .Include(m => m.HomeLocationZone)
                 .Include(m => m.User)
                 .Where(m => m.MediaId == mediaId)
                 .AsQueryable();
@@ -65,6 +69,8 @@ namespace QLAPLibraryCatalogAPI.Services
         {
             var mediaCopy = await _context.MediaCopies
                 .Include(m => m.Media)
+                .Include(m => m.CurrentLocationZone)
+                .Include(m => m.HomeLocationZone)
                 .Include(m => m.User)
                 .FirstOrDefaultAsync(m => m.CopyId == mediaCopyId);
 
@@ -85,8 +91,6 @@ namespace QLAPLibraryCatalogAPI.Services
                 Condition = createMediaCopyDto.Condition,
                 Notes = createMediaCopyDto.Notes,
                 IsAvailable = createMediaCopyDto.IsAvailable,
-                MaxLoanDays = createMediaCopyDto.MaxLoanDays,
-                RequiresApproval = createMediaCopyDto.RequiresApproval,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -103,6 +107,9 @@ namespace QLAPLibraryCatalogAPI.Services
         /// </summary>
         private static MediaCopyDto MapMediaCopy(MediaCopy mediaCopy)
         {
+            string? currentLocationZoneName = mediaCopy.CurrentLocationZone != null ? mediaCopy.CurrentLocationZone.ZoneName : null;
+            string? homeLocationZoneName = mediaCopy.HomeLocationZone != null ? mediaCopy.HomeLocationZone.ZoneName : null;
+            
             return new MediaCopyDto
             {
                 CopyId = mediaCopy.CopyId,
@@ -111,31 +118,12 @@ namespace QLAPLibraryCatalogAPI.Services
                 Condition = mediaCopy.Condition,
                 Notes = mediaCopy.Notes,
                 IsAvailable = mediaCopy.IsAvailable,
-                MaxLoanDays = mediaCopy.MaxLoanDays,
-                RequiresApproval = mediaCopy.RequiresApproval,
                 MediaTitle = mediaCopy.Media.Title,
                 MediaCreator = mediaCopy.Media.Creator,
                 OwnerUsername = mediaCopy.User.Username,
                 OwnerUserId = mediaCopy.User.UserId,
-                // Media = new MediaDto
-                // {
-                //     MediaId = mediaCopy.MediaId,
-                //     MediaTypeId = mediaCopy.Media.MediaTypeId,
-                //     Title = mediaCopy.Media.Title,
-                //     Subtitle = mediaCopy.Media.Subtitle,
-                //     Creator = mediaCopy.Media.Creator,
-                //     Publisher = mediaCopy.Media.Publisher,
-                //     PublicationDate = mediaCopy.Media.PublicationDate,
-                //     Language = mediaCopy.Media.Language,
-                //     Genre = mediaCopy.Media.Genre,
-                //     Description = mediaCopy.Media.Description,
-                //     CoverImageUrl = mediaCopy.Media.CoverImageUrl,
-                //     Isbn10 = mediaCopy.Media.Isbn10,
-                //     Isbn13 = mediaCopy.Media.Isbn13,
-                //     PageCount = mediaCopy.Media.PageCount,
-                //     IssueNumber = mediaCopy.Media.IssueNumber,
-                //     Volume = mediaCopy.Media.Volume,
-                // }
+                CurrentLocationZoneName = currentLocationZoneName,
+                HomeLocationZoneName = homeLocationZoneName,
             };
         }
         #endregion
