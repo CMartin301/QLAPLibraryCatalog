@@ -1,9 +1,9 @@
 import React from 'react';
-import { Media } from '../../types/media';
+import { Media, MediaDto } from '../../types/media';
 import { Book, Calendar, Globe, User, Check, Hash } from 'lucide-react';
 
 interface MediaDisplayProps {
-  media: Media;
+  media: MediaDto;
   variant?: 'card' | 'selection' | 'compact' | 'list';
   selected?: boolean;
   onClick?: () => void;
@@ -48,9 +48,9 @@ export function MediaDisplay({
     }
   };
 
-  // Calculate available copies count
-  const availableCopiesCount = media.copies?.filter(copy => copy.isAvailable).length || 0;
-  const totalCopiesCount = media.copies?.length || 0;
+  // // Calculate available copies count
+  // const availableCopiesCount = media.copies?.filter(copy => copy.isAvailable).length || 0;
+  // const totalCopiesCount = media.copies?.length || 0;
 
   return (
     <div
@@ -94,7 +94,7 @@ export function MediaDisplay({
           <div className="flex flex-wrap items-center gap-2">
             {/* Media type badge */}
             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-lavender-100 text-lavender-700">
-              {media.mediaType.displayName}
+              {media.mediaTypeName}
             </span>
             
             {/* Genre if present */}

@@ -1,11 +1,11 @@
 // MediaModal.tsx
 import React from 'react';
-import { Media, MediaCopy } from '../../types/media';
+import { Media, MediaCopy, MediaDto } from '../../types/media';
 import { Modal } from '../shared/Modal';
 import { Calendar, User, Building, Globe, BookOpen, Hash, Users } from 'lucide-react';
 
 interface MediaModalProps {
-  media: Media | undefined;
+  media: MediaDto | undefined;
   isOpen: boolean;
   onClose: () => void;
   showCopies?: boolean;
@@ -140,7 +140,7 @@ export function MediaModal({ media, isOpen, onClose, showCopies = true }: MediaM
 
             {/* Media Type */}
             <div className="text-sm text-gray-600">
-              <strong>Type:</strong> {media.mediaType?.displayName || 'Unknown'}
+              <strong>Type:</strong> {media.mediaTypeName || 'Unknown'}
             </div>
           </div>
         </div>
@@ -174,7 +174,7 @@ export function MediaModal({ media, isOpen, onClose, showCopies = true }: MediaM
         )}
 
         {/* Copies Section */}
-        {showCopies && media.copies && media.copies.length > 0 && (
+        {/* {showCopies && media.copies && media.copies.length > 0 && (
           <div className="pt-4 border-t">
             <div className="flex items-center gap-2 mb-4">
               <Users className="w-5 h-5 text-lavender-500 flex-shrink-0" />
@@ -189,7 +189,7 @@ export function MediaModal({ media, isOpen, onClose, showCopies = true }: MediaM
               ))}
             </div>
           </div>
-        )}
+        )} */}
       </div>
     </Modal>
   );

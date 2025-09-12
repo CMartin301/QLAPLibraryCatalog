@@ -42,6 +42,7 @@ namespace QLAPLibraryCatalogAPI.Services
         {
             var query = _context.Media
                 .Include(m => m.MediaType)
+                .Include(m => m.MediaCopies)
                 .AsQueryable();
 
 
@@ -62,11 +63,6 @@ namespace QLAPLibraryCatalogAPI.Services
                 );
             }
 
-            // if (includeCopies)
-            // {
-            //     query = query.Include(m => m.MediaCopies);
-            // }
-
             return await query
                 .Select(user => MapMedia(user))
                 .ToListAsync();
@@ -83,10 +79,8 @@ namespace QLAPLibraryCatalogAPI.Services
         {
             var query = _context.Media
                 .Include(m => m.MediaType)
+                .Include(m => m.MediaCopies)
                 .AsQueryable();
-
-            // if (includeCopies)
-            //     query = query.Include(m => m.MediaCopies);
 
             return await query
                 .Where(m => m.MediaId == mediaId)
@@ -188,10 +182,8 @@ namespace QLAPLibraryCatalogAPI.Services
         {
             var query = _context.Media
                 .Include(m => m.MediaType)
+                .Include(m => m.MediaCopies)
                 .AsQueryable();
-
-            // if (includeCopies)
-            //     query = query.Include(m => m.MediaCopies);
 
             return await query
                 .Where(m => m.MediaCopies.Any(c => c.UserId == userId)) 
@@ -205,26 +197,30 @@ namespace QLAPLibraryCatalogAPI.Services
         /// </summary>
         private static MediaDto MapMedia(Media m)
         {
+            int? totalCopiesCount = m.MediaCopies.Count();
+            int? availableCopiesCount = m.MediaCopies.Where(c => c.IsAvailable == true).Count();
             return new MediaDto
-                {
-                    MediaId = m.MediaId,
-                    MediaTypeId = m.MediaTypeId,
-                    MediaTypeName = m.MediaType.DisplayName,
-                    Title = m.Title,
-                    Subtitle = m.Subtitle,
-                    Creator = m.Creator,
-                    Publisher = m.Publisher,
-                    PublicationDate = m.PublicationDate,
-                    Language = m.Language,
-                    Genre = m.Genre,
-                    Description = m.Description,
-                    CoverImageUrl = m.CoverImageUrl,
-                    Isbn10 = m.Isbn10,
-                    Isbn13 = m.Isbn13,
-                    PageCount = m.PageCount,
-                    IssueNumber = m.IssueNumber,
-                    Volume = m.Volume
-                };
+            {
+                MediaId = m.MediaId,
+                MediaTypeId = m.MediaTypeId,
+                MediaTypeName = m.MediaType.DisplayName,
+                Title = m.Title,
+                Subtitle = m.Subtitle,
+                Creator = m.Creator,
+                Publisher = m.Publisher,
+                PublicationDate = m.PublicationDate,
+                Language = m.Language,
+                Genre = m.Genre,
+                Description = m.Description,
+                CoverImageUrl = m.CoverImageUrl,
+                Isbn10 = m.Isbn10,
+                Isbn13 = m.Isbn13,
+                PageCount = m.PageCount,
+                IssueNumber = m.IssueNumber,
+                Volume = m.Volume,
+                TotalCopiesCount = totalCopiesCount,
+                AvailableCopiesCount = availableCopiesCount
+            };
         }
         #endregion
     }

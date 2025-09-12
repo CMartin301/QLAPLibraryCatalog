@@ -35,6 +35,8 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
         public int? PageCount { get; set; }
         public string? IssueNumber { get; set; }
         public string? Volume { get; set; }
+        public int? TotalCopiesCount { get; set; }
+        public int? AvailableCopiesCount { get; set; }
         // public MediaTypeDto? MediaType { get; set; }
         // public List<MediaCopyDto> Copies { get; set; } = new();
     }

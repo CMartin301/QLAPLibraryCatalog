@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Media, CreateMediaRequest, MediaFormData, CreateMediaCopyRequest, MediaCopyDto } from '../../../types/media';
+import { Media, CreateMediaRequest, MediaFormData, CreateMediaCopyRequest, MediaCopyDto, MediaDto } from '../../../types/media';
 import { TableContainer } from '../../shared/TableContainer';
 import { Modal } from '../../shared/Modal';
 import { AddMediaForm } from '../AddMediaForm';
@@ -12,7 +12,7 @@ import { useTableActions } from '../../../hooks/useTableActions';
 import { useNetworkMediaColumns } from './networkMediaColumns';
 
 interface NetworkMediaTableProps {
-  media: Media[];
+  media: MediaDto[];
   loading?: boolean;
   error?: string | null;
   onRefresh: () => void;
@@ -30,11 +30,11 @@ export function NetworkMediaTable({
   const { executeAction, isLoading: actionLoading } = useTableActions();
   
   // Modal states
-  const [selectedMedia, setSelectedMedia] = useState<Media | undefined>(undefined);
+  const [selectedMedia, setSelectedMedia] = useState<MediaDto | undefined>(undefined);
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
   const [isAddMediaModalOpen, setIsAddMediaModalOpen] = useState(false);
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
-  const [selectedMediaForCopy, setSelectedMediaForCopy] = useState<Media | null>(null);
+  const [selectedMediaForCopy, setSelectedMediaForCopy] = useState<MediaDto | null>(null);
 
   const [isBorrowModalOpen, setIsBorrowModalOpen] = useState(false);
   const [selectedCopyForBorrow, setSelectedCopyForBorrow] = useState<number | undefined>(undefined);
@@ -43,22 +43,20 @@ export function NetworkMediaTable({
 
   const [addingToCopyMediaId, setAddingToCopyMediaId] = useState<number | null>(null);
 
-  const handleRowClick = (media: Media) => {
+  const handleRowClick = (media: MediaDto) => {
     setSelectedMedia(media);
     setIsMediaModalOpen(true);
   };
 
-  const handleAddToCollection = (mediaItem: Media) => {
+  const handleAddToCollection = (mediaItem: MediaDto) => {
     setAddingToCopyMediaId(mediaItem.mediaId);
     setSelectedMediaForCopy(mediaItem);
     setIsCopyModalOpen(true);
   };
 
-const handleRequestItem = async (mediaItem: Media) => {
+const handleRequestItem = async (mediaItem: MediaDto) => {
   
-  const availableCopies = mediaItem.copies?.filter(copy => copy.isAvailable) || [];
-  
-  if (availableCopies.length === 0) {
+  if (mediaItem.availableCopiesCount === 0) {
     executeAction(
       () => Promise.reject(new Error('No available copies for this item')),
       { errorMessage: 'No available copies for this item' }

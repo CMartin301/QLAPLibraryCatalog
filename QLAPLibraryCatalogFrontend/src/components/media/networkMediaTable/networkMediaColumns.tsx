@@ -1,16 +1,16 @@
 import { useMemo } from 'react';
 import { createColumnHelper, ColumnDef } from '@tanstack/react-table';
 import { Plus } from 'lucide-react';
-import { Media, MediaCopy } from '../../../types/media';
+import { Media, MediaCopy, MediaDto } from '../../../types/media';
 import { StatusBadge } from '../../shared/StatusBadge';
 import Button from '../../shared/Button';
 
-const columnHelper = createColumnHelper<Media>();
+const columnHelper = createColumnHelper<MediaDto>();
 
 interface UseNetworkMediaColumnsProps {
   handlers: {
-    onAddToCollection: (media: Media) => void;
-    onRequestItem: (media: Media) => void;
+    onAddToCollection: (media: MediaDto) => void;
+    onRequestItem: (media: MediaDto) => void;
   };
   addingToCopyMediaId: number | null;
 }
@@ -21,7 +21,7 @@ export function useNetworkMediaColumns({
 }: UseNetworkMediaColumnsProps) {
   const { onAddToCollection, onRequestItem } = handlers;
 
-  return useMemo<ColumnDef<Media, any>[]>(() => [
+  return useMemo<ColumnDef<MediaDto, any>[]>(() => [
     // Title & Creator
     columnHelper.accessor(row => row.title ?? "—", {
       id: "title",
@@ -44,7 +44,7 @@ export function useNetworkMediaColumns({
     }),
 
     // Media Type
-    columnHelper.accessor(row => row.mediaType?.displayName ?? "Unknown", {
+    columnHelper.accessor(row => row.mediaTypeName ?? "Unknown", {
       id: "mediaType",
       header: "Type",
       cell: info => (
@@ -70,12 +70,11 @@ export function useNetworkMediaColumns({
     }),
 
     // Availability
-    columnHelper.accessor(row => row.copies ?? [], {
+    columnHelper.accessor(row => row.availableCopiesCount ?? 0, {
       id: "availability",
       header: "Availability",
       cell: info => {
-        const copies = info.getValue();
-        const hasAvailableCopies = copies.some((c: MediaCopy) => c.isAvailable);
+        const hasAvailableCopies = info.getValue() > 0 ? true : false;
         
         const config = {
           text: hasAvailableCopies ? 'Available' : 'Not Available',

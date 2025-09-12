@@ -5,6 +5,27 @@ export interface MediaType {
   displayName: string;
   description: string;
 }
+export interface MediaDto {
+  mediaId: number;
+  mediaTypeId: number;
+  mediaTypeName?: string;
+  title: string;
+  subtitle: string | null;
+  creator: string;
+  publisher: string;
+  publicationDate: string;
+  language: string;
+  genre: string;
+  description: string;
+  coverImageUrl: string;
+  isbn10: string | null;
+  isbn13: string | null;
+  pageCount: number | null;
+  issueNumber: number | null;
+  volume: number | null;
+  totalCopiesCount: number | null;
+  availableCopiesCount: number | null;
+}
 
 export interface Media {
   mediaId: number;

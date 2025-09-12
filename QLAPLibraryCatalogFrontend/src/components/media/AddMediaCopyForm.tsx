@@ -1,5 +1,5 @@
 import { useForm } from 'react-hook-form';
-import { CreateMediaCopyRequest, Media } from '../../types/media';
+import { CreateMediaCopyRequest, Media, MediaDto } from '../../types/media';
 import useAuth from '../../hooks/useAuth';
 import Button from '../shared/Button';
 import { MediaDisplay } from '../shared/MediaDisplay';
@@ -8,7 +8,7 @@ interface AddMediaCopyFormProps {
   onSubmit: (data: CreateMediaCopyRequest) => void;
   isSubmitting: boolean;
   submitError: string | null;
-  preselectedMedia?: Media;
+  preselectedMedia?: MediaDto;
 }
 
 export function AddMediaCopyForm({ onSubmit, isSubmitting, submitError, preselectedMedia }: AddMediaCopyFormProps) {

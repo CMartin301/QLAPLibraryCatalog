@@ -3,7 +3,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { ChevronDown, ChevronUp, AlertCircle } from 'lucide-react';
 import { CreateBorrowRequestDto } from "../../../types/borrowRequests";
 import { borrowRequestService } from "../../../services/borrowRequestService";
-import { Media, MediaCopyDto } from "../../../types/media";
+import { Media, MediaCopyDto, MediaDto } from "../../../types/media";
 import { CopyDisplay } from "../../shared/CopyDisplay";
 import { ErrorAlert, FormFieldError, SubmitError } from '../../shared/ErrorAlert';
 import { MediaDisplay } from '../../shared/MediaDisplay';
@@ -18,7 +18,7 @@ interface BorrowRequestFormData {
 interface AddBorrowRequestFormProps {
   copyId: number | undefined; 
   borrowerId: number;
-  selectedMedia: Media | undefined;
+  selectedMedia: MediaDto | undefined;
   availableCopies: MediaCopyDto[];  
   onCopySelect: (copyId: number) => void; 
   onSubmit: (data: BorrowRequestFormData) => void;
