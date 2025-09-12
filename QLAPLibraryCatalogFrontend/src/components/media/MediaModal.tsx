@@ -5,7 +5,7 @@ import { Modal } from '../shared/Modal';
 import { Calendar, User, Building, Globe, BookOpen, Hash, Users } from 'lucide-react';
 
 interface MediaModalProps {
-  media: Media | null;
+  media: Media | undefined;
   isOpen: boolean;
   onClose: () => void;
   showCopies?: boolean;

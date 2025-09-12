@@ -30,7 +30,7 @@ export function NetworkMediaTable({
   const { executeAction, isLoading: actionLoading } = useTableActions();
   
   // Modal states
-  const [selectedMedia, setSelectedMedia] = useState<Media | null>(null);
+  const [selectedMedia, setSelectedMedia] = useState<Media | undefined>(undefined);
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
   const [isAddMediaModalOpen, setIsAddMediaModalOpen] = useState(false);
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
@@ -143,7 +143,7 @@ const handleBorrowRequestSubmit = async () => {
     {
       onSuccess: () => {
         setIsBorrowModalOpen(false);
-        setSelectedMedia(null);
+        setSelectedMedia(undefined);
         setSelectedCopyForBorrow(undefined);
         onRefresh();
       },
@@ -186,7 +186,7 @@ const handleBorrowRequestSubmit = async () => {
         isOpen={isMediaModalOpen}
         onClose={() => {
           setIsMediaModalOpen(false);
-          setSelectedMedia(null);
+          setSelectedMedia(undefined);
           setSelectedCopyForBorrow(undefined);
         }}
         showCopies={true}
@@ -228,7 +228,7 @@ const handleBorrowRequestSubmit = async () => {
         isOpen={isBorrowModalOpen}
         onClose={() => {
           setIsBorrowModalOpen(false);
-          setSelectedMedia(null);
+          setSelectedMedia(undefined);
           setSelectedCopyForBorrow(undefined);
         }}
         title={selectedMedia ? `Request "${selectedMedia.title}"` : 'Request Item'}
@@ -239,6 +239,7 @@ const handleBorrowRequestSubmit = async () => {
           <AddBorrowRequestForm
             copyId={selectedCopyForBorrow}
             borrowerId={userID}
+            selectedMedia={selectedMedia}
             availableCopies={mediaCopies}
             onCopySelect={(copyId) => {setSelectedCopyForBorrow(copyId);}}
             onSubmit={handleBorrowRequestSubmit}

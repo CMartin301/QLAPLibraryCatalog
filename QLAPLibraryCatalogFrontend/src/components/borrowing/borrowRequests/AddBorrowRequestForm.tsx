@@ -3,9 +3,10 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { ChevronDown, ChevronUp, AlertCircle } from 'lucide-react';
 import { CreateBorrowRequestDto } from "../../../types/borrowRequests";
 import { borrowRequestService } from "../../../services/borrowRequestService";
-import { MediaCopyDto } from "../../../types/media";
+import { Media, MediaCopyDto } from "../../../types/media";
 import { CopyDisplay } from "../../shared/CopyDisplay";
 import { ErrorAlert, FormFieldError, SubmitError } from '../../shared/ErrorAlert';
+import { MediaDisplay } from '../../shared/MediaDisplay';
 
 interface BorrowRequestFormData {
   borrowerId: number;
@@ -17,6 +18,7 @@ interface BorrowRequestFormData {
 interface AddBorrowRequestFormProps {
   copyId: number | undefined; 
   borrowerId: number;
+  selectedMedia: Media | undefined;
   availableCopies: MediaCopyDto[];  
   onCopySelect: (copyId: number) => void; 
   onSubmit: (data: BorrowRequestFormData) => void;
@@ -27,6 +29,7 @@ interface AddBorrowRequestFormProps {
 export function AddBorrowRequestForm({ 
   copyId, 
   borrowerId, 
+  selectedMedia,
   availableCopies,
   onCopySelect,
   onSubmit, 
@@ -34,7 +37,7 @@ export function AddBorrowRequestForm({
   submitError 
 }: AddBorrowRequestFormProps) {
   const [isCopySelectionExpanded, setIsCopySelectionExpanded] = useState(true);
-  
+
   const {
     register,
     handleSubmit,
@@ -113,6 +116,9 @@ export function AddBorrowRequestForm({
     >
       <SubmitError message={submitError} />
       <ErrorAlert message={errors.root?.message} variant="validation" />
+
+      {selectedMedia && (<MediaDisplay media={selectedMedia} variant="compact" />)}
+            
 
       {/* Copy Selection */}
       {availableCopies.length > 0 && (
