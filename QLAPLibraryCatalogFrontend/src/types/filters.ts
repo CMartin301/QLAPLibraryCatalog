@@ -4,6 +4,7 @@ export interface BaseFilter {
   label: string;
   type: 'select' | 'multiselect' | 'boolean' | 'range' | 'search';
   active: boolean;
+  priority?: 'primary' | 'advanced'; 
 }
 
 // Select filter for single selection (like media type)

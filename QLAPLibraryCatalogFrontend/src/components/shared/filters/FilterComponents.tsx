@@ -31,7 +31,7 @@ export function SelectFilterComponent({ filter, onChange }: { filter: SelectFilt
     <div className="space-y-2">
       <Listbox value={filter.value} onChange={handleChange}>
         <div className="relative">
-          <Listbox.Label className="block text-sm font-medium text-gray-700">
+          <Listbox.Label className="block text-sm font-medium text-gray-700 mb-1">
             {filter.label}
           </Listbox.Label>
           <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left border border-gray-300 focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:border-lavender-500 sm:text-sm">
@@ -112,7 +112,7 @@ export function MultiSelectFilterComponent({ filter, onChange }: { filter: Multi
     <div className="space-y-2">
       <Listbox value={filter.value} onChange={handleChange} multiple>
         <div className="relative">
-          <Listbox.Label className="block text-sm font-medium text-gray-700">
+          <Listbox.Label className="block text-sm font-medium text-gray-700 mb-1">
             {filter.label}
           </Listbox.Label>
           <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left border border-gray-300 focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:border-lavender-500 sm:text-sm">
@@ -216,8 +216,8 @@ export function BooleanFilterComponent({ filter, onChange }: { filter: BooleanFi
   ];
 
   return (
-    <div className="space-y-2">
-      <label className="block text-sm font-medium text-gray-700">
+    <div className="space-y-1">
+      <label className="block text-sm font-medium text-gray-700 mb-1">
         {filter.label}
       </label>
       <div className="flex gap-2">
@@ -273,7 +273,7 @@ export function RangeFilterComponent({ filter, onChange }: { filter: RangeFilter
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-1">
       <div className="flex items-center justify-between">
         <label className="block text-sm font-medium text-gray-700">
           {filter.label}

@@ -50,9 +50,7 @@ export function NetworkMediaTable({
     filteredData,
     filters,
     updateFilters,
-    activeFilterCount,
-    isFiltersOpen,
-    toggleFilters
+    activeFilterCount
   } = useFilters({
     data: media,
     createFilterConfig: createMediaFilterConfig
@@ -183,8 +181,6 @@ const handleBorrowRequestSubmit = async () => {
       <FilterPanel
         filters={filters}
         onFiltersChange={updateFilters}
-        isOpen={isFiltersOpen}
-        onToggle={toggleFilters}
         className="mb-4"
       />
       <TableContainer

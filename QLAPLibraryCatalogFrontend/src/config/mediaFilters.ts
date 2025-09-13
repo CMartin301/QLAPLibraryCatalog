@@ -57,6 +57,7 @@ export const createMediaFilterConfig = (data: MediaDto[]): FilterConfig<MediaDto
       label: 'Media Type',
       type: 'select',
       active: false,
+    priority: 'primary', 
       value: null,
       options: mediaTypes.map(type => ({
         value: type,
@@ -71,6 +72,7 @@ export const createMediaFilterConfig = (data: MediaDto[]): FilterConfig<MediaDto
       label: 'Genre',
       type: 'multiselect',
       active: false,
+    priority: 'primary', 
       value: [],
       options: genres.map(genre => ({
         value: genre,
@@ -85,6 +87,7 @@ export const createMediaFilterConfig = (data: MediaDto[]): FilterConfig<MediaDto
       label: 'Language',
       type: 'select',
       active: false,
+    priority: 'advanced', 
       value: null,
       options: languages.map(lang => ({
         value: lang,
@@ -99,6 +102,7 @@ export const createMediaFilterConfig = (data: MediaDto[]): FilterConfig<MediaDto
       label: 'Publisher',
       type: 'select',
       active: false,
+    priority: 'advanced', 
       value: null,
       options: publishers.map(pub => ({
         value: pub,
@@ -113,6 +117,7 @@ export const createMediaFilterConfig = (data: MediaDto[]): FilterConfig<MediaDto
       label: 'Availability',
       type: 'boolean',
       active: false,
+    priority: 'primary', 
       value: null,
       trueLabel: 'Available',
       falseLabel: 'Not Available'
@@ -124,6 +129,7 @@ export const createMediaFilterConfig = (data: MediaDto[]): FilterConfig<MediaDto
       label: 'Publication Year',
       type: 'range',
       active: false,
+    priority: 'advanced', 
       value: { min: null, max: null },
       min: minYear,
       max: maxYear,

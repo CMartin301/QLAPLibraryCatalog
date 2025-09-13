@@ -12,16 +12,12 @@ interface UseFiltersReturn<T> {
   updateFilters: (filters: Filter[]) => void;
   clearFilters: () => void;
   activeFilterCount: number;
-  isFiltersOpen: boolean;
-  toggleFilters: () => void;
 }
 
 export function useFilters<T>({ 
   data, 
   createFilterConfig 
 }: UseFiltersProps<T>): UseFiltersReturn<T> {
-  // State for filter panel visibility
-  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   
   // Generate initial filter configuration based on data
   const filterConfig = useMemo(() => createFilterConfig(data), [data, createFilterConfig]);
@@ -129,18 +125,11 @@ useEffect(() => {
     setFilters(clearedFilters);
   };
 
-  // Toggle filter panel visibility
-  const toggleFilters = () => {
-    setIsFiltersOpen(!isFiltersOpen);
-  };
-
   return {
     filteredData,
     filters,
     updateFilters,
     clearFilters,
-    activeFilterCount,
-    isFiltersOpen,
-    toggleFilters
+    activeFilterCount
   };
 }

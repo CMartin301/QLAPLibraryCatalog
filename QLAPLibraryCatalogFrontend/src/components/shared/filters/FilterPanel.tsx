@@ -1,26 +1,30 @@
-import React from 'react';
-import { Filter as FilterIcon, X, RotateCcw } from 'lucide-react';
+import React, { useState } from 'react';
+import { RotateCcw, ChevronDown, ChevronUp, Settings, X } from 'lucide-react';
 import { Filter } from '../../../types/filters';
 import { FilterComponent } from './FilterComponents';
-import Button from '../Button';
 
 interface FilterPanelProps {
   filters: Filter[];
   onFiltersChange: (filters: Filter[]) => void;
-  isOpen: boolean;
-  onToggle: () => void;
   className?: string;
 }
 
 export function FilterPanel({ 
   filters, 
-  onFiltersChange, 
-  isOpen, 
-  onToggle,
+  onFiltersChange,
   className = '' 
 }: FilterPanelProps) {
-  // Count active filters for the badge
+  // State for advanced filters visibility
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  
+  // Separate primary and advanced filters
+  const primaryFilters = filters.filter(f => f.priority === 'primary' || !f.priority);
+  const advancedFilters = filters.filter(f => f.priority === 'advanced');
+  
+  // Count active filters
   const activeFilterCount = filters.filter(f => f.active).length;
+  const activePrimaryCount = primaryFilters.filter(f => f.active).length;
+  const activeAdvancedCount = advancedFilters.filter(f => f.active).length;
 
   // Handle individual filter changes
   const handleFilterChange = (updatedFilter: Filter) => {
@@ -51,110 +55,114 @@ export function FilterPanel({
 
   return (
     <div className={className}>
-      {/* Filter Toggle Button */}
-      <div className="flex items-center justify-between mb-4">
-        <Button
-          variant="secondary"
-          size="md"
-          icon={FilterIcon}
-          onClick={onToggle}
-          className="relative"
-        >
-          Filters
-          {activeFilterCount > 0 && (
-            <span className="absolute -top-1 -right-1 bg-lavender-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-              {activeFilterCount}
-            </span>
-          )}
-        </Button>
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+        {/* Primary Filters Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {primaryFilters.map(filter => (
+            <div key={filter.id}>
+              <FilterComponent 
+                filter={filter} 
+                onChange={handleFilterChange}
+              />
+            </div>
+          ))}
+        </div>
 
-        {/* Clear all button - only show if filters are active */}
+        {/* Advanced Filters Section */}
+        {advancedFilters.length > 0 && (
+          <div className="mt-2">
+            {/* Advanced Filters Toggle - Compact */}
+            <button
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              className="flex items-center gap-1 text-xs text-gray-600 hover:text-gray-800 focus:outline-none focus:text-gray-800 transition-colors mb-1"
+            >
+                <div className="flex items-center gap-2">
+                  <Settings className="w-4 h-4 text-gray-600" />
+                  <span className="text-sm font-medium text-gray-700">
+                    Advanced Filters
+                  </span>
+                  {activeAdvancedCount > 0 && (
+                    <span className="bg-lavender-100 text-lavender-700 text-xs px-2 py-0.5 rounded-full">
+                      {activeAdvancedCount} active
+                    </span>
+                  )}
+                </div>
+              {showAdvanced ? (
+                <ChevronUp className="w-3 h-3" />
+              ) : (
+                <ChevronDown className="w-3 h-3" />
+              )}
+            </button>
+
+            {/* Advanced Filter Grid - Seamless continuation */}
+            {showAdvanced && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {advancedFilters.map(filter => (
+                  <div key={filter.id}>
+                    <FilterComponent 
+                      filter={filter} 
+                      onChange={handleFilterChange}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Active Filters Summary - Compact */}
         {activeFilterCount > 0 && (
-          <Button
-            variant="ghost"
-            size="sm"
-            icon={RotateCcw}
-            onClick={handleClearAll}
-            className="text-gray-600"
-          >
-            Clear All ({activeFilterCount})
-          </Button>
+          <div className="mt-4 pt-3 border-t border-gray-100">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">
+                Active ({activeFilterCount})
+              </span>
+              <button
+                onClick={handleClearAll}
+                className="text-xs text-red-600 hover:text-red-700 focus:outline-none focus:underline flex items-center gap-1"
+              >
+                <RotateCcw className="w-3 h-3" />
+                Clear All
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {filters
+                .filter(f => f.active)
+                .map(filter => (
+                  <ActiveFilterChip
+                    key={filter.id}
+                    filter={filter}
+                    onRemove={() => {
+                      const clearedFilter = { ...filter };
+                      switch (filter.type) {
+                        case 'select':
+                          clearedFilter.value = null;
+                          break;
+                        case 'multiselect':
+                          clearedFilter.value = [];
+                          break;
+                        case 'boolean':
+                          clearedFilter.value = null;
+                          break;
+                        case 'range':
+                          clearedFilter.value = { min: null, max: null };
+                          break;
+                      }
+                      clearedFilter.active = false;
+                      handleFilterChange(clearedFilter);
+                    }}
+                  />
+                ))
+              }
+            </div>
+          </div>
         )}
       </div>
-
-      {/* Filter Panel - Collapsible */}
-      {isOpen && (
-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 space-y-4">
-          <div className="flex items-center justify-between border-b border-gray-200 pb-3 mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Filter Results</h3>
-            <button
-              onClick={onToggle}
-              className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-              aria-label="Close filters"
-            >
-              <X className="w-5 h-5 text-gray-500" />
-            </button>
-          </div>
-
-          {/* Filter Grid - Responsive layout */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {filters.map(filter => (
-              <div key={filter.id} className="space-y-2">
-                <FilterComponent 
-                  filter={filter} 
-                  onChange={handleFilterChange}
-                />
-              </div>
-            ))}
-          </div>
-
-          {/* Active Filters Summary */}
-          {activeFilterCount > 0 && (
-            <div className="border-t border-gray-200 pt-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-gray-700">
-                  Active Filters ({activeFilterCount})
-                </span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {filters
-                  .filter(f => f.active)
-                  .map(filter => (
-                    <ActiveFilterChip
-                      key={filter.id}
-                      filter={filter}
-                      onRemove={() => {
-                        const clearedFilter = { ...filter };
-                        switch (filter.type) {
-                          case 'select':
-                            clearedFilter.value = null;
-                            break;
-                          case 'multiselect':
-                            clearedFilter.value = [];
-                            break;
-                          case 'boolean':
-                            clearedFilter.value = null;
-                            break;
-                          case 'range':
-                            clearedFilter.value = { min: null, max: null };
-                            break;
-                        }
-                        clearedFilter.active = false;
-                        handleFilterChange(clearedFilter);
-                      }}
-                    />
-                  ))
-                }
-              </div>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }
 
-// Component to show active filter chips
+// Compact active filter chips
 interface ActiveFilterChipProps {
   filter: Filter;
   onRemove: () => void;
@@ -185,16 +193,22 @@ function ActiveFilterChip({ filter, onRemove }: ActiveFilterChipProps) {
   const displayValue = getFilterDisplayValue(filter);
   if (!displayValue) return null;
 
+  // Compact chip styling
+  const isAdvanced = filter.priority === 'advanced';
+  const chipStyles = isAdvanced 
+    ? "bg-blue-50 text-blue-700 border border-blue-200"
+    : "bg-lavender-50 text-lavender-700 border border-lavender-200";
+
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-1 bg-lavender-100 text-lavender-700 rounded-full text-sm">
+    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs ${chipStyles}`}>
       <span className="font-medium">{filter.label}:</span>
       <span>{displayValue}</span>
       <button
         onClick={onRemove}
-        className="hover:text-lavender-900 ml-1"
+        className="hover:opacity-70"
         aria-label={`Remove ${filter.label} filter`}
       >
-        <X className="w-3 h-3" />
+        <X className="w-2.5 h-2.5" />
       </button>
     </span>
   );
