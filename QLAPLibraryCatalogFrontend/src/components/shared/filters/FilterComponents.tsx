@@ -1,7 +1,6 @@
 import React from 'react';
-import { Check, ChevronDown, X } from 'lucide-react';
-import { Listbox, Transition } from '@headlessui/react';
-import { Fragment } from 'react';
+import Select, { SingleValue, MultiValue, StylesConfig, components } from 'react-select';
+import { X } from 'lucide-react';
 import { Filter, SelectFilter, MultiSelectFilter, BooleanFilter, RangeFilter } from '../../../types/filters';
 
 interface FilterComponentProps {
@@ -9,81 +8,162 @@ interface FilterComponentProps {
   onChange: (updatedFilter: Filter) => void;
 }
 
-// Select Filter Component using Headless UI Listbox
-export function SelectFilterComponent({ filter, onChange }: { filter: SelectFilter; onChange: (filter: SelectFilter) => void }) {
-  const handleChange = (value: string | null) => {
+// Option type for React Select - needs to be defined for both single and multi
+interface SelectOption {
+  value: string;
+  label: string;
+  count?: number;
+}
+
+interface MultiSelectOption {
+  value: string;
+  label: string;
+  count?: number;
+}
+
+// Custom styles for React Select to match your design system
+const getSelectStyles = (isMulti: boolean): StylesConfig<SelectOption | MultiSelectOption, boolean> => ({
+  control: (provided, state) => ({
+    ...provided,
+    borderColor: state.isFocused ? '#a855f7' : '#d1d5db',
+    boxShadow: state.isFocused ? '0 0 0 2px rgba(168, 85, 247, 0.2)' : 'none',
+    '&:hover': {
+      borderColor: state.isFocused ? '#a855f7' : '#9ca3af'
+    },
+    minHeight: '38px',
+    fontSize: '14px'
+  }),
+  option: (provided, state) => ({
+    ...provided,
+    backgroundColor: state.isSelected 
+      ? '#f3e8ff' 
+      : state.isFocused 
+      ? '#faf5ff' 
+      : 'white',
+    color: state.isSelected ? '#7c3aed' : '#374151',
+    cursor: 'pointer',
+    padding: 0, // Remove default padding since we're using custom components
+  }),
+  multiValue: (provided) => ({
+    ...provided,
+    backgroundColor: '#f3e8ff',
+    borderRadius: '6px'
+  }),
+  multiValueLabel: (provided) => ({
+    ...provided,
+    color: '#7c3aed',
+    fontSize: '12px'
+  }),
+  multiValueRemove: (provided) => ({
+    ...provided,
+    color: '#7c3aed',
+    '&:hover': {
+      backgroundColor: '#e9d5ff',
+      color: '#6b21a8'
+    }
+  }),
+  placeholder: (provided) => ({
+    ...provided,
+    color: '#9ca3af',
+    fontSize: '14px'
+  })
+});
+
+// Custom option component factory
+const createOptionComponent = (isMulti: boolean) => {
+  return (props: any) => {
+    const { isSelected, data, innerRef, innerProps } = props;
+    
+    return (
+      <div 
+        ref={innerRef} 
+        {...innerProps} 
+        className="flex items-center px-3 py-2 cursor-pointer hover:bg-purple-50"
+      >
+        {isMulti ? (
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={() => {}} // Controlled by React Select
+            className="h-4 w-4 text-lavender-600 border-gray-300 rounded focus:ring-lavender-500 mr-3 pointer-events-none"
+          />
+        ) : (
+          <input
+            type="radio"
+            checked={isSelected}
+            onChange={() => {}} // Controlled by React Select
+            className="h-4 w-4 text-lavender-600 border-gray-300 focus:ring-lavender-500 mr-3 pointer-events-none"
+          />
+        )}
+        <span className={`${isSelected ? 'font-medium text-purple-700' : 'text-gray-900'}`}>
+          {data.label} {data.count && `(${data.count})`}
+        </span>
+      </div>
+    );
+  };
+};
+
+// React Select Filter Component (Single Select)
+export function SelectFilterComponent({ 
+  filter, 
+  onChange 
+}: { 
+  filter: SelectFilter; 
+  onChange: (filter: SelectFilter) => void 
+}) {
+  const handleChange = (selectedOption: SingleValue<SelectOption>) => {
     onChange({
       ...filter,
-      value,
-      active: value !== null
+      value: selectedOption?.value || null,
+      active: selectedOption?.value !== null
     });
   };
 
-  // Add "All" option to the beginning
-  const allOptions = [
-    { value: null, label: `All ${filter.label}`, count: undefined },
-    ...filter.options.map(opt => ({ ...opt, value: opt.value as string | null }))
-  ];
+  // Create options without the "All" option since we want null to represent "no selection"
+  const options: SelectOption[] = filter.options.map(opt => ({
+    value: opt.value,
+    label: opt.label,
+    count: opt.count
+  }));
 
-  const selectedOption = allOptions.find(opt => opt.value === filter.value) || allOptions[0];
+  const selectedOption = filter.value ? options.find(opt => opt.value === filter.value) : null;
 
   return (
-    <div className="space-y-2">
-      <Listbox value={filter.value} onChange={handleChange}>
-        <div className="relative">
-          <Listbox.Label className="block text-sm font-medium text-gray-700 mb-1">
-            {filter.label}
-          </Listbox.Label>
-          <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left border border-gray-300 focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:border-lavender-500 sm:text-sm">
-            <span className="block truncate">
-              {selectedOption.label} {selectedOption.count && `(${selectedOption.count})`}
-            </span>
-            <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-              <ChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
-            </span>
-          </Listbox.Button>
-          <Transition
-            as={Fragment}
-            leave="transition ease-in duration-100"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-              {allOptions.map((option, optionIdx) => (
-                <Listbox.Option
-                  key={option.value || 'all'}
-                  className={({ active }) =>
-                    `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                      active ? 'bg-lavender-100 text-lavender-900' : 'text-gray-900'
-                    }`
-                  }
-                  value={option.value}
-                >
-                  {({ selected }) => (
-                    <>
-                      <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
-                        {option.label} {option.count && `(${option.count})`}
-                      </span>
-                      {selected ? (
-                        <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-lavender-600">
-                          <Check className="h-4 w-4" aria-hidden="true" />
-                        </span>
-                      ) : null}
-                    </>
-                  )}
-                </Listbox.Option>
-              ))}
-            </Listbox.Options>
-          </Transition>
-        </div>
-      </Listbox>
+    <div className="space-y-1">
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        {filter.label}
+      </label>
+      <Select<SelectOption, false>
+        options={options}
+        value={selectedOption}
+        onChange={handleChange}
+        placeholder={`Select ${filter.label.toLowerCase()}...`}
+        isClearable={true}
+        isSearchable={true}
+        styles={getSelectStyles(false)}
+        components={{
+          Option: createOptionComponent(false)
+        }}
+        formatOptionLabel={(option) => (
+          <span>
+            {option.label} {option.count && `(${option.count})`}
+          </span>
+        )}
+      />
     </div>
   );
 }
 
-// Multi-Select Filter Component using Headless UI Listbox with multiple selection
-export function MultiSelectFilterComponent({ filter, onChange }: { filter: MultiSelectFilter; onChange: (filter: MultiSelectFilter) => void }) {
-  const handleChange = (values: string[]) => {
+// React Select Multi-Select Filter Component
+export function MultiSelectFilterComponent({ 
+  filter, 
+  onChange 
+}: { 
+  filter: MultiSelectFilter; 
+  onChange: (filter: MultiSelectFilter) => void 
+}) {
+  const handleChange = (selectedOptions: MultiValue<MultiSelectOption>) => {
+    const values = selectedOptions.map(option => option.value);
     onChange({
       ...filter,
       value: values,
@@ -91,116 +171,51 @@ export function MultiSelectFilterComponent({ filter, onChange }: { filter: Multi
     });
   };
 
-  const handleClear = () => {
-    onChange({
-      ...filter,
-      value: [],
-      active: false
-    });
-  };
+  const options: MultiSelectOption[] = filter.options.map(opt => ({
+    value: opt.value,
+    label: opt.label,
+    count: opt.count
+  }));
 
-  const getDisplayText = () => {
-    if (filter.value.length === 0) return `All ${filter.label}`;
-    if (filter.value.length === 1) {
-      const option = filter.options.find(o => o.value === filter.value[0]);
-      return option?.label || filter.value[0];
-    }
-    return `${filter.value.length} selected`;
-  };
+  const selectedOptions = options.filter(opt => filter.value.includes(opt.value));
 
   return (
-    <div className="space-y-2">
-      <Listbox value={filter.value} onChange={handleChange} multiple>
-        <div className="relative">
-          <Listbox.Label className="block text-sm font-medium text-gray-700 mb-1">
-            {filter.label}
-          </Listbox.Label>
-          <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left border border-gray-300 focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:border-lavender-500 sm:text-sm">
-            <span className="block truncate">{getDisplayText()}</span>
-            <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-              <ChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
-            </span>
-          </Listbox.Button>
-          <Transition
-            as={Fragment}
-            leave="transition ease-in duration-100"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-              {filter.value.length > 0 && (
-                <div className="border-b border-gray-100 pb-1 mb-1">
-                  <button
-                    type="button"
-                    onClick={handleClear}
-                    className="w-full px-4 py-2 text-sm text-left hover:bg-gray-50 flex items-center justify-between text-red-600"
-                  >
-                    Clear all
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
-              {filter.options.map((option) => (
-                <Listbox.Option
-                  key={option.value}
-                  className={({ active }) =>
-                    `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                      active ? 'bg-lavender-100 text-lavender-900' : 'text-gray-900'
-                    }`
-                  }
-                  value={option.value}
-                >
-                  {({ selected }) => (
-                    <>
-                      <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
-                        {option.label} {option.count && `(${option.count})`}
-                      </span>
-                      {selected ? (
-                        <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-lavender-600">
-                          <Check className="h-4 w-4" aria-hidden="true" />
-                        </span>
-                      ) : null}
-                    </>
-                  )}
-                </Listbox.Option>
-              ))}
-            </Listbox.Options>
-          </Transition>
-        </div>
-      </Listbox>
-      
-      {/* Show selected values as chips */}
-      {filter.value.length > 0 && (
-        <div className="flex flex-wrap gap-1">
-          {filter.value.map(value => {
-            const option = filter.options.find(o => o.value === value);
-            return (
-              <span
-                key={value}
-                className="inline-flex items-center px-2 py-1 text-xs bg-lavender-100 text-lavender-700 rounded-full"
-              >
-                {option?.label || value}
-                <button
-                  type="button"
-                  onClick={() => {
-                    const newValues = filter.value.filter(v => v !== value);
-                    handleChange(newValues);
-                  }}
-                  className="ml-1 hover:text-lavender-900"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              </span>
-            );
-          })}
-        </div>
-      )}
+    <div className="space-y-1">
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        {filter.label}
+      </label>
+      <Select<MultiSelectOption, true>
+        options={options}
+        value={selectedOptions}
+        onChange={handleChange}
+        placeholder={`Select ${filter.label.toLowerCase()}...`}
+        isClearable={true}
+        isSearchable={true}
+        isMulti={true}
+        styles={getSelectStyles(true)}
+        components={{
+          Option: createOptionComponent(true)
+        }}
+        formatOptionLabel={(option) => (
+          <span>
+            {option.label} {option.count && `(${option.count})`}
+          </span>
+        )}
+        closeMenuOnSelect={false}
+        hideSelectedOptions={false}
+      />
     </div>
   );
 }
 
 // Boolean Filter Component with Radio Group behavior
-export function BooleanFilterComponent({ filter, onChange }: { filter: BooleanFilter; onChange: (filter: BooleanFilter) => void }) {
+export function BooleanFilterComponent({ 
+  filter, 
+  onChange 
+}: { 
+  filter: BooleanFilter; 
+  onChange: (filter: BooleanFilter) => void 
+}) {
   const handleChange = (value: boolean | null) => {
     onChange({
       ...filter,
@@ -244,9 +259,17 @@ export function BooleanFilterComponent({ filter, onChange }: { filter: BooleanFi
   );
 }
 
-// Range Filter Component (kept simple since Headless UI doesn't have a range component)
-export function RangeFilterComponent({ filter, onChange }: { filter: RangeFilter; onChange: (filter: RangeFilter) => void }) {
-  const handleMinChange = (min: number | null) => {
+// Range Filter Component
+export function RangeFilterComponent({ 
+  filter, 
+  onChange 
+}: { 
+  filter: RangeFilter; 
+  onChange: (filter: RangeFilter) => void 
+}) {
+  const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const min = value === '' ? null : parseInt(value, 10);
     const newValue = { ...filter.value, min };
     onChange({
       ...filter,
@@ -255,7 +278,9 @@ export function RangeFilterComponent({ filter, onChange }: { filter: RangeFilter
     });
   };
 
-  const handleMaxChange = (max: number | null) => {
+  const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const max = value === '' ? null : parseInt(value, 10);
     const newValue = { ...filter.value, max };
     onChange({
       ...filter,
@@ -274,7 +299,7 @@ export function RangeFilterComponent({ filter, onChange }: { filter: RangeFilter
 
   return (
     <div className="space-y-1">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-1">
         <label className="block text-sm font-medium text-gray-700">
           {filter.label}
         </label>
@@ -282,8 +307,10 @@ export function RangeFilterComponent({ filter, onChange }: { filter: RangeFilter
           <button
             type="button"
             onClick={handleClear}
-            className="text-xs text-red-600 hover:text-red-700 focus:outline-none focus:underline"
+            className="text-xs text-red-600 hover:text-red-700 focus:outline-none focus:underline flex items-center gap-1"
+            aria-label={`Clear ${filter.label} filter`}
           >
+            <X className="w-3 h-3" />
             Clear
           </button>
         )}
@@ -295,7 +322,7 @@ export function RangeFilterComponent({ filter, onChange }: { filter: RangeFilter
             type="number"
             placeholder={`Min (${filter.min})`}
             value={filter.value.min ?? ''}
-            onChange={(e) => handleMinChange(e.target.value ? parseInt(e.target.value) : null)}
+            onChange={handleMinChange}
             min={filter.min}
             max={filter.max}
             step={filter.step}
@@ -308,7 +335,7 @@ export function RangeFilterComponent({ filter, onChange }: { filter: RangeFilter
             type="number"
             placeholder={`Max (${filter.max})`}
             value={filter.value.max ?? ''}
-            onChange={(e) => handleMaxChange(e.target.value ? parseInt(e.target.value) : null)}
+            onChange={handleMaxChange}
             min={filter.min}
             max={filter.max}
             step={filter.step}
