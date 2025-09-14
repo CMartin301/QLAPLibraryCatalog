@@ -71,7 +71,7 @@ export function FilterPanel({
         {advancedFilters.length > 0 && (
           <div className="mt-3">
             {/* Advanced Filters Toggle with Clear All Button */}
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between ">
               <button
                 onClick={() => setShowAdvanced(!showAdvanced)}
                 className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800 focus:outline-none focus:text-gray-800 transition-colors"
