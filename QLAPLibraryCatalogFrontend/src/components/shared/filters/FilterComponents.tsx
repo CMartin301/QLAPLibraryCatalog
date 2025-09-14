@@ -1,7 +1,9 @@
 import React from 'react';
-import Select, { SingleValue, MultiValue, StylesConfig, components } from 'react-select';
+import Select, { SingleValue, MultiValue, StylesConfig } from 'react-select';
 import { X } from 'lucide-react';
 import { Filter, SelectFilter, MultiSelectFilter, BooleanFilter, RangeFilter } from '../../../types/filters';
+import Button from '../../shared/Button';
+import { colors } from '../../../styles/theme';
 
 interface FilterComponentProps {
   filter: Filter;
@@ -20,52 +22,56 @@ interface MultiSelectOption {
   label: string;
   count?: number;
 }
-
-// Custom styles for React Select to match your design system
 const getSelectStyles = (isMulti: boolean): StylesConfig<SelectOption | MultiSelectOption, boolean> => ({
   control: (provided, state) => ({
     ...provided,
-    borderColor: state.isFocused ? '#a855f7' : '#d1d5db',
-    boxShadow: state.isFocused ? '0 0 0 2px rgba(168, 85, 247, 0.2)' : 'none',
+    borderColor: state.isFocused ? colors.lavender[500] : colors.gray[300],
+    boxShadow: state.isFocused ? `0 0 0 2px ${colors.lavender[500]}33` : 'none', // 33 = 20% opacity in hex
     '&:hover': {
-      borderColor: state.isFocused ? '#a855f7' : '#9ca3af'
+      borderColor: state.isFocused ? colors.lavender[500] : colors.gray[400]
     },
     minHeight: '38px',
-    fontSize: '14px'
+    fontSize: '14px',
+    backgroundColor: colors.white
   }),
   option: (provided, state) => ({
     ...provided,
     backgroundColor: state.isSelected 
-      ? '#f3e8ff' 
+      ? colors.lavender[200]
       : state.isFocused 
-      ? '#faf5ff' 
-      : 'white',
-    color: state.isSelected ? '#7c3aed' : '#374151',
+      ? colors.lavender[100]
+      : colors.white,
+    color: state.isSelected ? colors.lavender[600] : colors.gray[700],
     cursor: 'pointer',
-    padding: 0, // Remove default padding since we're using custom components
+    padding: 0,
   }),
   multiValue: (provided) => ({
     ...provided,
-    backgroundColor: '#f3e8ff',
+    backgroundColor: colors.lavender[200],
     borderRadius: '6px'
   }),
   multiValueLabel: (provided) => ({
     ...provided,
-    color: '#7c3aed',
+    color: colors.lavender[600],
     fontSize: '12px'
   }),
   multiValueRemove: (provided) => ({
     ...provided,
-    color: '#7c3aed',
+    color: colors.lavender[600],
     '&:hover': {
-      backgroundColor: '#e9d5ff',
-      color: '#6b21a8'
+      backgroundColor: colors.lavender[300],
+      color: colors.lavender[600]
     }
   }),
   placeholder: (provided) => ({
     ...provided,
-    color: '#9ca3af',
+    color: colors.gray[400],
     fontSize: '14px'
+  }),
+  menu: (provided) => ({
+    ...provided,
+    borderRadius: '8px',
+    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
   })
 });
 
@@ -78,24 +84,24 @@ const createOptionComponent = (isMulti: boolean) => {
       <div 
         ref={innerRef} 
         {...innerProps} 
-        className="flex items-center px-3 py-2 cursor-pointer hover:bg-purple-50"
+        className="flex items-center px-3 py-2 cursor-pointer hover:bg-lavender-100"
       >
         {isMulti ? (
           <input
             type="checkbox"
             checked={isSelected}
             onChange={() => {}} // Controlled by React Select
-            className="h-4 w-4 text-lavender-600 border-gray-300 rounded focus:ring-lavender-500 mr-3 pointer-events-none"
+            className="h-4 w-4 text-lavender-500 border-gray-300 rounded focus:ring-lavender-500 mr-3 pointer-events-none"
           />
         ) : (
           <input
             type="radio"
             checked={isSelected}
             onChange={() => {}} // Controlled by React Select
-            className="h-4 w-4 text-lavender-600 border-gray-300 focus:ring-lavender-500 mr-3 pointer-events-none"
+            className="h-4 w-4 text-lavender-500 border-gray-300 focus:ring-lavender-500 mr-3 pointer-events-none"
           />
         )}
-        <span className={`${isSelected ? 'font-medium text-purple-700' : 'text-gray-900'}`}>
+        <span className={`${isSelected ? 'font-medium text-lavender-600' : 'text-gray-900'}`}>
           {data.label} {data.count && `(${data.count})`}
         </span>
       </div>
@@ -244,7 +250,7 @@ export function BooleanFilterComponent({
             className={`px-3 py-2 text-sm rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-lavender-500 ${
               filter.value === option.value
                 ? option.value === null
-                  ? 'bg-lavender-100 border-lavender-300 text-lavender-700'
+                  ? 'bg-lavender-100 border-lavender-300 text-lavender-600'
                   : option.value === true
                   ? 'bg-green-100 border-green-300 text-green-700'
                   : 'bg-red-100 border-red-300 text-red-700'
@@ -304,15 +310,16 @@ export function RangeFilterComponent({
           {filter.label}
         </label>
         {(filter.value.min !== null || filter.value.max !== null) && (
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={handleClear}
-            className="text-xs text-red-600 hover:text-red-700 focus:outline-none focus:underline flex items-center gap-1"
+            icon={X}
+            className="text-red-600 hover:text-red-700 hover:bg-red-50"
             aria-label={`Clear ${filter.label} filter`}
           >
-            <X className="w-3 h-3" />
             Clear
-          </button>
+          </Button>
         )}
       </div>
       <div className="grid grid-cols-2 gap-2">

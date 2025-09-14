@@ -69,7 +69,7 @@ export function FilterPanel({
 
         {/* Advanced Filters Section */}
         {advancedFilters.length > 0 && (
-          <div className="mt-6">
+          <div className="mt-3">
             {/* Advanced Filters Toggle with Clear All Button */}
             <div className="flex items-center justify-between mb-4">
               <button
