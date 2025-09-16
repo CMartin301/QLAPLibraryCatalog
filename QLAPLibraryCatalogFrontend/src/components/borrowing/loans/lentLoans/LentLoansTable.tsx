@@ -70,6 +70,7 @@ export function LentLoansTable({ loans, onRefresh, error, loading }: LentLoansTa
     },
     isLoading
   });
+  
   return (
     <>
       <TableContainer

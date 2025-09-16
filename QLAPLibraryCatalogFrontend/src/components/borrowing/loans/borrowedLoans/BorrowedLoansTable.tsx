@@ -7,6 +7,7 @@ import { getLoanStatusDisplay } from "../../../../utilities/statusDisplayHelpers
 import { StatusBadge } from "../../../shared/StatusBadge";
 import { TableContainer } from "../../../shared/TableContainer";
 import { LoanModal } from "../LoanModal";
+import { useBorrowedLoansColumns } from "./borrowedLoansColumns";
 
 interface BorrowedLoansTableProps {
   loans: LoanWithDetails[];
@@ -31,7 +32,6 @@ export function BorrowedLoansTable({
   setDetailModal({ isOpen: true, loan });
 };
 
-  const columnHelper = createColumnHelper<LoanWithDetails>();
 
   const handleReturn = async (loanId: number): Promise<void> => {
     return executeAction(
@@ -44,90 +44,12 @@ export function BorrowedLoansTable({
     );
   };
 
-  const columns = useMemo(
-    () => [
-      columnHelper.accessor(row => row.mediaTitle ?? "—", {
-        id: "media",
-        header: "Book",
-        cell: (info) => {
-          const row = info.row.original;
-          return (
-            <div className="flex items-start space-x-3">
-              <div className="min-w-0 flex-1">
-                <p className="font-medium text-gray-900 truncate">
-                  {row.mediaTitle || "—"}
-                </p>
-                <p className="text-sm text-gray-500 truncate">
-                  {row.mediaAuthor || "Unknown author"}
-                </p>
-              </div>
-            </div>
-          );
-        },
-        enableSorting: true,
-        size: 260,
-      }),
-      columnHelper.accessor("ownerUsername", {
-        header: "Owner",
-        cell: (info) => <span className="text-sm text-gray-900">{info.getValue()}</span>,
-        enableSorting: true,
-        size: 150,
-      }),
-      columnHelper.accessor("startDate", {
-        header: "Start Date",
-        cell: (info) => <span className="text-sm text-gray-900">{info.getValue()}</span>,
-        enableSorting: true,
-        size: 120,
-      }),
-      columnHelper.accessor("dueDate", {
-        header: "Due Date",
-        cell: (info) => <span className="text-sm text-gray-900">{info.getValue()}</span>,
-        enableSorting: true,
-        size: 120,
-      }),
-      columnHelper.accessor("status", {
-        header: "Status",
-        size: 160,
-        cell: (info) => {
-          const config = getLoanStatusDisplay(info.row.original);
-          return <StatusBadge config={config} />;
-        },
-        enableSorting: true,
-      }),
-      columnHelper.display({
-        id: "actions",
-        header: "Actions",
-        size: 180,
-        cell: (info) => {
-          const loan = info.row.original;
-
-          // Borrower can only mark returned if they haven't already
-          if (loan.borrowerReturnedAt === null) {
-            return (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevent row click
-                  handleReturn(loan.loanId);
-                }}
-                disabled={isLoading}
-                className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoading ? "Processing..." : "Mark Returned"}
-              </button>
-            );
-          }
-
-          return (
-            <span className="text-xs text-gray-400">
-              No Actions
-            </span>
-          );
-        },
-      }),
-    ],
-    [isLoading]
-  );
-
+  const columns = useBorrowedLoansColumns({
+    handlers: {
+      handleReturn: handleReturn
+    },
+    isLoading
+  });
   return (
     <>
       <TableContainer
