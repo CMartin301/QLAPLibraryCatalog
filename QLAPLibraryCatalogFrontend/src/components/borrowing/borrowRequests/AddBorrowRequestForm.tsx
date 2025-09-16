@@ -4,9 +4,9 @@ import { ChevronDown, ChevronUp, AlertCircle } from 'lucide-react';
 import { CreateBorrowRequestDto } from "../../../types/borrowRequests";
 import { borrowRequestService } from "../../../services/borrowRequestService";
 import { Media, MediaCopyDto, MediaDto } from "../../../types/media";
-import { CopyDisplay } from "../../shared/CopyDisplay";
 import { ErrorAlert, FormFieldError, SubmitError } from '../../shared/ErrorAlert';
-import { MediaDisplay } from '../../shared/MediaDisplay';
+import { CopyDisplay } from '../../shared/displays/CopyDisplay';
+import { MediaDisplay } from '../../shared/displays/MediaDisplay';
 
 interface BorrowRequestFormData {
   borrowerId: number;

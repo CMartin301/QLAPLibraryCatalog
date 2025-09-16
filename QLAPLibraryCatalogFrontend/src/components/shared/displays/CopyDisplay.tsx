@@ -1,7 +1,7 @@
 import React from 'react';
-import { MediaCopyDto } from '../../types/media';
 import { User, Book, Check, MapPin, Home } from 'lucide-react';
-import { StatusBadge } from './StatusBadge';
+import { MediaCopyDto } from '../../../types/media';
+import { StatusBadge } from '../StatusBadge';
 
 interface CopyDisplayProps {
   copy: MediaCopyDto;

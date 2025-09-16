@@ -51,7 +51,7 @@ export function ReceivedBorrowRequestsTable({
       }
     );
   };
-
+ 
   const handleRowClick = (request: BorrowRequestDto) => {
     setSelectedRequest(request);
     setIsModalOpen(true);

@@ -2,9 +2,9 @@
 import React from 'react';
 import { MediaDto, MediaCopyDto } from '../../types/media';
 import { Modal } from '../shared/Modal';
-import { MediaDisplay } from '../shared/MediaDisplay';
-import { CopyDisplay } from '../shared/CopyDisplay';
 import { Users } from 'lucide-react';
+import { CopyDisplay } from '../shared/displays/CopyDisplay';
+import { MediaDisplay } from '../shared/displays/MediaDisplay';
 
 interface MediaModalProps {
   media: MediaDto | undefined;

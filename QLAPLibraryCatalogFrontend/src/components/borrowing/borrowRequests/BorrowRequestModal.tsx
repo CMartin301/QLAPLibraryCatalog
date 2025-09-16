@@ -5,6 +5,7 @@ import { Modal } from '../../shared/Modal';
 import { StatusBadge } from '../../shared/StatusBadge';
 import { BorrowRequestDto } from '../../../types/borrowRequests';
 import { getBorrowRequestStatusDisplay } from '../../../utilities/statusDisplayHelpers';
+import { BorrowRequestDisplay } from '../../shared/displays/BorrowRequestDisplay';
 
 interface BorrowRequestModalProps {
   isOpen: boolean;
@@ -68,15 +69,35 @@ export function BorrowRequestModal({
         </div>
       ) : (
         <div className="space-y-6">
+          <BorrowRequestDisplay 
+            borrowRequest={borrowRequest} 
+            variant="card"
+          />
+          <BorrowRequestDisplay 
+            borrowRequest={borrowRequest} 
+            variant="compact"
+          />
+          <BorrowRequestDisplay 
+            borrowRequest={borrowRequest} 
+            variant="list"
+          />
+          <BorrowRequestDisplay 
+            borrowRequest={borrowRequest} 
+            variant="modal"
+          />
+
+
           {/* Request Status & Basic Info */}
           <div className="bg-gray-50 rounded-lg p-4">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-lg font-semibold text-gray-900">
-                Request #{borrowRequest.requestId}
+                {borrowRequest.borrowerUsername}'s Request
               </h3>
               <StatusBadge config={statusConfig} />
             </div>
             
+            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div className="flex items-center">
                 <Calendar className="w-4 h-4 text-gray-400 mr-2" />

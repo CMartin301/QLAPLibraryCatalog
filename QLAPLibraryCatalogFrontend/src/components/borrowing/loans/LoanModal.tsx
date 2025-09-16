@@ -11,14 +11,15 @@ import {
   FileText,
   Hash 
 } from 'lucide-react';
+import { LoanDisplay } from '../../shared/displays/LoanDisplay';
 
-interface LoanDetailModalProps {
+interface LoanModalProps {
   loan: LoanWithDetails | null;
   isOpen: boolean;
   onClose: () => void;
 }
 
-export function LoanDetailModal({ loan, isOpen, onClose }: LoanDetailModalProps) {
+export function LoanModal({ loan, isOpen, onClose }: LoanModalProps) {
   if (!loan) return null;
 
   const formatDate = (dateString: string | null) => {
@@ -134,6 +135,9 @@ export function LoanDetailModal({ loan, isOpen, onClose }: LoanDetailModalProps)
       }
       size="lg"
     >
+
+      <LoanDisplay loan={loan} variant={'card'}/>
+
       <div className="space-y-6">
         {/* Status and Key Info */}
         <div className="bg-gray-50 rounded-lg p-4">

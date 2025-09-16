@@ -1,6 +1,6 @@
 import React from 'react';
-import { Media, MediaDto } from '../../types/media';
 import { Book, Calendar, Globe, User, Check, Hash, BookOpen, Building } from 'lucide-react';
+import { MediaDto } from '../../../types/media';
 
 interface MediaDisplayProps {
   media: MediaDto;

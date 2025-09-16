@@ -4,7 +4,7 @@ import { LoanWithDetails } from "../../../types/loans";
 import { loanService } from "../../../services/loanService";
 import { TableContainer } from "../../shared/TableContainer";
 import { useTableActions } from "../../../hooks/useTableActions";
-import { LoanDetailModal } from "./LoanDetailModal";
+import { LoanModal } from "./LoanModal";
 import { StatusBadge } from "../../shared/StatusBadge";
 import { getLoanStatusDisplay } from "../../../utilities/statusDisplayHelpers";
 
@@ -141,7 +141,7 @@ export function BorrowedLoansTable({
         rowClassName="cursor-pointer"
       />
 
-      <LoanDetailModal
+      <LoanModal
         isOpen={detailModal.isOpen}
         onClose={() => setDetailModal({ isOpen: false, loan: null })}
         loan={detailModal.loan}

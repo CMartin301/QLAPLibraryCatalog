@@ -6,7 +6,7 @@ import { ExtendLoanModal } from "./ExtendLoanModal";
 // import { useTableState } from "../../../hooks/useTableState";
 import { TableContainer } from "../../shared/TableContainer";
 import { useTableActions } from "../../../hooks/useTableActions";
-import { LoanDetailModal } from "./LoanDetailModal";
+import { LoanModal } from "./LoanModal";
 import { StatusBadge } from "../../shared/StatusBadge";
 import { getLoanStatusDisplay } from "../../../utilities/statusDisplayHelpers";
 
@@ -182,6 +182,7 @@ export function LentLoansTable({ loans, onRefresh, error, loading }: LentLoansTa
         loading={loading || isLoading}
         error={error} // only fetch/load errors
         onRefresh={onRefresh}
+        onRowClick={handleRowClick}
         emptyMessage="No lent loans found"
       />
 
@@ -193,7 +194,7 @@ export function LentLoansTable({ loans, onRefresh, error, loading }: LentLoansTa
         isLoading={isLoading}
       />
       
-      <LoanDetailModal
+      <LoanModal
         isOpen={detailModal.isOpen}
         onClose={() => setDetailModal({ isOpen: false, loan: null })}
         loan={detailModal.loan}
