@@ -104,7 +104,7 @@ export function useNetworkMediaColumns({
                 onClick={(e) => {
                   e.stopPropagation();
                   onAddToCollection(mediaItem);
-                }}
+                }} 
                 disabled={isAdding}
                 loading={isAdding}
                 aria-label={`Add ${mediaItem.title} to collection`}

@@ -195,7 +195,7 @@ const handleBorrowRequestSubmit = async () => {
         onRowClick={handleRowClick}
         rowClassName="cursor-pointer hover:bg-gray-50"
       />
-
+ 
       {/* Media Detail Modal */}
       <MediaModal
         media={selectedMedia}
