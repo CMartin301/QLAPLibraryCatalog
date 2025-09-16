@@ -1,10 +1,11 @@
 import React from 'react';
 import { MediaCopyDto } from '../../types/media';
 import { User, Book, Check, MapPin, Home } from 'lucide-react';
+import { StatusBadge } from './StatusBadge';
 
 interface CopyDisplayProps {
   copy: MediaCopyDto;
-  variant?: 'card' | 'selection' | 'compact' | 'list';
+  variant?: 'card' | 'selection' | 'compact' | 'list' | 'emphasis';
   selected?: boolean;
   onClick?: () => void;
   showSelection?: boolean;
@@ -27,14 +28,18 @@ export function CopyDisplay({
       selected ? 'border-lavender-400 bg-lavender-50' : 'border-gray-200 hover:border-gray-300'
     }`,
     compact: 'p-3 rounded border border-gray-200 bg-white',
-    list: 'p-2 border-b border-gray-100 last:border-b-0'
+    list: 'p-2 border-b border-gray-100 last:border-b-0',
+    emphasis: `p-4 rounded-lg border-2 transition-all cursor-pointer ${
+      selected ? 'border-lavender-400 bg-lavender-50' : 'border-gray-200 hover:border-gray-300'
+    }`
   };
 
   const layoutStyles = {
     card: 'space-y-3',
     selection: 'space-y-3',
     compact: 'space-y-2',
-    list: 'flex flex-col space-y-2'
+    list: 'flex flex-col space-y-2',
+    emphasis: 'space-y-3'
   };
 
   const handleClick = () => {
@@ -48,6 +53,88 @@ export function CopyDisplay({
     }
   };
 
+  // Emphasis variant with copy-focused layout
+  if (variant === 'emphasis') {
+    return (
+      <div
+        className={`${variantStyles[variant]} ${className}`}
+        onClick={handleClick}
+        onKeyDown={handleKeyDown}
+        tabIndex={onClick ? 0 : undefined}
+        role={onClick ? 'button' : undefined}
+        aria-label={onClick ? `Select copy owned by ${copy.ownerUsername}` : undefined}
+      >
+        <div className="space-y-2">
+          {/* Primary row: Owner and Availability (most important for selection) */}
+          <div className="flex items-center justify-between gap-4">
+            {/* Left: Owner info (emphasized) */}
+            <div className="flex items-center gap-2">
+              <User className="w-4 h-4 text-lavender-500 flex-shrink-0" aria-hidden="true" />
+              <p className="text-sm font-semibold text-gray-900">{copy.ownerUsername}'s Copy</p>
+            </div>
+
+            {/* Right: Availability badge and selection indicator */}
+            <div className="flex items-center gap-2">
+              <StatusBadge 
+                config={{
+                  text: copy.isAvailable ? 'Available' : 'On Loan',
+                  color: copy.isAvailable ? 'green' : 'red'
+                }}
+              />
+
+              {showSelection && selected && (
+                <div className="w-5 h-5 bg-lavender-400 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Check className="w-3 h-3 text-white" />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Secondary row: Location information */}
+          <div className="flex flex-wrap items-center gap-2">
+            {copy.currentLocationZoneName && (
+              <StatusBadge 
+                config={{
+                  text: `Current: ${copy.currentLocationZoneName}`,
+                  color: 'blue',
+                  icon: MapPin
+                }}
+              />
+            )}
+            {copy.homeLocationZoneName && copy.homeLocationZoneName !== copy.currentLocationZoneName && (
+              <StatusBadge 
+                config={{
+                  text: `Home: ${copy.homeLocationZoneName}`,
+                  color: 'gray',
+                  icon: Home
+                }}
+              />
+            )}
+          </div>
+
+          {/* Tertiary row: Media title (de-emphasized) */}
+          <div className="flex items-center gap-2 pt-1 border-t border-gray-100">
+            <Book className="w-3 h-3 text-gray-400 flex-shrink-0" aria-hidden="true" />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm text-gray-600 truncate">{copy.mediaTitle}</p>
+              {copy.mediaCreator && (
+                <p className="text-xs text-gray-500 truncate">by {copy.mediaCreator}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Notes (if present) */}
+          {copy.notes && copy.notes.trim() !== '' && (
+            <div className="p-2 bg-gray-50 rounded text-xs text-gray-600">
+              <strong>Notes:</strong> {copy.notes}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Original layout for other variants
   return (
     <div
       className={`${variantStyles[variant]} ${className}`}
@@ -102,18 +189,22 @@ export function CopyDisplay({
   {/* Left: Location badges */}
   <div className="flex flex-wrap items-center gap-2">
     {copy.currentLocationZoneName && (
-      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 gap-1">
-        <MapPin className="w-3 h-3" aria-hidden="true" />
-        <span className="hidden sm:inline">Current:</span>
-        <span>{copy.currentLocationZoneName}</span>
-      </span>
+              <StatusBadge 
+                config={{
+                  text: `Current: ${copy.currentLocationZoneName}`,
+                  color: 'blue',
+                  icon: MapPin
+                }}
+              />
     )}
     {copy.homeLocationZoneName && copy.homeLocationZoneName !== copy.currentLocationZoneName && (
-      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600 gap-1">
-        <Home className="w-3 h-3" aria-hidden="true" />
-        <span className="hidden sm:inline">Home:</span>
-        <span>{copy.homeLocationZoneName}</span>
-      </span>
+      <StatusBadge 
+                config={{
+                  text: `Home: ${copy.homeLocationZoneName}`,
+                  color: 'gray',
+                  icon: Home
+                }}
+              />
     )}
   </div>
 

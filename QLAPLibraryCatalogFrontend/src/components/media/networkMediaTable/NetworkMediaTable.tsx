@@ -200,6 +200,7 @@ const handleBorrowRequestSubmit = async () => {
       <MediaModal
         media={selectedMedia}
         isOpen={isMediaModalOpen}
+        copies={mediaCopies}
         onClose={() => {
           setIsMediaModalOpen(false);
           setSelectedMedia(undefined);
@@ -247,7 +248,9 @@ const handleBorrowRequestSubmit = async () => {
           setSelectedMedia(undefined);
           setSelectedCopyForBorrow(undefined);
         }}
-        title={selectedMedia ? `Request "${selectedMedia.title}"` : 'Request Item'}
+
+        title={'Submit a Borrow Request'}
+        // title={selectedMedia ? `Request "${selectedMedia.title}"` : 'Request Item'}
         description="Choose a copy and set your preferred loan dates" 
         size="lg" 
       >

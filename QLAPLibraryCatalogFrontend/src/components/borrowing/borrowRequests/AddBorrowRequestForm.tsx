@@ -117,7 +117,7 @@ export function AddBorrowRequestForm({
       <SubmitError message={submitError} />
       <ErrorAlert message={errors.root?.message} variant="validation" />
 
-      {selectedMedia && (<MediaDisplay media={selectedMedia} variant="compact" />)}
+      {selectedMedia && (<MediaDisplay media={selectedMedia} variant="card" />)}
             
 
       {/* Copy Selection */}
@@ -131,7 +131,7 @@ export function AddBorrowRequestForm({
               id="copy-selection-label" 
               className="block text-sm font-medium text-gray-700"
             >
-              Choose a Copy <span className="text-red-500">*</span>
+              Choose a Copy to Request <span className="text-red-500">*</span>
             </label>
             
             {copyId && (
@@ -175,7 +175,7 @@ export function AddBorrowRequestForm({
               >
                 <CopyDisplay
                   copy={copy}
-                  variant={"selection"}
+                  variant={"emphasis"}
                   selected={copyId === copy.copyId}
                   showSelection={true}
                   className={copyId === copy.copyId && !isCopySelectionExpanded ? "border-lavender-200 bg-lavender-50" : ""}
