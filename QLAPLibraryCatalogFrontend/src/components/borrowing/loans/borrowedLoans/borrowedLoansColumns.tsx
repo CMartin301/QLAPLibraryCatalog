@@ -1,10 +1,8 @@
 import { useMemo } from 'react';
 import { createColumnHelper, ColumnDef } from '@tanstack/react-table';
-import { Plus } from 'lucide-react';
-import { BorrowRequestDto } from '../../../../types/borrowRequests';
 import Button from '../../../shared/Button';
 import { StatusBadge } from '../../../shared/StatusBadge';
-import { getBorrowRequestStatusDisplay, getLoanStatusDisplay } from '../../../../utilities/statusDisplayHelpers';
+import { getLoanStatusDisplay } from '../../../../utilities/statusDisplayHelpers';
 import { LoanWithDetails } from '../../../../types/loans';
 
   const columnHelper = createColumnHelper<LoanWithDetails>();
@@ -73,7 +71,7 @@ export function useBorrowedLoansColumns({
       }),
       columnHelper.display({
         id: "actions",
-        header: "Actions",
+        header: "",
         size: 180,
         cell: (info) => {
           const loan = info.row.original;
@@ -81,16 +79,19 @@ export function useBorrowedLoansColumns({
           // Borrower can only mark returned if they haven't already
           if (loan.borrowerReturnedAt === null) {
             return (
-              <button
+              <Button
+                variant="primary"
+                size="sm"
                 onClick={(e) => {
-                  e.stopPropagation(); // Prevent row click
+                  e.stopPropagation(); 
                   handleReturn(loan.loanId);
-                }}
+                }} 
                 disabled={isLoading}
-                className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                loading={isLoading}
+                aria-label={`Mark loan as returned`}
               >
                 {isLoading ? "Processing..." : "Mark Returned"}
-              </button>
+              </Button>
             );
           }
 

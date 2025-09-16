@@ -74,7 +74,7 @@ export function useLentLoansColumns({
         }),
         columnHelper.display({
           id: "actions",
-          header: "Actions",
+          header: "",
           size: 220,
           cell: (info) => {
             const loan = info.row.original;
@@ -102,28 +102,33 @@ export function useLentLoansColumns({
             return (
               <div className="flex gap-2">
                 {canMarkReturned && (
-                  <button
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent row click
-                    handleReturn(loan.loanId);
-                  }}
-                    disabled={isLoading}
-                    className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isLoading ? "Processing..." : "Confirm Return"}
-                  </button>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation(); 
+                        handleReturn(loan.loanId);
+                      }} 
+                      disabled={isLoading}
+                      loading={isLoading}
+                      aria-label={`Mark loan as returned`}
+                    >
+                      {isLoading ? "Processing..." : "Confirm Return"}
+                    </Button>
                 )}
                 {canExtend && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevent row click
-                      handleExtend(loan);
-                    }}
-                    disabled={isLoading}
-                    className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Extend Loan
-                  </button>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation(); 
+                        handleExtend(loan);
+                      }} 
+                      disabled={isLoading}
+                      aria-label={`Extend loan`}
+                    >
+                      Extend Loan
+                    </Button>
                 )}
               </div>
             );

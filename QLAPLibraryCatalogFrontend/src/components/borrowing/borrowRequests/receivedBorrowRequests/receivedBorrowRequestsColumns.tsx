@@ -78,7 +78,7 @@ export function useReceivedBorrowRequestsColumns({
       }),
       columnHelper.display({
         id: "actions",
-        header: "Actions",
+        header: "",
         size: 220,
         cell: (info) => {
           const request = info.row.original;

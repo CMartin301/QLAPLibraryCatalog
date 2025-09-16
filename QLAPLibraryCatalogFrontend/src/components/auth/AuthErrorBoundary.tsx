@@ -1,4 +1,5 @@
 import { Component, ReactNode } from 'react';
+import Button from '../shared/Button';
 
 interface Props {
   children: ReactNode;
@@ -49,12 +50,15 @@ export class AuthErrorBoundary extends Component<Props, State> {
               <p className="text-gray-600 mb-6">
                 Something went wrong. Please try refreshing the page.
               </p>
-              <button
-                onClick={() => window.location.reload()}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                Refresh Page
-              </button>
+
+                    <Button
+                      variant="primary"
+                      size="md"
+                      onClick={() => window.location.reload()}
+                      aria-label={`Cancel borrow request`}
+                    >
+                      Refresh Page
+                    </Button>
             </div>
           </div>
         )

@@ -77,23 +77,27 @@ export function useSentBorrowRequestsColumns({
       }),
       columnHelper.display({
         id: "actions",
-        header: "Actions",
+        header: "",
         size: 180,
         cell: (info) => {
           const request = info.row.original;
 
           if (request.status === "pending") {
             return (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevent row click
-                  handleCancel(request.requestId);
-                }}
-                disabled={isLoading}
-                className="px-3 py-1 text-sm border border-gray-300 text-gray-700 bg-white rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lavender-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoading ? "Processing..." : "Cancel"}
-              </button>
+              
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation(); 
+                        handleCancel(request.requestId);
+                      }} 
+                      disabled={isLoading}
+                      loading={isLoading}
+                      aria-label={`Cancel borrow request`}
+                    >
+                      {isLoading ? "Processing..." : "Cancel"}
+                    </Button>
             );
           }
 
