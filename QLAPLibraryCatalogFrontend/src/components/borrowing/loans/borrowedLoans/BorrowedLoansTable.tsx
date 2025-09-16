@@ -1,12 +1,12 @@
 import { useMemo, useState } from "react";
 import { createColumnHelper } from "@tanstack/react-table";
-import { LoanWithDetails } from "../../../types/loans";
-import { loanService } from "../../../services/loanService";
-import { TableContainer } from "../../shared/TableContainer";
-import { useTableActions } from "../../../hooks/useTableActions";
-import { LoanModal } from "./LoanModal";
-import { StatusBadge } from "../../shared/StatusBadge";
-import { getLoanStatusDisplay } from "../../../utilities/statusDisplayHelpers";
+import { useTableActions } from "../../../../hooks/useTableActions";
+import { loanService } from "../../../../services/loanService";
+import { LoanWithDetails } from "../../../../types/loans";
+import { getLoanStatusDisplay } from "../../../../utilities/statusDisplayHelpers";
+import { StatusBadge } from "../../../shared/StatusBadge";
+import { TableContainer } from "../../../shared/TableContainer";
+import { LoanModal } from "../LoanModal";
 
 interface BorrowedLoansTableProps {
   loans: LoanWithDetails[];
