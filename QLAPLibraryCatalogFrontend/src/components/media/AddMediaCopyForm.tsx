@@ -7,7 +7,7 @@ import { MediaDisplay } from '../shared/displays/MediaDisplay';
 interface AddMediaCopyFormProps {
   onSubmit: (data: CreateMediaCopyRequest) => void;
   isSubmitting: boolean;
-  submitError: string | null;
+  submitError: string | undefined;
   preselectedMedia?: MediaDto;
 }
 

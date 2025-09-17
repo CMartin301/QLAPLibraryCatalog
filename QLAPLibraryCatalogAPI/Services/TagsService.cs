@@ -29,6 +29,7 @@ namespace QLAPLibraryCatalogAPI.Services
         public async Task<IEnumerable<TagDto>> GetTagsAsync()
         {
             var q = _context.Tags
+                .Include(m => m.MediaTags)
                 .AsQueryable();
 
             return await q.Select(r => MapTag(r)).ToListAsync();
@@ -58,10 +59,12 @@ namespace QLAPLibraryCatalogAPI.Services
         #region Mapping Methods
         private static TagDto MapTag(Tag tag)
         {
+            int tagCount = tag.MediaTags.Count();
             return new TagDto
             {
                 TagId = tag.TagId,
-                TagName = tag.TagName
+                TagName = tag.TagName,
+                MediaTagCount = tagCount
             };
         }
         #endregion

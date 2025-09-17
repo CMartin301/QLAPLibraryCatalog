@@ -1,5 +1,5 @@
 import { User } from '../types/auth';
-import { Media, GetMediaResponse, MediaSearchParams, CreateMediaRequest } from '../types/media';
+import { Media, CreateMediaRequest } from '../types/media';
 import { UserPreferences } from '../types/preferences';
 import api from './apiService';
 
