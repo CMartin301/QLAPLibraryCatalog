@@ -1,6 +1,8 @@
 import React from 'react';
 import { Book, Calendar, Globe, User, Check, Hash, BookOpen, Building } from 'lucide-react';
 import { MediaDto } from '../../../types/media';
+import { TagDto } from '../../../types/tags';
+import { StatusBadge } from '../StatusBadge';
 
 interface MediaDisplayProps {
   media: MediaDto;
@@ -149,7 +151,7 @@ export function MediaDisplay({
               )}
               
               {/* Language if not English */}
-              {media.language && media.language.toLowerCase() !== 'english' && media.language.toLowerCase() !== 'en' && (
+              {media.language && (
                 <span className="inline-flex items-center px-1.5 py-0.5 text-xs text-gray-600 gap-1">
                   <Globe className="w-3 h-3" aria-hidden="true" />
                   <span>{media.language}</span>
@@ -183,6 +185,18 @@ export function MediaDisplay({
             {media.issueNumber && <InfoRow icon={Hash} label="Issue" value={media.issueNumber} />}
           </div>
         </div>
+        <p className="text-base sm:text-lg text-gray-600 break-words mt-2">Tags</p>
+        <div className="flex flex-wrap gap-1 mt-2">
+                    {media.tags && (
+                      media.tags.map((tag: TagDto) => {
+                      const config = {
+                        text: tag.tagName,
+                        color: 'purple' as const
+                      };
+                      return <StatusBadge key={tag.tagId} config={config} />;
+                    })
+                  )}
+                  </div>
 
       </div>
     );
