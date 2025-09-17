@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration.UserSecrets;
 using QLAPLibraryCatalogAPI.Data;
 using QLAPLibraryCatalogAPI.Models;
 using QLAPLibraryCatalogAPI.Models.DTOs;
@@ -10,6 +11,7 @@ namespace QLAPLibraryCatalogAPI.Services
     {
 #pragma warning disable 1591
         Task<IEnumerable<TagDto>> GetTagsAsync();
+        Task<bool> AddMediaTagAsync(int userID, int mediaID, int tagID);
 #pragma warning restore 1591
     }
     /// <summary>
@@ -30,6 +32,27 @@ namespace QLAPLibraryCatalogAPI.Services
                 .AsQueryable();
 
             return await q.Select(r => MapTag(r)).ToListAsync();
+        }
+        /// <summary>
+        /// Adds a tag to a piece of media, adds a mediaTag object/association
+        /// </summary>
+        /// <param name="mediaID"></param>
+        /// <param name="tagID"></param>
+        /// <returns></returns>
+        public async Task<bool> AddMediaTagAsync(int userID, int mediaID, int tagID)
+        {
+            var mediaTag = new MediaTag
+            {
+                MediaId = mediaID,
+                TagId = tagID,
+                CreatedBy = userID,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.MediaTags.Add(mediaTag);
+            await _context.SaveChangesAsync();
+
+            return true;
         }
 
         #region Mapping Methods

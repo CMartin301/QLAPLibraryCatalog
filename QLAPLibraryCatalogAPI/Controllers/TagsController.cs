@@ -51,6 +51,24 @@ namespace QLAPLibraryCatalogAPI.Controllers
                 return StatusCode(500, new { error = ex.Message });
             }
         }
+        /// <summary>
+        ///  Adds tag to a media object, adds mediaTag association
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost("{tagID}/Media/{mediaID}")]
+        public async Task<IActionResult> AddMediaTag(int tagID, int mediaID)
+        {
+            try
+            {
+                int userID = GetUserId();
+                var items = await _tagsService.AddMediaTagAsync(userID, mediaID, tagID);
+                return Ok(items);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
 
     }
 }
