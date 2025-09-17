@@ -38,7 +38,7 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
         public int? TotalCopiesCount { get; set; }
         public int? AvailableCopiesCount { get; set; }
         // public MediaTypeDto? MediaType { get; set; }
-        // public List<MediaCopyDto> Copies { get; set; } = new();
+        public List<TagDto> Tags { get; set; } = new();
     }
 
     public class CreateMediaDto

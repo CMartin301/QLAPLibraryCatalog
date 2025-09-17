@@ -30,6 +30,8 @@ public partial class LibraryCatalogContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     public virtual DbSet<UserPreferences> UserPreferences { get; set; }
+    public virtual DbSet<Tag> Tags { get; set; }
+    public virtual DbSet<MediaTag> MediaTags { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseNpgsql("Name=ConnectionStrings:DefaultConnection");
@@ -359,6 +361,58 @@ public partial class LibraryCatalogContext : DbContext
                 .HasForeignKey<UserPreferences>(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("user_preferences_user_id_fkey");
+        });
+
+        modelBuilder.Entity<Tag>(entity =>
+        {
+            entity.HasKey(e => e.TagId).HasName("tags_pkey");
+
+            entity.ToTable("tags");
+
+            entity.HasIndex(e => e.TagName, "idx_tags_name");
+            entity.HasIndex(e => e.CreatedAt, "idx_tags_created_at");
+            entity.HasIndex(e => e.UpdatedAt, "idx_tags_updated_at");
+            entity.HasIndex(e => e.TagName, "tags_tag_name_key").IsUnique();
+
+            entity.Property(e => e.TagId).HasColumnName("tag_id");
+            entity.Property(e => e.TagName)
+                .HasMaxLength(50)
+                .HasColumnName("tag_name");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnName("created_at");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnName("updated_at");
+            entity.Property(e => e.UpdatedBy).HasColumnName("updated_by");
+        });
+
+        modelBuilder.Entity<MediaTag>(entity =>
+        {
+            entity.HasKey(e => new { e.MediaId, e.TagId }).HasName("media_tags_pkey");
+
+            entity.ToTable("media_tags");
+
+            entity.HasIndex(e => e.MediaId, "idx_media_tags_media_id");
+            entity.HasIndex(e => e.TagId, "idx_media_tags_tag_id");
+
+            entity.Property(e => e.MediaId).HasColumnName("media_id");
+            entity.Property(e => e.TagId).HasColumnName("tag_id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnName("created_at");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+
+            entity.HasOne(d => d.Media).WithMany(p => p.MediaTags)
+                .HasForeignKey(d => d.MediaId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("media_tags_media_id_fkey");
+
+            entity.HasOne(d => d.Tag).WithMany(p => p.MediaTags)
+                .HasForeignKey(d => d.TagId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("media_tags_tag_id_fkey");
         });
 
         OnModelCreatingPartial(modelBuilder);

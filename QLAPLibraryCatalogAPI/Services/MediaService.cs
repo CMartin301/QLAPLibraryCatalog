@@ -43,6 +43,8 @@ namespace QLAPLibraryCatalogAPI.Services
             var query = _context.Media
                 .Include(m => m.MediaType)
                 .Include(m => m.MediaCopies)
+                .Include(m => m.MediaTags)
+                    .ThenInclude(m => m.Tag)
                 .AsQueryable();
 
 
@@ -80,6 +82,8 @@ namespace QLAPLibraryCatalogAPI.Services
             var query = _context.Media
                 .Include(m => m.MediaType)
                 .Include(m => m.MediaCopies)
+                .Include(m => m.MediaTags)
+                    .ThenInclude(m => m.Tag)
                 .AsQueryable();
 
             return await query
@@ -183,6 +187,8 @@ namespace QLAPLibraryCatalogAPI.Services
             var query = _context.Media
                 .Include(m => m.MediaType)
                 .Include(m => m.MediaCopies)
+                .Include(m => m.MediaTags)
+                    .ThenInclude(m => m.Tag)
                 .AsQueryable();
 
             return await query
@@ -219,7 +225,12 @@ namespace QLAPLibraryCatalogAPI.Services
                 IssueNumber = m.IssueNumber,
                 Volume = m.Volume,
                 TotalCopiesCount = totalCopiesCount,
-                AvailableCopiesCount = availableCopiesCount
+                AvailableCopiesCount = availableCopiesCount,
+                Tags = m.MediaTags.Select(mediaTag => new TagDto
+                    {
+                        TagId = mediaTag.TagId,
+                        TagName = mediaTag.Tag.TagName
+                    }).ToList()
             };
         }
         #endregion
