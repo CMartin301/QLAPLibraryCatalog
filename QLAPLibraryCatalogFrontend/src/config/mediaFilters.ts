@@ -27,6 +27,40 @@ const getValueCounts = (data: MediaDto[], accessor: (item: MediaDto) => string |
   return counts;
 };
 
+const getUniqueTags = (data: MediaDto[]): string[] => {
+  const tags = new Set<string>();
+  
+  data.forEach(item => {
+    if (item.tags && Array.isArray(item.tags)) {
+      item.tags.forEach(tag => {
+        if (tag.tagName && tag.tagName.trim()) {
+          tags.add(tag.tagName.trim());
+        }
+      });
+    }
+  });
+  
+  return Array.from(tags).sort();
+};
+
+// Helper function to get tag counts
+const getTagCounts = (data: MediaDto[]): Record<string, number> => {
+  const counts: Record<string, number> = {};
+  
+  data.forEach(item => {
+    if (item.tags && Array.isArray(item.tags)) {
+      item.tags.forEach(tag => {
+        if (tag.tagName && tag.tagName.trim()) {
+          const tagName = tag.tagName.trim();
+          counts[tagName] = (counts[tagName] || 0) + 1;
+        }
+      });
+    }
+  });
+  
+  return counts;
+};
+
 // Create initial filter configuration based on available data
 export const createMediaFilterConfig = (data: MediaDto[]): FilterConfig<MediaDto> => {
   // Get unique values and counts for each filterable field
@@ -135,6 +169,23 @@ export const createMediaFilterConfig = (data: MediaDto[]): FilterConfig<MediaDto
       max: maxYear,
       step: 1
     } as RangeFilter,
+    {
+      id: 'tags',
+      label: 'Tags',
+      type: 'multiselect',
+      active: false,
+      priority: 'primary',
+      value: [],
+      options: (() => {
+        const uniqueTags = getUniqueTags(data);
+        const tagCounts = getTagCounts(data);
+        return uniqueTags.map(tag => ({
+          value: tag,
+          label: tag,
+          count: tagCounts[tag]
+        }));
+      })()
+    } as MultiSelectFilter,
   ];
 
   return {
@@ -157,6 +208,15 @@ export const createMediaFilterConfig = (data: MediaDto[]): FilterConfig<MediaDto
               const multiFilter = filter as MultiSelectFilter;
               if (multiFilter.value.length === 0) return true;
               
+              // Handle tags filtering
+              if (filter.id === 'tags') {
+                if (!item.tags || item.tags.length === 0) return false;
+                
+                // Check if the item has any of the selected tags
+                return item.tags.some(tag => 
+                  tag.tagName && multiFilter.value.includes(tag.tagName.trim())
+                );
+              }
               const itemValue = getFilterValue(item, filter.id);
               return itemValue ? multiFilter.value.includes(itemValue) : false;
             }
