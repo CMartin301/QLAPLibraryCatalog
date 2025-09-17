@@ -56,7 +56,17 @@ export function NetworkMediaTable({
     createFilterConfig: createMediaFilterConfig
   });
 
-  const handleRowClick = (media: MediaDto) => {
+  const handleRowClick = async (media: MediaDto) => {
+    try{
+    const enrichedCopies = await mediaService.getMediaCopiesByMediaID(media.mediaId);
+    // const availableEnrichedCopies = enrichedCopies.filter(copy => copy.isAvailable) //only available copies
+                                                  // .filter(copy => copy.ownerUserId != userID); //exclude copies owned by user
+
+    setMediaCopies(enrichedCopies);
+
+    } catch (error) {
+      console.error('Error loading enriched copies:', error);
+    }
     setSelectedMedia(media);
     setIsMediaModalOpen(true);
   };
@@ -80,7 +90,7 @@ const handleRequestItem = async (mediaItem: MediaDto) => {
     try {
     const enrichedCopies = await mediaService.getMediaCopiesByMediaID(mediaItem.mediaId);
     const availableEnrichedCopies = enrichedCopies.filter(copy => copy.isAvailable) //only available copies
-                                                  .filter(copy => copy.ownerUserId != userID); //exclude copies owned byuser
+                                                  .filter(copy => copy.ownerUserId != userID); //exclude copies owned by user
 
     setMediaCopies(availableEnrichedCopies);
     setSelectedMedia(mediaItem);
@@ -89,10 +99,6 @@ const handleRequestItem = async (mediaItem: MediaDto) => {
   } catch (error) {
     console.error('Error loading enriched copies:', error);
   }
-  
-  // setSelectedMedia(mediaItem);
-  // setSelectedCopyForBorrow(undefined);
-  // setIsBorrowModalOpen(true);
 };
 
   const handleAddMedia = async (data: MediaFormData) => {
