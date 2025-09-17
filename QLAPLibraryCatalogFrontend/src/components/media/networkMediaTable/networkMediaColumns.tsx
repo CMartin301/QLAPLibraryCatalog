@@ -1,9 +1,10 @@
 import { useMemo } from 'react';
 import { createColumnHelper, ColumnDef } from '@tanstack/react-table';
-import { Plus } from 'lucide-react';
+import { InfoIcon, Plus } from 'lucide-react';
 import { Media, MediaCopy, MediaDto } from '../../../types/media';
 import { StatusBadge } from '../../shared/StatusBadge';
 import Button from '../../shared/Button';
+import { TagDto } from '../../../types/tags';
 
 const columnHelper = createColumnHelper<MediaDto>();
 
@@ -69,6 +70,31 @@ export function useNetworkMediaColumns({
       size: 140,
     }),
 
+    // Tags
+    columnHelper.accessor(row => row.tags ?? "", {
+      id: "tags",
+      header: "Tags",
+      cell: info => {
+        const tags = info.getValue();
+        if (!tags || tags.length === 0) {
+          return <span className="text-sm text-gray-400">No tags</span>;
+        }
+        
+        return (
+          <div className="flex flex-wrap gap-1">
+            {tags.map((tag: TagDto) => {
+              const config = {
+                text: tag.tagName,
+                color: 'purple' as const
+              };
+              return <StatusBadge key={tag.tagId} config={config} />;
+            })}
+          </div>
+        );
+      },
+      enableSorting: false,
+      size: 120,
+    }),
     // Availability
     columnHelper.accessor(row => row.availableCopiesCount ?? 0, {
       id: "availability",

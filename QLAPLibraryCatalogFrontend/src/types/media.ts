@@ -1,3 +1,5 @@
+import { TagDto } from "./tags";
+
 // Types for Media objects
 export interface MediaType {
   mediaTypeId: number;
@@ -25,6 +27,7 @@ export interface MediaDto {
   volume: number | null;
   totalCopiesCount: number | null;
   availableCopiesCount: number | null;
+  tags?: TagDto[];
 }
 
 export interface Media {
