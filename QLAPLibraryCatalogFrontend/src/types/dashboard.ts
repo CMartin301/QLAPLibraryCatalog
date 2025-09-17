@@ -7,6 +7,11 @@ export interface DashboardStats {
   overdueItems: number;
 }
 
+export interface RecentActivityDto {
+  mediaTitle: string;
+  activityType: string; 
+  activityDate: string;
+}
 export interface RecentActivityItem {
   type: "loan" | "return" | "request";
   date: string; // ISO date string

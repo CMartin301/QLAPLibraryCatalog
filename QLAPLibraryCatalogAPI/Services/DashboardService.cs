@@ -12,7 +12,7 @@ namespace QLAPLibraryCatalogAPI.Services
     {
 #pragma warning disable 1591
         Task<DashboardStatsDto> GetStatsAsync(int userId);
-        Task<IEnumerable<RecentActivityDto>> GetRecentActivityAsync(int userId, int count = 5);
+        Task<IEnumerable<ActivityDto>> GetRecentActivityAsync(int userId, int count = 5);
         Task<IEnumerable<UpcomingDueDateDto>> GetUpcomingDueDatesAsync(int userId, int daysAhead = 7);
 #pragma warning restore 1591
     }
@@ -55,21 +55,64 @@ namespace QLAPLibraryCatalogAPI.Services
 /// <param name="userId"></param>
 /// <param name="count"></param>
 /// <returns></returns>
-        public async Task<IEnumerable<RecentActivityDto>> GetRecentActivityAsync(int userId, int count = 5)
+        public async Task<IEnumerable<ActivityDto>> GetRecentActivityAsync(int userId, int count = 5)
         {
-            return await _context.Loans
+            var recentActivity = await _context.Loans
                 .Where(l => l.Request.BorrowerId == userId || l.Request.Copy.UserId == userId)
                 .OrderByDescending(l => l.UpdatedAt)
                 .Take(count)
-                .Select(l => new RecentActivityDto
+                .Select(l => new ActivityDto
                 {
-                    LoanId = l.LoanId,
                     MediaTitle = l.Request.Copy.Media.Title,
                     ActivityType = l.ReturnedDate != null ? "Returned" : "Borrowed",
                     ActivityDate = l.UpdatedAt ?? l.CreatedAt
                 })
                 .AsNoTracking()
                 .ToListAsync();
+
+            //Get media you added
+            recentActivity.AddRange(
+                await _context.MediaCopies
+                    .Include(m => m.Media)
+                    .Where(c => c.UserId == userId)
+                    .OrderByDescending(c => c.CreatedAt)
+                    .Take(count)
+                    .Select(c => new ActivityDto
+                    {
+                        MediaTitle = c.Media.Title,
+                        ActivityType = "Added",
+                        ActivityDate = c.CreatedAt
+                    })
+                    .AsNoTracking()
+                    .ToListAsync()
+            );
+            // recentActivity.AddRange(
+            //     await _context.BorrowRequests
+            //         .Include(r => r.Borrower)
+            //         .Include(r => r.Copy)
+            //             .ThenInclude(c => c.Media)
+            //         .Include(r => r.Copy.User)
+            //         .Where(l => l.BorrowerId == userId || l.Copy.UserId == userId)
+            //         .OrderByDescending(c => c.UpdatedAt)
+            //         .Take(count)
+            //         .Select(c => new ActivityDto
+            //         {
+            //             MediaTitle = c.Copy.Media.Title,
+            //             ActivityType = c.Status ?? "Added",
+            //             ActivityDate = c.UpdatedAt
+            //         })
+            //         .AsNoTracking()
+            //         .ToListAsync()
+
+            // );
+
+            //Get just the {count} most recent
+            recentActivity = recentActivity
+                    .OrderByDescending(c => c.ActivityDate)
+                    .Take(count)
+                    .ToList();
+
+            return recentActivity;
         }
 /// <summary>
 /// Gets upcoming due dates for user

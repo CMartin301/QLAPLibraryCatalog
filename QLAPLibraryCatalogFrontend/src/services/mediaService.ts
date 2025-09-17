@@ -1,14 +1,14 @@
-import { Media, CreateMediaRequest, MediaType, CreateMediaCopyRequest, MediaCopy } from '../types/media';
+import { Media, CreateMediaRequest, MediaType, CreateMediaCopyRequest, MediaCopy, MediaCopyDto, MediaDto } from '../types/media';
 import api from './apiService';
 
 export const mediaService = {
-  async getMedia(includeCopies: boolean = false): Promise<Media[]> {    
-    const response = await api.get<Media[]>(`/api/Media?includeCopies=${includeCopies}`);
+  async getMedia(): Promise<MediaDto[]> {    
+    const response = await api.get<MediaDto[]>(`/api/Media`);
     return response.data;
   },
 
-  async getMediaById(mediaId: number, includeCopies: boolean = false): Promise<Media> {
-    const response = await api.get<Media>(`/api/Media/${mediaId}?includeCopies=${includeCopies}`);
+  async getMediaById(mediaId: number): Promise<MediaDto> {
+    const response = await api.get<MediaDto>(`/api/Media/${mediaId}`);
     return response.data;
   },
   
@@ -17,8 +17,8 @@ export const mediaService = {
     return response.data;
   },
   
-  async getUserMedia(userId: number, includeCopies: boolean = false): Promise<Media[]> {    
-    const response = await api.get<Media[]>(`/api/Media/User/${userId}?includeCopies=${includeCopies}`);
+  async getUserMedia(userId: number): Promise<MediaDto[]> {    
+    const response = await api.get<MediaDto[]>(`/api/Media/User/${userId}`);
     return response.data;
   },
   async createNewMediaCopy(newMediaCopy: CreateMediaCopyRequest): Promise<MediaCopy> {
@@ -28,6 +28,10 @@ export const mediaService = {
 
   async getMediaTypes(): Promise<MediaType[]> {    
     const response = await api.get<MediaType[]>('/api/MediaTypes');
+    return response.data;
+  },
+  async getMediaCopiesByMediaID(mediaId: number): Promise<MediaCopyDto[]> {    
+    const response = await api.get<MediaCopyDto[]>(`/api/MediaCopy/Media/${mediaId}`);
     return response.data;
   },
 };

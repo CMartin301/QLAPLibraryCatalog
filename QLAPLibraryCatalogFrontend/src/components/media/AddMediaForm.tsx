@@ -1,9 +1,9 @@
-// components/forms/AddMediaForm.tsx
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { MediaFormData, MediaType } from "../../types/media";
 import { mediaService } from "../../services/mediaService";
 import { Select } from "../shared/Select";
+import Button from "../shared/Button";
 
 interface AddMediaFormProps {
   onSubmit: (data: MediaFormData) => void;
@@ -277,15 +277,14 @@ export function AddMediaForm({ onSubmit, isSubmitting = false, submitError }: Ad
 
       {/* Submit */}
       <div className="flex justify-end pt-2">
-        <button
+        <Button
           type="submit"
-          disabled={isSubmitting || isLoadingTypes}
-          className="py-2 px-4 bg-lavender-400 hover:bg-lavender-500 disabled:bg-gray-300 
-                     disabled:cursor-not-allowed text-white rounded-lg transition-all duration-200
-                     focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:ring-offset-2"
+          variant="primary"
+          size="md"
+          loading={isSubmitting || isLoadingTypes}
         >
           {isSubmitting ? 'Saving...' : isLoadingTypes ? 'Loading...' : 'Save Media'}
-        </button>
+        </Button>
       </div>
     </form>
   );

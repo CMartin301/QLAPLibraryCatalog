@@ -11,10 +11,13 @@ const colorMap = {
 };
 
 export function StatusBadge({ config }: { config: StatusConfig }) {
+  const Icon = config.icon;
+  
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colorMap[config.color]}`}
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium gap-1 ${colorMap[config.color]}`}
     >
+      {Icon && <Icon className="w-3 h-3" aria-hidden="true" />}
       {config.text}
     </span>
   );

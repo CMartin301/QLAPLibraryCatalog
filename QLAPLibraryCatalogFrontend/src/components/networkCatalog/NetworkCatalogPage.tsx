@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
-import { Media } from '../../types/media';
+import { Media, MediaDto } from '../../types/media';
 import { mediaService } from '../../services/mediaService';
 import { NetworkMediaTable } from '../media/networkMediaTable/NetworkMediaTable';
 
@@ -9,7 +9,7 @@ const NetworkCatalogPage: React.FC = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [media, setMedia] = useState<Media[]>([]);
+  const [media, setMedia] = useState<MediaDto[]>([]);
 
   
   useEffect(() => {
@@ -21,7 +21,7 @@ const NetworkCatalogPage: React.FC = () => {
     setError(null);
     
     try {
-      const response = await mediaService.getMedia(true);
+      const response = await mediaService.getMedia();
       // console.log(response.data);
       setMedia(response);
     } catch (err: any) {

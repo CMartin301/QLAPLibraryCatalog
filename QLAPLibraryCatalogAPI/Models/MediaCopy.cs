@@ -17,10 +17,6 @@ public partial class MediaCopy
 
     public bool? IsAvailable { get; set; }
 
-    public int? MaxLoanDays { get; set; }
-
-    public bool? RequiresApproval { get; set; }
-
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }

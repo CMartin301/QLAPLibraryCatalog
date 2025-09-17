@@ -1,21 +1,20 @@
-import React from 'react';
 import { useForm } from 'react-hook-form';
-import { CreateMediaCopyRequest, Media } from '../../types/media';
+import { CreateMediaCopyRequest, Media, MediaDto } from '../../types/media';
 import useAuth from '../../hooks/useAuth';
+import Button from '../shared/Button';
+import { MediaDisplay } from '../shared/displays/MediaDisplay';
 
 interface AddMediaCopyFormProps {
   onSubmit: (data: CreateMediaCopyRequest) => void;
   isSubmitting: boolean;
   submitError: string | null;
-  preselectedMedia?: Media;
+  preselectedMedia?: MediaDto;
 }
 
 export function AddMediaCopyForm({ onSubmit, isSubmitting, submitError, preselectedMedia }: AddMediaCopyFormProps) {
   const { register, handleSubmit, reset } = useForm<CreateMediaCopyRequest>({
     defaultValues: {
       condition: 'Good',
-      maxLoanDays: 14,
-      requiresApproval: false,
     }
   });
   const { userID } = useAuth();
@@ -40,21 +39,7 @@ export function AddMediaCopyForm({ onSubmit, isSubmitting, submitError, preselec
   return (
     <div className="space-y-6">
       {/* Media Info Display */}
-      <div className="bg-gray-50 rounded-lg p-4 border">
-        <h3 className="font-semibold text-lg text-gray-900 mb-2">
-          {preselectedMedia.title}
-        </h3>
-        <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
-          <div><span className="font-medium">Author:</span> {preselectedMedia.creator || 'Unknown'}</div>
-          <div><span className="font-medium">Genre:</span> {preselectedMedia.genre || 'N/A'}</div>
-          {preselectedMedia.publisher && (
-            <div><span className="font-medium">Publisher:</span> {preselectedMedia.publisher}</div>
-          )}
-          {preselectedMedia.publicationDate && (
-            <div><span className="font-medium">Published:</span> {preselectedMedia.publicationDate}</div>
-          )}
-        </div>
-      </div>
+      <MediaDisplay media={preselectedMedia} variant="compact" />
 
       {/* Copy Details Form */}
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
@@ -74,34 +59,6 @@ export function AddMediaCopyForm({ onSubmit, isSubmitting, submitError, preselec
           </select>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Maximum Loan Days <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="number"
-            min="1"
-            max="365"
-            {...register('maxLoanDays', { 
-              required: 'Max loan days is required',
-              min: { value: 1, message: 'Must be at least 1 day' },
-              max: { value: 365, message: 'Cannot exceed 365 days' }
-            })}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-lavender-500 focus:border-lavender-500"
-          />
-        </div>
-
-        <div className="flex items-center gap-3">
-          <input 
-            type="checkbox" 
-            id="requiresApproval"
-            {...register('requiresApproval')}
-            className="rounded border-gray-300 text-lavender-500 focus:ring-lavender-500"
-          />
-          <label htmlFor="requiresApproval" className="text-sm font-medium text-gray-700">
-            Requires approval before lending
-          </label>
-        </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -121,15 +78,15 @@ export function AddMediaCopyForm({ onSubmit, isSubmitting, submitError, preselec
           </div>
         )}
 
-        <button
+        <Button
           type="submit"
-          disabled={isSubmitting}
-          className="w-full py-3 px-4 bg-lavender-500 hover:bg-lavender-600 disabled:bg-gray-400 disabled:cursor-not-allowed
-                   text-white font-medium rounded-lg shadow-sm transition-colors duration-200
-                   focus:ring-2 focus:ring-lavender-500 focus:ring-offset-2"
+          variant="primary"
+          size="lg"
+          loading={isSubmitting}
+          className="w-full"
         >
           {isSubmitting ? 'Adding to Collection...' : 'Add to My Collection'}
-        </button>
+        </Button>
       </form>
     </div>
   );

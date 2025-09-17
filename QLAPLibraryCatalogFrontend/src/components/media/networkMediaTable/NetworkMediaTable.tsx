@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Media, CreateMediaRequest, MediaFormData, CreateMediaCopyRequest } from '../../../types/media';
+import { Media, CreateMediaRequest, MediaFormData, CreateMediaCopyRequest, MediaCopyDto, MediaDto } from '../../../types/media';
 import { TableContainer } from '../../shared/TableContainer';
 import { Modal } from '../../shared/Modal';
 import { AddMediaForm } from '../AddMediaForm';
@@ -10,9 +10,12 @@ import { mediaService } from '../../../services/mediaService';
 import useAuth from '../../../hooks/useAuth';
 import { useTableActions } from '../../../hooks/useTableActions';
 import { useNetworkMediaColumns } from './networkMediaColumns';
+import { createMediaFilterConfig } from '../../../config/mediaFilters';
+import { useFilters } from '../../../hooks/useFilters';
+import { FilterPanel } from '../../shared/filters/FilterPanel';
 
 interface NetworkMediaTableProps {
-  media: Media[];
+  media: MediaDto[];
   loading?: boolean;
   error?: string | null;
   onRefresh: () => void;
@@ -30,40 +33,66 @@ export function NetworkMediaTable({
   const { executeAction, isLoading: actionLoading } = useTableActions();
   
   // Modal states
-  const [selectedMedia, setSelectedMedia] = useState<Media | null>(null);
+  const [selectedMedia, setSelectedMedia] = useState<MediaDto | undefined>(undefined);
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
   const [isAddMediaModalOpen, setIsAddMediaModalOpen] = useState(false);
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
-  const [selectedMediaForCopy, setSelectedMediaForCopy] = useState<Media | null>(null);
+  const [selectedMediaForCopy, setSelectedMediaForCopy] = useState<MediaDto | null>(null);
+
   const [isBorrowModalOpen, setIsBorrowModalOpen] = useState(false);
-  const [selectedCopyForBorrow, setSelectedCopyForBorrow] = useState<number | null>(null);
+  const [selectedCopyForBorrow, setSelectedCopyForBorrow] = useState<number | undefined>(undefined);
+    const [mediaCopies, setMediaCopies] = useState<MediaCopyDto[]>([]);
+  // const [requestModalData, setRequestModalData] = useState<number | undefined>(undefined);
+
   const [addingToCopyMediaId, setAddingToCopyMediaId] = useState<number | null>(null);
 
-  const handleRowClick = (media: Media) => {
+    const {
+    filteredData,
+    filters,
+    updateFilters,
+    activeFilterCount
+  } = useFilters({
+    data: media,
+    createFilterConfig: createMediaFilterConfig
+  });
+
+  const handleRowClick = (media: MediaDto) => {
     setSelectedMedia(media);
     setIsMediaModalOpen(true);
   };
 
-  const handleAddToCollection = (mediaItem: Media) => {
+  const handleAddToCollection = (mediaItem: MediaDto) => {
     setAddingToCopyMediaId(mediaItem.mediaId);
     setSelectedMediaForCopy(mediaItem);
     setIsCopyModalOpen(true);
   };
 
-const handleRequestItem = (mediaItem: Media) => {
-  const availableCopies = mediaItem.copies?.filter(copy => copy.isAvailable) || [];
+const handleRequestItem = async (mediaItem: MediaDto) => {
   
-  if (availableCopies.length === 0) {
+  if (mediaItem.availableCopiesCount === 0) {
     executeAction(
       () => Promise.reject(new Error('No available copies for this item')),
       { errorMessage: 'No available copies for this item' }
     );
     return;
   }
+
+    try {
+    const enrichedCopies = await mediaService.getMediaCopiesByMediaID(mediaItem.mediaId);
+    const availableEnrichedCopies = enrichedCopies.filter(copy => copy.isAvailable) //only available copies
+                                                  .filter(copy => copy.ownerUserId != userID); //exclude copies owned byuser
+
+    setMediaCopies(availableEnrichedCopies);
+    setSelectedMedia(mediaItem);
+    setSelectedCopyForBorrow(undefined);
+    setIsBorrowModalOpen(true);
+  } catch (error) {
+    console.error('Error loading enriched copies:', error);
+  }
   
-  setSelectedMedia(mediaItem);
-  setSelectedCopyForBorrow(availableCopies[0].copyId);
-  setIsBorrowModalOpen(true);
+  // setSelectedMedia(mediaItem);
+  // setSelectedCopyForBorrow(undefined);
+  // setIsBorrowModalOpen(true);
 };
 
   const handleAddMedia = async (data: MediaFormData) => {
@@ -125,8 +154,8 @@ const handleBorrowRequestSubmit = async () => {
     {
       onSuccess: () => {
         setIsBorrowModalOpen(false);
-        setSelectedMedia(null);
-        setSelectedCopyForBorrow(null);
+        setSelectedMedia(undefined);
+        setSelectedCopyForBorrow(undefined);
         onRefresh();
       },
       successMessage: 'Borrow request submitted successfully!'
@@ -149,8 +178,13 @@ const handleBorrowRequestSubmit = async () => {
 
   return (
     <>
+      <FilterPanel
+        filters={filters}
+        onFiltersChange={updateFilters}
+        className="mb-4"
+      />
       <TableContainer
-        data={media}
+        data={filteredData}
         columns={columns}
         loading={loading}
         error={error}
@@ -161,14 +195,16 @@ const handleBorrowRequestSubmit = async () => {
         onRowClick={handleRowClick}
         rowClassName="cursor-pointer hover:bg-gray-50"
       />
-
+ 
       {/* Media Detail Modal */}
       <MediaModal
         media={selectedMedia}
         isOpen={isMediaModalOpen}
+        copies={mediaCopies}
         onClose={() => {
           setIsMediaModalOpen(false);
-          setSelectedMedia(null);
+          setSelectedMedia(undefined);
+          setSelectedCopyForBorrow(undefined);
         }}
         showCopies={true}
       />
@@ -209,15 +245,22 @@ const handleBorrowRequestSubmit = async () => {
         isOpen={isBorrowModalOpen}
         onClose={() => {
           setIsBorrowModalOpen(false);
-          setSelectedMedia(null);
-          setSelectedCopyForBorrow(null);
+          setSelectedMedia(undefined);
+          setSelectedCopyForBorrow(undefined);
         }}
-        title={selectedMedia ? `Request "${selectedMedia.title}"` : 'Request Item'}
+
+        title={'Submit a Borrow Request'}
+        // title={selectedMedia ? `Request "${selectedMedia.title}"` : 'Request Item'}
+        description="Choose a copy and set your preferred loan dates" 
+        size="lg" 
       >
-        {selectedCopyForBorrow && userID && (
+        { userID && (
           <AddBorrowRequestForm
             copyId={selectedCopyForBorrow}
             borrowerId={userID}
+            selectedMedia={selectedMedia}
+            availableCopies={mediaCopies}
+            onCopySelect={(copyId) => {setSelectedCopyForBorrow(copyId);}}
             onSubmit={handleBorrowRequestSubmit}
             isSubmitting={actionLoading}
             submitError={null}

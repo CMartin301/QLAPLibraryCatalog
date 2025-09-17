@@ -1,51 +1,26 @@
-import { useMemo, useState } from "react";
-import { createColumnHelper } from "@tanstack/react-table";
-import { LoanWithDetails } from "../../../types/loans";
-import { loanService } from "../../../services/loanService";
-import { TableContainer } from "../../shared/TableContainer";
-import { useTableActions } from "../../../hooks/useTableActions";
-import { LoanDetailModal } from "./LoanDetailModal";
-import { StatusBadge } from "../../shared/StatusBadge";
-import { getLoanStatusDisplay } from "../../../utilities/statusDisplayHelpers";
-
-interface BorrowedLoansTableProps {
-  loans: LoanWithDetails[];
-  onRefresh: () => void;
-  error?: string | null;
-  loading?: boolean;
-}
-
-export function BorrowedLoansTable({
-  loans,
-  onRefresh,
-  error,
-  loading,
-}: BorrowedLoansTableProps) {
-  const { executeAction, isLoading } = useTableActions();
-  const [detailModal, setDetailModal] = useState<{
-    isOpen: boolean;
-    loan: LoanWithDetails | null;
-  }>({ isOpen: false, loan: null });
-
-  const handleRowClick = (loan: LoanWithDetails) => {
-  setDetailModal({ isOpen: true, loan });
-};
+import { useMemo } from 'react';
+import { createColumnHelper, ColumnDef } from '@tanstack/react-table';
+import Button from '../../../shared/Button';
+import { StatusBadge } from '../../../shared/StatusBadge';
+import { getLoanStatusDisplay } from '../../../../utilities/statusDisplayHelpers';
+import { LoanWithDetails } from '../../../../types/loans';
 
   const columnHelper = createColumnHelper<LoanWithDetails>();
 
-  const handleReturn = async (loanId: number): Promise<void> => {
-    return executeAction(
-      () => loanService.returnLoan(loanId, { isBorrower: true }),
-      {
-        onSuccess: onRefresh,
-        successMessage: "Loan marked as returned",
-        errorMessage: "Failed to mark loan as returned",
-      }
-    );
+interface UseBorrowedLoansColumnsProps {
+  handlers: {
+    handleReturn: (loanId: number) => void;
   };
+  isLoading: boolean | undefined;
+}
 
-  const columns = useMemo(
-    () => [
+export function useBorrowedLoansColumns({ 
+  handlers, 
+  isLoading 
+}: UseBorrowedLoansColumnsProps) {
+  const { handleReturn } = handlers;
+
+  return useMemo<ColumnDef<LoanWithDetails, any>[]>(() => [
       columnHelper.accessor(row => row.mediaTitle ?? "—", {
         id: "media",
         header: "Book",
@@ -96,7 +71,7 @@ export function BorrowedLoansTable({
       }),
       columnHelper.display({
         id: "actions",
-        header: "Actions",
+        header: "",
         size: 180,
         cell: (info) => {
           const loan = info.row.original;
@@ -104,16 +79,19 @@ export function BorrowedLoansTable({
           // Borrower can only mark returned if they haven't already
           if (loan.borrowerReturnedAt === null) {
             return (
-              <button
+              <Button
+                variant="primary"
+                size="sm"
                 onClick={(e) => {
-                  e.stopPropagation(); // Prevent row click
+                  e.stopPropagation(); 
                   handleReturn(loan.loanId);
-                }}
+                }} 
                 disabled={isLoading}
-                className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                loading={isLoading}
+                aria-label={`Mark loan as returned`}
               >
                 {isLoading ? "Processing..." : "Mark Returned"}
-              </button>
+              </Button>
             );
           }
 
@@ -124,30 +102,5 @@ export function BorrowedLoansTable({
           );
         },
       }),
-    ],
-    [isLoading]
-  );
-
-  return (
-    <>
-      <TableContainer
-        data={loans}
-        columns={columns}
-        loading={loading || isLoading}
-        error={error} // only fetch/load errors
-        onRefresh={onRefresh}
-        emptyMessage="No borrowed loans found"
-        onRowClick={handleRowClick}
-        rowClassName="cursor-pointer"
-      />
-
-      <LoanDetailModal
-        isOpen={detailModal.isOpen}
-        onClose={() => setDetailModal({ isOpen: false, loan: null })}
-        loan={detailModal.loan}
-      />
-    </>
-  );
+  ], [isLoading, handleReturn]);
 }
-
-export default BorrowedLoansTable;

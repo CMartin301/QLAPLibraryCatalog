@@ -20,7 +20,7 @@ export function Header() {
             to="/dashboard" 
             className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
           >
-            <BookOpen className="h-8 w-8 text-lavender-400" />
+            <BookOpen className="h-8 w-8 text-lavender-200" />
             <h1 className="text-xl font-bold text-white">QLAP</h1>
           </Link>
 

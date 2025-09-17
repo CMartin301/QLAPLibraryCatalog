@@ -3,7 +3,8 @@ import { Book, Calendar, ArrowLeftRight, Clock, User, TrendingUp, AlertCircle } 
 import useAuth from '../../hooks/useAuth';
 import { useDashboardStats, useRecentActivity, useUpcomingDueDates } from '../../hooks/useDashboard';
 import StatCard from '../shared/StatCard';
-import { RecentActivityItem, UpcomingDueDateItem } from '../../types/dashboard';
+import ActivityItem from './ActivityItem';
+import DueDateItem from './DueDateItem';
 
 // Loading component for better UX
 const LoadingSkeleton: React.FC<{ className?: string }> = ({ className = '' }) => (
@@ -31,103 +32,11 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ message, onRetry }) => (
   </div>
 );
 
-// Activity Item Component (improved)
-interface ActivityItemProps {
-  activity: RecentActivityItem;
-}
-
-const ActivityItem: React.FC<ActivityItemProps> = ({ activity }) => {
-  const getIcon = (type: RecentActivityItem['type']) => {
-    switch (type) {
-      case 'loan':
-        return <ArrowLeftRight className="w-4 h-4 text-blue-500" />;
-      case 'request':
-        return <Calendar className="w-4 h-4 text-orange-500" />;
-      case 'return':
-        return <Book className="w-4 h-4 text-green-500" />;
-      default:
-        return <Book className="w-4 h-4 text-gray-500" />;
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    try {
-      const date = new Date(dateString);
-      const now = new Date();
-      const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-      
-      if (diffInHours < 1) return 'Just now';
-      if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
-      
-      const diffInDays = Math.floor(diffInHours / 24);
-      if (diffInDays < 7) return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
-      
-      return date.toLocaleDateString();
-    } catch {
-      return dateString; // fallback to original string if parsing fails
-    }
-  };
-
-  return (
-    <div className="flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
-      <div className="flex-shrink-0 mt-0.5" aria-hidden="true">
-        {getIcon(activity.type)}
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm text-gray-900">{activity.description}</p>
-        <time className="text-xs text-gray-500 mt-1" dateTime={activity.date}>
-          {formatDate(activity.date)}
-        </time>
-      </div>
-    </div>
-  );
-};
-
-// Due Date Item Component (improved)
-interface DueDateItemProps {
-  item: UpcomingDueDateItem;
-}
-
-const DueDateItem: React.FC<DueDateItemProps> = ({ item }) => {
-  const isOverdue = item.daysUntilDue !== undefined && item.daysUntilDue < 0;
-  const isDueSoon = item.daysUntilDue !== undefined && item.daysUntilDue <= 3 && item.daysUntilDue >= 0;
-
-  const getStatusColor = () => {
-    if (isOverdue) return 'bg-red-100 text-red-700';
-    if (isDueSoon) return 'bg-orange-100 text-orange-700';
-    return 'bg-blue-100 text-blue-700';
-  };
-
-  const getStatusText = () => {
-    if (isOverdue) return `Overdue by ${Math.abs(item.daysUntilDue!)} day${Math.abs(item.daysUntilDue!) > 1 ? 's' : ''}`;
-    if (item.daysUntilDue === 0) return 'Due today';
-    if (item.daysUntilDue === 1) return 'Due tomorrow';
-    if (isDueSoon) return `Due in ${item.daysUntilDue} days`;
-    return `Due ${new Date(item.dueDate).toLocaleDateString()}`;
-  };
-
-  return (
-    <div className="flex items-start space-x-3 p-3 rounded-lg border border-gray-100">
-      <Book className="w-5 h-5 text-lavender-500 mt-1 flex-shrink-0" aria-hidden="true" />
-      <div className="flex-1 min-w-0">
-        <div className="font-medium text-gray-900 text-sm">{item.mediaTitle}</div>
-        <div 
-          className={`text-xs px-2 py-1 rounded-full inline-block mt-2 ${getStatusColor()}`}
-          role="status"
-          aria-label={`${item.mediaTitle} ${getStatusText()}`}
-        >
-          {getStatusText()}
-        </div>
-      </div>
-    </div>
-  );
-};
 
 // Main Dashboard Component
 const Dashboard: React.FC = () => {
   const { username } = useAuth();
   
-  // Use your custom hooks instead of mock data
   const { stats, loading: statsLoading, error: statsError, refetch: refetchStats } = useDashboardStats();
   const { activity, loading: activityLoading, error: activityError, refetch: refetchActivity } = useRecentActivity(5);
   const { dueDates, loading: dueDatesLoading, error: dueDatesError, refetch: refetchDueDates } = useUpcomingDueDates(7);

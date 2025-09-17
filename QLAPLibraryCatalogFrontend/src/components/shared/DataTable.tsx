@@ -1,5 +1,5 @@
 // src/components/shared/DataTable.tsx
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -19,6 +19,7 @@ import {
   Search,
   Plus,
 } from "lucide-react";
+import Button from "./Button";
 
 interface DataTableProps<T> {
   data: T[];
@@ -109,17 +110,15 @@ export function DataTable<T>({
 
             {/* Action button */}
             {actionButton && (
-              <button
-                type="button"
+              <Button
+                variant="primary"
+                size="md"
+                icon={Plus}
                 onClick={actionButton.onClick}
-                className="py-2 pl-4 pr-5 bg-lavender-400 hover:bg-lavender-500
-                      text-white text-sm font-medium rounded-lg shadow
-                      transition-all duration-200 transform hover:scale-[1.01]
-                      flex items-center gap-2 justify-center whitespace-nowrap"
+                className="whitespace-nowrap"
               >
-                <Plus size={16} className="text-white" />
                 {actionButton.text}
-              </button>
+              </Button>
             )}
           </div>
         </div>

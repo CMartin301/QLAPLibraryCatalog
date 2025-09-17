@@ -5,10 +5,10 @@ import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import useAuth from '../../hooks/useAuth';
 import { useLoans } from '../../hooks/useLoans';
 import { useBorrowRequests } from '../../hooks/useBorrowRequests';
-import BorrowedLoansTable from './loans/BorrowedLoansTable';
-import LentLoansTable from './loans/LentLoansTable';
-import SentBorrowRequestsTable from './borrowRequests/SentBorrowRequestsTable';
-import ReceivedBorrowRequestsTable from './borrowRequests/ReceivedBorrowRequestsTable';
+import SentBorrowRequestsTable from './borrowRequests/sentBorrowRequests/SentBorrowRequestsTable';
+import { ReceivedBorrowRequestsTable } from './borrowRequests/receivedBorrowRequests/ReceivedBorrowRequestsTable';
+import { LentLoansTable } from './loans/lentLoans/LentLoansTable';
+import BorrowedLoansTable from './loans/borrowedLoans/BorrowedLoansTable';
 
 const BorrowingDashboard: React.FC = () => {
   const { userID } = useAuth();

@@ -1,10 +1,10 @@
-// utilities/statusDisplayHelpers.ts
-
 import { LoanWithDetails } from "../types/loans";
+import { LucideIcon } from 'lucide-react';
 
 export interface StatusConfig {
   text: string;
-  color: "gray" | "red" | "yellow" | "green" | "blue" | "purple";
+  color: 'gray' | 'red' | 'yellow' | 'green' | 'blue' | 'purple';
+  icon?: LucideIcon;
 }
 
 // Loan statuses

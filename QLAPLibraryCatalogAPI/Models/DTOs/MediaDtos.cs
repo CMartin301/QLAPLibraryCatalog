@@ -19,6 +19,8 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
     {
         public int MediaId { get; set; }
         public int MediaTypeId { get; set; }
+        public string? MediaTypeName { get; set; }
+
         public string Title { get; set; } = null!;
         public string? Subtitle { get; set; }
         public string Creator { get; set; } = null!;
@@ -33,8 +35,10 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
         public int? PageCount { get; set; }
         public string? IssueNumber { get; set; }
         public string? Volume { get; set; }
-        public MediaTypeDto? MediaType { get; set; }
-        public List<MediaCopyDto> Copies { get; set; } = new();
+        public int? TotalCopiesCount { get; set; }
+        public int? AvailableCopiesCount { get; set; }
+        // public MediaTypeDto? MediaType { get; set; }
+        // public List<MediaCopyDto> Copies { get; set; } = new();
     }
 
     public class CreateMediaDto
@@ -70,11 +74,24 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
         public string? Condition { get; set; }
         public string? Notes { get; set; }
         public bool? IsAvailable { get; set; }
-        public int? MaxLoanDays { get; set; }
-        public bool? RequiresApproval { get; set; }
         public string? CurrentLocationZoneName { get; set; }
         public string? HomeLocationZoneName { get; set; }
-        public MediaDto Media { get; set; } = null!;
+
+        public string? MediaTitle { get; set; }
+        public string? MediaCreator { get; set; }
+        public string? OwnerUsername { get; set; }
+        public int? OwnerUserId { get; set; }
+
+
+//   // Media fields (following your existing pattern)
+        //   mediaTitle: string;
+        //   mediaCreator?: string;
+
+        //   // Owner fields (following your BorrowRequestDto pattern)
+        //   ownerUsername: string;
+        //   ownerUserId: number;
+
+        // public MediaDto Media { get; set; } = null!;
     }
 
     public class CreateMediaCopyDto
@@ -84,8 +101,7 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
         public string? Condition { get; set; }
         public string? Notes { get; set; }
         public bool? IsAvailable { get; set; }
-        public int? MaxLoanDays { get; set; }
-        public bool? RequiresApproval { get; set; }
+        public int? HomeLocationZoneId { get; set; }
         
     }
 }

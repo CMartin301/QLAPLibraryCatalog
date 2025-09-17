@@ -42,13 +42,30 @@ namespace QLAPLibraryCatalogAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public async Task<IActionResult> GetMediaCopies()
+        public async Task<IActionResult> GetAllMediaCopies()
         {
             try
             {
                 var media = await _mediaCopiesService.GetAllMediaCopiesAsync();
                 // return Ok(media);
                 return Ok(new { data = media });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+        /// <summary>
+        /// Gets all copies for some media
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("Media/{mediaId}")]
+        public async Task<IActionResult> GetMediaCopiesByMediaID(int mediaId)
+        {
+            try
+            {
+                var media = await _mediaCopiesService.GetMediaCopiesByMediaIDAsync(mediaId);
+                return Ok(media);
             }
             catch (Exception ex)
             {
