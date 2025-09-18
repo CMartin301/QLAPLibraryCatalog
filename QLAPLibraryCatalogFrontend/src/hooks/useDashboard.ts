@@ -39,7 +39,6 @@ export const useRecentActivity = (count = 5) => {
       setLoading(true);
       setError(null);
       const data = await dashboardService.getRecentActivity(count);
-      console.log(data);
       setActivity(data);
     } catch (err) {
       console.error("Failed to fetch recent activity:", err);
