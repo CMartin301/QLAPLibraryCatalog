@@ -101,6 +101,30 @@ namespace QLAPLibraryCatalogAPI.Controllers
         }
 
         /// <summary>
+        /// Update user password
+        /// </summary>
+        /// <param name="userID"></param>
+        /// <param name="newPassword"></param>
+        /// <returns></returns>
+        [HttpPut("{userID}/Password")]
+        public async Task<IActionResult> UpdateUserPassword(int userID, [FromBody] string newPassword)
+        {
+            try
+            {
+                // int userID = GetUserId();
+
+                var updatedUser = await _usersService.UpdateUserPasswordAsync(userID, newPassword);
+                if (updatedUser == null) return NotFound();
+                
+                return Ok(updatedUser);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        /// <summary>
         /// Updates existing user preferences
         /// </summary>
         /// <param name="userId"></param>
