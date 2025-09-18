@@ -60,12 +60,6 @@ namespace QLAPLibraryCatalogAPI.Controllers
                     userLocationZoneId, 
                     maxDistanceMiles
                 );
-                var media = await _mediaService.GetAllMediaAsync(
-                    includeCopies, 
-                    search, 
-                    userLocationZoneId, 
-                    maxDistanceMiles
-                );
                 return Ok(media);
             }
             catch (Exception ex)
