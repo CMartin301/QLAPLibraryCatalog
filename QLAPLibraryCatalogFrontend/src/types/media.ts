@@ -47,6 +47,12 @@ export interface MediaDto {
 
   tags?: TagDto[];
 }
+export interface LocationInfo {
+  zoneId: number;
+  zoneName: string;
+  distance: number;
+  availableCopiesCount: number;
+}
 
 export interface Media {
   mediaId: number;

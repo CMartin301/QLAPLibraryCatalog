@@ -45,14 +45,8 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
 
         public List<TagDto> Tags { get; set; } = new();
     }
+
     // New supporting class
-public class MediaSearchRequest
-{
-    public bool IncludeCopies { get; set; } = false;
-    public string? Search { get; set; }
-    public int? UserLocationZoneId { get; set; }  // Selected zip code
-    public decimal? MaxDistanceMiles { get; set; } = 10;  // Default 10 miles
-}
     public class LocationInfo
     {
         public int ZoneId { get; set; }
@@ -60,6 +54,16 @@ public class MediaSearchRequest
         public decimal Distance { get; set; }
         public int AvailableCopiesCount { get; set; }
     }
+
+    // Add to your API request handling
+    public class MediaSearchRequest
+    {
+        public bool IncludeCopies { get; set; } = false;
+        public string? Search { get; set; }
+        public int? UserLocationZoneId { get; set; }  // Selected zip code
+        public decimal? MaxDistanceMiles { get; set; } = 10;  // Default 10 miles
+    }
+
     public class CreateMediaDto
     {
         public int MediaTypeId { get; set; }

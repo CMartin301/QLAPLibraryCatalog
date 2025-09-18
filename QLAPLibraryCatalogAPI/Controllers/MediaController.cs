@@ -42,6 +42,8 @@ namespace QLAPLibraryCatalogAPI.Controllers
         /// </summary>
         /// <param name="includeCopies"></param>
         /// <param name="search"></param>
+        /// <param name="userLocationZoneId"></param>
+        /// <param name="maxDistanceMiles"></param>
         /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> GetMedia(
@@ -52,6 +54,12 @@ namespace QLAPLibraryCatalogAPI.Controllers
         {
             try
             {
+                var media = await _mediaService.GetAllMediaAsync(
+                    includeCopies, 
+                    search, 
+                    userLocationZoneId, 
+                    maxDistanceMiles
+                );
                 var media = await _mediaService.GetAllMediaAsync(
                     includeCopies, 
                     search, 
