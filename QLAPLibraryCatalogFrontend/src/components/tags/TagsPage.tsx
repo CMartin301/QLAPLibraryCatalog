@@ -1,13 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { TagDto } from '../../types/tags';
+import { CreateTagRequest, TagDto, TagFormData } from '../../types/tags';
 import { tagService } from '../../services/tagService';
-import { Tag, Search, AlertCircle, RefreshCw } from 'lucide-react';
+import { Tag, Search, AlertCircle, RefreshCw, Plus } from 'lucide-react';
+import Button from '../shared/Button';
+import { Modal } from '../shared/Modal';
+import { AddTagForm } from './AddTagForm';
+import { mediaService } from '../../services/mediaService';
+import { MediaFormData, CreateMediaRequest } from '../../types/media';
+import { useTableActions } from '../../hooks/useTableActions';
 
 const TagsPage: React.FC = () => {
   const [tags, setTags] = useState<TagDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isAddMediaModalOpen, setIsAddMediaModalOpen] = useState(false);
+    const { executeAction, isLoading: actionLoading } = useTableActions();
 
   useEffect(() => {
     loadTags();
@@ -28,6 +36,23 @@ const TagsPage: React.FC = () => {
     }
   };
 
+  const handleAddTag = async (data: TagFormData) => {
+  const apiPayload: CreateTagRequest = {
+    tagName: data.tagName,
+  };
+
+  return executeAction(
+    () => tagService.createNewTag(apiPayload),
+    {
+      onSuccess: () => {
+        setIsAddMediaModalOpen(false);
+        loadTags();
+      },
+      successMessage: 'Media added successfully!',
+      errorMessage: 'Failed to create media'
+    }
+  );
+};
   // Filter tags based on search term
   const filteredTags = tags.filter(tag =>
     tag.tagName.toLowerCase().includes(searchTerm.toLowerCase())
@@ -73,6 +98,7 @@ const TagsPage: React.FC = () => {
   }
 
   return (
+    <>
     <div className="container mx-auto py-8 px-4">
       {/* Page Header */}
       <div className="mb-8">
@@ -86,6 +112,7 @@ const TagsPage: React.FC = () => {
 
 
           <div className="flex items-center justify-between gap-4 mb-4">
+            
             {/* Search Bar */}
               <div className="relative max-w-md flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -97,7 +124,6 @@ const TagsPage: React.FC = () => {
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-lavender-500 focus:border-transparent"
                 />
               </div>
-
             {/* Stats */}
             <div className="mb-6 text-sm text-gray-600">
               Showing {sortedTags.length} of {tags.length} tags
@@ -113,6 +139,18 @@ const TagsPage: React.FC = () => {
                 </span>
               )}
             </div>
+
+
+              <Button
+                variant="primary"
+                size="md"
+                icon={Plus}
+                onClick={() => setIsAddMediaModalOpen(true)}
+                className="whitespace-nowrap"
+              >
+                Add Tag
+              </Button>
+
         </div>
 
 
@@ -158,6 +196,20 @@ const TagsPage: React.FC = () => {
         )}
       </div>
     </div>
+
+          {/* Add Media Modal */}
+          <Modal
+            isOpen={isAddMediaModalOpen}
+            onClose={() => setIsAddMediaModalOpen(false)}
+            title="Add New Tag"
+          >
+            <AddTagForm 
+              onSubmit={handleAddTag}
+              isSubmitting={actionLoading}
+              submitError={null}
+            />
+          </Modal>
+          </>
   );
 };
 

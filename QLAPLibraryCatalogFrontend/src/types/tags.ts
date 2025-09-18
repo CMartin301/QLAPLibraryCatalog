@@ -4,3 +4,10 @@ export interface TagDto {
   tagName: string;
   mediaTagCount?: number;
 }
+
+export interface CreateTagRequest {
+  tagName: string;
+}
+export interface TagFormData {
+  tagName: string;
+}

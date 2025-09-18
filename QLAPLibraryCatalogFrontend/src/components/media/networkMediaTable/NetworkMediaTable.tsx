@@ -241,7 +241,7 @@ const handleBorrowRequestSubmit = async () => {
         <AddMediaCopyForm
           onSubmit={handleAddMediaCopy}
           isSubmitting={actionLoading}
-          submitError={null}
+          submitError={undefined}
           preselectedMedia={selectedMediaForCopy || undefined}
         />
       </Modal>

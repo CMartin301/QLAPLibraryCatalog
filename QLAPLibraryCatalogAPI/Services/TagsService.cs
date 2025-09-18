@@ -11,6 +11,8 @@ namespace QLAPLibraryCatalogAPI.Services
     {
 #pragma warning disable 1591
         Task<IEnumerable<TagDto>> GetTagsAsync();
+        Task<TagDto?> GetTagByIDAsync(int tagID);
+        Task<TagDto> AddTagAsync(int userID, CreateTagDto tag);
         Task<bool> AddMediaTagAsync(int userID, int mediaID, int tagID);
 #pragma warning restore 1591
     }
@@ -34,9 +36,48 @@ namespace QLAPLibraryCatalogAPI.Services
 
             return await q.Select(r => MapTag(r)).ToListAsync();
         }
+
+        /// <summary>
+        /// Gets all tags
+        /// </summary>
+        /// <returns></returns>
+        public async Task<TagDto?> GetTagByIDAsync(int tagID)
+        {
+            var q = _context.Tags
+                .Include(m => m.MediaTags)
+                .Where(m => m.TagId == tagID)
+                .AsQueryable();
+
+            return await q.Select(r => MapTag(r))
+                .FirstOrDefaultAsync();
+        }
+
+        /// <summary>
+        /// Adds a tag 
+        /// </summary>
+        /// <param name="userID"></param>
+        /// <param name="tag"></param>
+        /// <returns></returns>
+        public async Task<TagDto> AddTagAsync(int userID, CreateTagDto tag)
+        {
+            var createdTag = new Tag
+            {
+                TagName = tag.TagName,
+                CreatedBy = userID,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.Tags.Add(createdTag);
+            await _context.SaveChangesAsync();
+
+            return await GetTagByIDAsync(createdTag.TagId) ?? throw new InvalidOperationException("Failed to retrieve created media");
+        }
+
+
         /// <summary>
         /// Adds a tag to a piece of media, adds a mediaTag object/association
         /// </summary>
+        /// <param name="userID"></param>
         /// <param name="mediaID"></param>
         /// <param name="tagID"></param>
         /// <returns></returns>
