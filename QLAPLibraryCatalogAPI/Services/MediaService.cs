@@ -90,7 +90,7 @@ namespace QLAPLibraryCatalogAPI.Services
             }
 
             return await query
-                .Select(m => MapMediaWithLocation(m, userLocationZoneId, maxDistanceMiles))
+                .Select(media => MapMedia(media))
                 .ToListAsync();
         }
 
@@ -113,7 +113,7 @@ namespace QLAPLibraryCatalogAPI.Services
 
             return await query
                 .Where(m => m.MediaId == mediaId)
-                .Select(user => MapMedia(user))
+                .Select(media => MapMedia(media))
                 .FirstOrDefaultAsync();
         }
 
@@ -260,70 +260,70 @@ namespace QLAPLibraryCatalogAPI.Services
         }
         
         private MediaDto MapMediaWithLocation(Media m, int? userLocationZoneId = null, decimal? maxDistanceMiles = null)
-{
-    int? totalCopiesCount = m.MediaCopies.Count();
-    int? availableCopiesCount = m.MediaCopies.Where(c => c.IsAvailable == true).Count();
-    
-    // Calculate nearest copy distance if user location provided
-    decimal? nearestDistance = null;
-    string? nearestLocationName = null;
-    
-    if (userLocationZoneId.HasValue)
-    {
-        var userLocation = _context.LocationZones.FirstOrDefault(lz => lz.ZoneId == userLocationZoneId.Value);
-        if (userLocation != null)
         {
-            var availableCopies = m.MediaCopies.Where(mc => mc.IsAvailable == true && mc.HomeLocationZone != null);
+            int? totalCopiesCount = m.MediaCopies.Count();
+            int? availableCopiesCount = m.MediaCopies.Where(c => c.IsAvailable == true).Count();
             
-            var nearestCopy = availableCopies
-                .Select(mc => new {
-                    Copy = mc,
-                    Distance = CalculateDistance(
-                        userLocation.CenterLat.Value, userLocation.CenterLong.Value,
-                        mc.HomeLocationZone.CenterLat.Value, mc.HomeLocationZone.CenterLong.Value
-                    )
-                })
-                .OrderBy(x => x.Distance)
-                .FirstOrDefault();
-                
-            if (nearestCopy != null)
+            // Calculate nearest copy distance if user location provided
+            decimal? nearestDistance = null;
+            string? nearestLocationName = null;
+            
+            if (userLocationZoneId.HasValue)
             {
-                nearestDistance = nearestCopy.Distance;
-                nearestLocationName = nearestCopy.Copy.HomeLocationZone.ZoneName;
+                var userLocation = _context.LocationZones.FirstOrDefault(lz => lz.ZoneId == userLocationZoneId.Value);
+                if (userLocation != null)
+                {
+                    var availableCopies = m.MediaCopies.Where(mc => mc.IsAvailable == true && mc.HomeLocationZone != null);
+                    
+                    var nearestCopy = availableCopies
+                        .Select(mc => new {
+                            Copy = mc,
+                            Distance = CalculateDistance(
+                                userLocation.CenterLat.Value, userLocation.CenterLong.Value,
+                                mc.HomeLocationZone.CenterLat.Value, mc.HomeLocationZone.CenterLong.Value
+                            )
+                        })
+                        .OrderBy(x => x.Distance)
+                        .FirstOrDefault();
+                        
+                    if (nearestCopy != null)
+                    {
+                        nearestDistance = nearestCopy.Distance;
+                        nearestLocationName = nearestCopy.Copy.HomeLocationZone.ZoneName;
+                    }
+                }
             }
-        }
-    }
 
-    return new MediaDto
-    {
-        MediaId = m.MediaId,
-        MediaTypeId = m.MediaTypeId,
-        MediaTypeName = m.MediaType.DisplayName,
-        Title = m.Title,
-        Subtitle = m.Subtitle,
-        Creator = m.Creator,
-        Publisher = m.Publisher,
-        PublicationDate = m.PublicationDate,
-        Language = m.Language,
-        Genre = m.Genre,
-        Description = m.Description,
-        CoverImageUrl = m.CoverImageUrl,
-        Isbn10 = m.Isbn10,
-        Isbn13 = m.Isbn13,
-        PageCount = m.PageCount,
-        IssueNumber = m.IssueNumber,
-        Volume = m.Volume,
-        TotalCopiesCount = totalCopiesCount,
-        AvailableCopiesCount = availableCopiesCount,
-        Tags = m.MediaTags.Select(mediaTag => new TagDto
-        {
-            TagId = mediaTag.TagId,
-            TagName = mediaTag.Tag.TagName
-        }).ToList(),
-        NearestCopyDistance = nearestDistance,
-        NearestCopyLocationName = nearestLocationName
-    };
-}
+            return new MediaDto
+            {
+                MediaId = m.MediaId,
+                MediaTypeId = m.MediaTypeId,
+                MediaTypeName = m.MediaType.DisplayName,
+                Title = m.Title,
+                Subtitle = m.Subtitle,
+                Creator = m.Creator,
+                Publisher = m.Publisher,
+                PublicationDate = m.PublicationDate,
+                Language = m.Language,
+                Genre = m.Genre,
+                Description = m.Description,
+                CoverImageUrl = m.CoverImageUrl,
+                Isbn10 = m.Isbn10,
+                Isbn13 = m.Isbn13,
+                PageCount = m.PageCount,
+                IssueNumber = m.IssueNumber,
+                Volume = m.Volume,
+                TotalCopiesCount = totalCopiesCount,
+                AvailableCopiesCount = availableCopiesCount,
+                Tags = m.MediaTags.Select(mediaTag => new TagDto
+                {
+                    TagId = mediaTag.TagId,
+                    TagName = mediaTag.Tag.TagName
+                }).ToList(),
+                NearestCopyDistance = nearestDistance,
+                NearestCopyLocationName = nearestLocationName
+            };
+        }
         #endregion
         #region Helper Functions
 
