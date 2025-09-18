@@ -154,7 +154,7 @@ export const createMediaCopiesFilterConfig = (data: MediaCopyDto[]): FilterConfi
     priority: 'primary', 
       value: null,
       trueLabel: 'Available',
-      falseLabel: 'Not Available'
+      falseLabel: 'On Loan'
     } as BooleanFilter,
 
     // Publication Year range filter

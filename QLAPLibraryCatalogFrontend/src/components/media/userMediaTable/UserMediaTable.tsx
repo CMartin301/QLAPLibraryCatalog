@@ -12,6 +12,7 @@ import { useFilters } from '../../../hooks/useFilters';
 import { createMediaFilterConfig } from '../../../config/mediaFilters';
 import { createMediaCopiesFilterConfig } from '../../../config/mediaCopyFilters';
 import { FilterPanel } from '../../shared/filters/FilterPanel';
+import { UserMediaModal } from '../UserMediaModal';
 
 interface UserMediaTableProps {
   media: MediaCopyDto[];
@@ -28,7 +29,7 @@ export function UserMediaTable({
   onRefresh,
   onSaveMessage,
 }: UserMediaTableProps) {
-  const [selectedMedia, setSelectedMedia] = useState<MediaDto | undefined>(undefined);
+  const [selectedMedia, setSelectedMedia] = useState<MediaCopyDto | undefined>(undefined);
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
   const [selectedMediaForCopy, setSelectedMediaForCopy] = useState<MediaDto | undefined>(undefined);
@@ -47,7 +48,7 @@ export function UserMediaTable({
   });
 
   const handleRowClick = (mediaCopy: MediaCopyDto) => {
-    setSelectedMedia(mediaCopy.media);
+    setSelectedMedia(mediaCopy);
     setIsMediaModalOpen(true);
   };
 
@@ -114,14 +115,13 @@ export function UserMediaTable({
       />
 
       {/* Media Detail Modal */}
-      <MediaModal
-        media={selectedMedia}
+      <UserMediaModal
+        mediaCopy={selectedMedia}
         isOpen={isMediaModalOpen}
         onClose={() => {
           setIsMediaModalOpen(false);
           setSelectedMedia(undefined);
         }}
-        showCopies={true}
       />
 
       {/* Add Copy Modal */}
