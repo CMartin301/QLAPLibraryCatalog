@@ -2,6 +2,8 @@ import { useMemo } from 'react';
 import { createColumnHelper, ColumnDef } from '@tanstack/react-table';
 import { Plus } from 'lucide-react';
 import { MediaCopyDto } from '../../../types/media';
+import { StatusBadge } from '../../shared/StatusBadge';
+import { TagDto } from '../../../types/tags';
 
 const columnHelper = createColumnHelper<MediaCopyDto>();
 
@@ -42,30 +44,59 @@ export function useUserMediaColumns({ onAddCopy }: UseUserMediaColumnsProps) {
       enableSorting: true,
       size: 120,
     }),
+    // Media Type
+    columnHelper.accessor(row => row.condition ?? "Unknown", {
+      id: "condition",
+      header: "Condition",
+      cell: info => (
+        <span className="text-sm text-gray-900">{info.getValue()}</span>
+      ),
+      enableSorting: true,
+      size: 120,
+    }),
 
-    // // Number of Copies
-    // columnHelper.accessor(row => row.copies?.length ?? 0, {
-    //   id: "copiesCount",
-    //   header: "My Copies",
-    //   cell: info => {
-    //     const count = info.getValue();
-    //     const row = info.row.original;
-    //     const availableCount = row.copies?.filter((c: MediaCopy) => c.isAvailable).length ?? 0;
+    // Genre
+    columnHelper.accessor(row => row.media?.genre ?? "Unknown", {
+      id: "genre",
+      header: "Genre",
+      cell: info => {
+        const config = {
+          text: info.getValue(),
+          color: 'purple' as const
+        };
+        return <StatusBadge config={config} />;
+      },
+      enableSorting: true,
+      size: 140,
+    }),
+
+    // Tags
+    columnHelper.accessor(row => row.media?.tags ?? "", {
+      id: "tags",
+      header: "Tags",
+      cell: info => {
+        const tags = info.getValue();
+        if (!tags || tags.length === 0) {
+          return <span className="text-sm text-gray-400">No tags</span>;
+        }
         
-    //     return (
-    //       <div className="text-sm text-gray-900">
-    //         {count} total 
-    //         {count > 0 && (
-    //           <span className="text-green-600 ml-1">
-    //             ({availableCount} available)
-    //           </span>
-    //         )}
-    //       </div>
-    //     );
-    //   },
-    //   enableSorting: true,
-    //   size: 140,
-    // }),
+        return (
+          <div className="flex flex-wrap gap-1">
+            {tags.map((tag: TagDto) => {
+              const config = {
+                text: tag.tagName,
+                color: 'purple' as const
+              };
+              return <StatusBadge key={tag.tagId} config={config} />;
+            })}
+          </div>
+        );
+      },
+      enableSorting: false,
+      size: 120,
+    }),
+
+
 
     // Actions
     columnHelper.display({
