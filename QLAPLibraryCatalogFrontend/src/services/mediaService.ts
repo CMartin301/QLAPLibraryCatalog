@@ -1,9 +1,34 @@
 import { Media, CreateMediaRequest, MediaType, CreateMediaCopyRequest, MediaCopy, MediaCopyDto, MediaDto } from '../types/media';
 import api from './apiService';
 
+export interface MediaSearchParams {
+  includeCopies?: boolean;
+  search?: string;
+  userLocationZoneId?: number;
+  maxDistanceMiles?: number;
+}
+
 export const mediaService = {
-  async getMedia(): Promise<MediaDto[]> {    
-    const response = await api.get<MediaDto[]>(`/api/Media`);
+ async getMedia(params: MediaSearchParams = {}): Promise<MediaDto[]> {
+    const searchParams = new URLSearchParams();
+    
+    if (params.includeCopies) {
+      searchParams.append('includeCopies', 'true');
+    }
+    if (params.search) {
+      searchParams.append('search', params.search);
+    }
+    if (params.userLocationZoneId) {
+      searchParams.append('userLocationZoneId', params.userLocationZoneId.toString());
+    }
+    if (params.maxDistanceMiles) {
+      searchParams.append('maxDistanceMiles', params.maxDistanceMiles.toString());
+    }
+    
+    const queryString = searchParams.toString();
+    const url = queryString ? `/api/Media?${queryString}` : '/api/Media';
+    
+    const response = await api.get<MediaDto[]>(url);
     return response.data;
   },
 

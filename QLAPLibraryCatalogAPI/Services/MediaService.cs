@@ -9,7 +9,7 @@ namespace QLAPLibraryCatalogAPI.Services
     public interface IMediaService
     {
 #pragma warning disable 1591
-        Task<IEnumerable<MediaDto>> GetAllMediaAsync(bool includeCopies = false, string? search = null);
+        Task<IEnumerable<MediaDto>> GetAllMediaAsync(bool includeCopies = false, string? search = null, int? userLocationZoneId = null, decimal? maxDistanceMiles = null );
         Task<MediaDto?> GetMediaByIdAsync(int mediaId, bool includeCopies = false);
         Task<MediaDto> CreateMediaAsync(CreateMediaDto createMediaDto);
         Task<MediaDto?> UpdateMediaAsync(int id, CreateMediaDto updateMediaDto);
@@ -38,11 +38,16 @@ namespace QLAPLibraryCatalogAPI.Services
         /// <param name="includeCopies"></param>
         /// <param name="search"></param>
         /// <returns></returns>
-        public async Task<IEnumerable<MediaDto>> GetAllMediaAsync(bool includeCopies = false, string? search = null)
+        public async Task<IEnumerable<MediaDto>> GetAllMediaAsync(
+    bool includeCopies = false,
+    string? search = null,
+    int? userLocationZoneId = null,
+    decimal? maxDistanceMiles = null)
         {
             var query = _context.Media
                 .Include(m => m.MediaType)
                 .Include(m => m.MediaCopies)
+                    .ThenInclude(mc => mc.HomeLocationZone) 
                 .Include(m => m.MediaTags)
                     .ThenInclude(m => m.Tag)
                 .AsQueryable();
@@ -65,11 +70,30 @@ namespace QLAPLibraryCatalogAPI.Services
                 );
             }
 
+
+            var mediaList = await query.ToListAsync();
+
+            // Apply location filtering and add distance calculations
+            if (userLocationZoneId.HasValue)
+            {
+                var userLocation = await _context.LocationZones
+                    .FirstOrDefaultAsync(lz => lz.ZoneId == userLocationZoneId.Value);
+
+                if (userLocation != null)
+                {
+                    mediaList = await FilterByLocationAndAddDistances(
+                        mediaList,
+                        userLocation,
+                        maxDistanceMiles ?? 10
+                    );
+                }
+            }
+
             return await query
-                .Select(user => MapMedia(user))
+                .Select(m => MapMediaWithLocation(m, userLocationZoneId, maxDistanceMiles))
                 .ToListAsync();
         }
-        
+
 
         /// <summary>
         /// Gets media by ID
@@ -82,6 +106,7 @@ namespace QLAPLibraryCatalogAPI.Services
             var query = _context.Media
                 .Include(m => m.MediaType)
                 .Include(m => m.MediaCopies)
+                    .ThenInclude(mc => mc.HomeLocationZone) 
                 .Include(m => m.MediaTags)
                     .ThenInclude(m => m.Tag)
                 .AsQueryable();
@@ -91,7 +116,7 @@ namespace QLAPLibraryCatalogAPI.Services
                 .Select(user => MapMedia(user))
                 .FirstOrDefaultAsync();
         }
-        
+
         /// <summary>
         /// Creates new media object
         /// </summary>
@@ -126,7 +151,7 @@ namespace QLAPLibraryCatalogAPI.Services
 
             return await GetMediaByIdAsync(media.MediaId) ?? throw new InvalidOperationException("Failed to retrieve created media");
         }
-        
+
         /// <summary>
         /// Updates existing media object
         /// </summary>
@@ -159,7 +184,7 @@ namespace QLAPLibraryCatalogAPI.Services
 
             return await GetMediaByIdAsync(mediaId);
         }
-        
+
         /// <summary>
         /// Deletes existing media object
         /// </summary>
@@ -192,7 +217,7 @@ namespace QLAPLibraryCatalogAPI.Services
                 .AsQueryable();
 
             return await query
-                .Where(m => m.MediaCopies.Any(c => c.UserId == userId)) 
+                .Where(m => m.MediaCopies.Any(c => c.UserId == userId))
                 .Select(user => MapMedia(user))
                 .ToListAsync();
         }
@@ -227,12 +252,135 @@ namespace QLAPLibraryCatalogAPI.Services
                 TotalCopiesCount = totalCopiesCount,
                 AvailableCopiesCount = availableCopiesCount,
                 Tags = m.MediaTags.Select(mediaTag => new TagDto
-                    {
-                        TagId = mediaTag.TagId,
-                        TagName = mediaTag.Tag.TagName
-                    }).ToList()
+                {
+                    TagId = mediaTag.TagId,
+                    TagName = mediaTag.Tag.TagName
+                }).ToList()
             };
         }
+        
+        private MediaDto MapMediaWithLocation(Media m, int? userLocationZoneId = null, decimal? maxDistanceMiles = null)
+{
+    int? totalCopiesCount = m.MediaCopies.Count();
+    int? availableCopiesCount = m.MediaCopies.Where(c => c.IsAvailable == true).Count();
+    
+    // Calculate nearest copy distance if user location provided
+    decimal? nearestDistance = null;
+    string? nearestLocationName = null;
+    
+    if (userLocationZoneId.HasValue)
+    {
+        var userLocation = _context.LocationZones.FirstOrDefault(lz => lz.ZoneId == userLocationZoneId.Value);
+        if (userLocation != null)
+        {
+            var availableCopies = m.MediaCopies.Where(mc => mc.IsAvailable == true && mc.HomeLocationZone != null);
+            
+            var nearestCopy = availableCopies
+                .Select(mc => new {
+                    Copy = mc,
+                    Distance = CalculateDistance(
+                        userLocation.CenterLat.Value, userLocation.CenterLong.Value,
+                        mc.HomeLocationZone.CenterLat.Value, mc.HomeLocationZone.CenterLong.Value
+                    )
+                })
+                .OrderBy(x => x.Distance)
+                .FirstOrDefault();
+                
+            if (nearestCopy != null)
+            {
+                nearestDistance = nearestCopy.Distance;
+                nearestLocationName = nearestCopy.Copy.HomeLocationZone.ZoneName;
+            }
+        }
+    }
+
+    return new MediaDto
+    {
+        MediaId = m.MediaId,
+        MediaTypeId = m.MediaTypeId,
+        MediaTypeName = m.MediaType.DisplayName,
+        Title = m.Title,
+        Subtitle = m.Subtitle,
+        Creator = m.Creator,
+        Publisher = m.Publisher,
+        PublicationDate = m.PublicationDate,
+        Language = m.Language,
+        Genre = m.Genre,
+        Description = m.Description,
+        CoverImageUrl = m.CoverImageUrl,
+        Isbn10 = m.Isbn10,
+        Isbn13 = m.Isbn13,
+        PageCount = m.PageCount,
+        IssueNumber = m.IssueNumber,
+        Volume = m.Volume,
+        TotalCopiesCount = totalCopiesCount,
+        AvailableCopiesCount = availableCopiesCount,
+        Tags = m.MediaTags.Select(mediaTag => new TagDto
+        {
+            TagId = mediaTag.TagId,
+            TagName = mediaTag.Tag.TagName
+        }).ToList(),
+        NearestCopyDistance = nearestDistance,
+        NearestCopyLocationName = nearestLocationName
+    };
+}
+        #endregion
+        #region Helper Functions
+
+        private async Task<List<Media>> FilterByLocationAndAddDistances(
+            List<Media> mediaList,
+            LocationZone userLocation,
+            decimal maxDistanceMiles)
+        {
+            var filteredMedia = new List<Media>();
+
+            foreach (var media in mediaList)
+            {
+                var availableCopies = media.MediaCopies
+                    .Where(mc => mc.IsAvailable == true && mc.HomeLocationZone != null)
+                    .ToList();
+
+                if (!availableCopies.Any()) continue;
+
+                // Calculate distances to all available copies
+                var copyDistances = availableCopies
+                    .Select(mc => new
+                    {
+                        Copy = mc,
+                        Distance = CalculateDistance(
+                            userLocation.CenterLat.Value, userLocation.CenterLong.Value,
+                            mc.HomeLocationZone.CenterLat.Value, mc.HomeLocationZone.CenterLong.Value
+                        )
+                    })
+                    .Where(cd => cd.Distance <= maxDistanceMiles)
+                    .ToList();
+
+                if (copyDistances.Any())
+                {
+                    filteredMedia.Add(media);
+                }
+            }
+
+            return filteredMedia;
+        }
+
+private static decimal CalculateDistance(decimal lat1, decimal lon1, decimal lat2, decimal lon2)
+{
+    // Haversine formula for calculating distance in miles
+    var dLat = ToRadians((double)(lat2 - lat1));
+    var dLon = ToRadians((double)(lon2 - lon1));
+    
+    var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+            Math.Cos(ToRadians((double)lat1)) * Math.Cos(ToRadians((double)lat2)) *
+            Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+            
+    var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+    var distance = 3959 * c; // Earth's radius in miles
+    
+    return (decimal)distance;
+}
+
+private static double ToRadians(double degrees) => degrees * (Math.PI / 180);
         #endregion
     }
 }

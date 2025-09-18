@@ -38,9 +38,28 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
         public int? TotalCopiesCount { get; set; }
         public int? AvailableCopiesCount { get; set; }
         // public MediaTypeDto? MediaType { get; set; }
+
+    public List<LocationInfo>? NearbyLocations { get; set; }
+    public decimal? NearestCopyDistance { get; set; }
+    public string? NearestCopyLocationName { get; set; }
+
         public List<TagDto> Tags { get; set; } = new();
     }
-
+    // New supporting class
+public class MediaSearchRequest
+{
+    public bool IncludeCopies { get; set; } = false;
+    public string? Search { get; set; }
+    public int? UserLocationZoneId { get; set; }  // Selected zip code
+    public decimal? MaxDistanceMiles { get; set; } = 10;  // Default 10 miles
+}
+    public class LocationInfo
+    {
+        public int ZoneId { get; set; }
+        public string ZoneName { get; set; } = string.Empty;
+        public decimal Distance { get; set; }
+        public int AvailableCopiesCount { get; set; }
+    }
     public class CreateMediaDto
     {
         public int MediaTypeId { get; set; }

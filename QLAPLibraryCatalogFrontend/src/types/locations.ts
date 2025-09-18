@@ -1,8 +1,8 @@
 
 export interface LocationZoneDto {
-  ZoneId: number;
-  ZoneName: string;
-  ZoneType?: string;
-  CenterLat?: number;
-  CenterLong?: number;
+  zoneId: number;
+  zoneName: string;
+  zoneType?: string;
+  centerLat?: number;
+  centerLong?: number;
 }

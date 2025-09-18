@@ -95,6 +95,40 @@ export function useNetworkMediaColumns({
       enableSorting: false,
       size: 120,
     }),
+
+
+    // Distance/Location column (only show when location data exists)
+    columnHelper.accessor(row => row.nearestCopyDistance ?? null, {
+      id: "distance",
+      header: "Distance",
+      cell: info => {
+        const distance = info.getValue();
+        const locationName = info.row.original.nearestCopyLocationName;
+        
+        if (distance === null || distance === undefined) {
+          return <span className="text-sm text-gray-400">-</span>;
+        }
+        
+        const config = {
+          text: `${distance.toFixed(1)} mi`,
+          color: distance <= 5 ? 'green' as const : 
+                distance <= 15 ? 'yellow' as const : 'red' as const
+        };
+        
+        return (
+          <div className="flex flex-col">
+            <StatusBadge config={config} />
+            {locationName && (
+              <span className="text-xs text-gray-500 mt-1 truncate" title={locationName}>
+                {locationName}
+              </span>
+            )}
+          </div>
+        );
+      },
+      enableSorting: true,
+      size: 110,
+    }),
     // Availability
     columnHelper.accessor(row => row.availableCopiesCount ?? 0, {
       id: "availability",

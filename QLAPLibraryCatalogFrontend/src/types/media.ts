@@ -7,6 +7,17 @@ export interface MediaType {
   displayName: string;
   description: string;
 }
+
+
+// Location-related interfaces
+export interface LocationInfo {
+  zoneId: number;
+  zoneName: string;
+  distance: number;
+  availableCopiesCount: number;
+}
+
+
 export interface MediaDto {
   mediaId: number;
   mediaTypeId: number;
@@ -27,6 +38,13 @@ export interface MediaDto {
   volume: number | null;
   totalCopiesCount: number | null;
   availableCopiesCount: number | null;
+
+  // New location-related properties
+  nearbyLocations?: LocationInfo[];
+  nearestCopyDistance?: number;
+  nearestCopyLocationName?: string;
+
+
   tags?: TagDto[];
 }
 

@@ -2,16 +2,39 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 import { Media, MediaDto } from '../../types/media';
-import { mediaService } from '../../services/mediaService';
+import { MediaSearchParams, mediaService } from '../../services/mediaService';
 import { NetworkMediaTable } from '../media/networkMediaTable/NetworkMediaTable';
+import { LocationZoneDto } from '../../types/locations';
+import { LocationFilters, LocationParams } from '../shared/filters/LocationFilters';
+import { locationService } from '../../services/locationService';
 
 const NetworkCatalogPage: React.FC = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [media, setMedia] = useState<MediaDto[]>([]);
+  const [locationZones, setLocationZones] = useState<LocationZoneDto[]>([]);
+  
+  // Filter state
+  const [locationParams, setLocationParams] = useState<LocationParams>({});
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
   
+    const loadLocationZones = async () => {
+      try {
+        const zones = await locationService.getLocationZones();
+        setLocationZones(zones);
+      } catch (err) {
+        console.error('Error loading location zones:', err);
+        // Don't set error state for location zones - it's not critical
+      }
+    };
+  // Load location zones on mount
+  useEffect(() => {
+    
+    loadLocationZones();
+  }, [locationParams, searchTerm]);
+
   useEffect(() => {
     loadMedia();
   }, []);
@@ -21,14 +44,36 @@ const NetworkCatalogPage: React.FC = () => {
     setError(null);
     
     try {
-      const response = await mediaService.getMedia();
-      // console.log(response.data);
+      const searchParams: MediaSearchParams = {
+        includeCopies: false,
+        ...(searchTerm && { search: searchTerm }),
+        ...(locationParams.userLocationZoneId && { 
+          userLocationZoneId: locationParams.userLocationZoneId 
+        }),
+        ...(locationParams.maxDistanceMiles && { 
+          maxDistanceMiles: locationParams.maxDistanceMiles 
+        }),
+      };
+
+      const response = await mediaService.getMedia(searchParams);
       setMedia(response);
     } catch (err: any) {
       setError('Failed to load media');
+      console.error('Error loading media:', err);
     } finally {
       setIsLoading(false);
     }
+  };
+
+
+  // Handle location filter changes
+  const handleLocationChange = (newLocationParams: LocationParams) => {
+    setLocationParams(newLocationParams);
+  };
+
+  // Handle search changes (you can wire this up to a search input if needed)
+  const handleSearchChange = (newSearchTerm: string) => {
+    setSearchTerm(newSearchTerm);
   };
 
   if (isLoading) {
@@ -49,6 +94,14 @@ const NetworkCatalogPage: React.FC = () => {
                 </h1>
             </div>
         </div>
+
+            {/* Location Filters */}
+      <LocationFilters
+        locationZones={locationZones}
+        currentLocation={locationParams}
+        onChange={handleLocationChange}
+        className="mb-6"
+      />
 
 <NetworkMediaTable 
   media={media} 
