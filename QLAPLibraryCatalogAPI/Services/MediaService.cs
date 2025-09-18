@@ -48,7 +48,6 @@ namespace QLAPLibraryCatalogAPI.Services
                 .Include(m => m.MediaType)
                 .Include(m => m.MediaCopies)
                     .ThenInclude(mc => mc.HomeLocationZone)
-                    .ThenInclude(mc => mc.HomeLocationZone)
                 .Include(m => m.MediaTags)
                     .ThenInclude(m => m.Tag)
                 .AsQueryable();
@@ -419,46 +418,6 @@ private void AddLocationInfo(List<MediaDto> mediaDtos, int userLocationZoneId)
 }
 
 private static double ToRadians(double degrees) => degrees * (Math.PI / 180);
-        #endregion
-        #region Helper Methods
-        
-
-        private async Task<List<Media>> FilterByLocationAndAddDistances(
-            List<Media> mediaList, 
-            LocationZone userLocation, 
-            decimal maxDistanceMiles)
-        {
-            var filteredMedia = new List<Media>();
-            
-            foreach (var media in mediaList)
-            {
-                var availableCopies = media.MediaCopies
-                    .Where(mc => mc.IsAvailable == true && mc.HomeLocationZone != null)
-                    .ToList();
-                    
-                if (!availableCopies.Any()) continue;
-                
-                // Calculate distances to all available copies
-                var copyDistances = availableCopies
-                    .Select(mc => new {
-                        Copy = mc,
-                        Distance = CalculateDistance(
-                            userLocation.CenterLat.Value, userLocation.CenterLong.Value,
-                            mc.HomeLocationZone.CenterLat.Value, mc.HomeLocationZone.CenterLong.Value
-                        )
-                    })
-                    .Where(cd => cd.Distance <= maxDistanceMiles)
-                    .ToList();
-                    
-                if (copyDistances.Any())
-                {
-                    filteredMedia.Add(media);
-                }
-            }
-            
-            return filteredMedia;
-        }
-
         #endregion
     }
 }
