@@ -46,7 +46,7 @@ export function NetworkMediaTable({
 
   const [addingToCopyMediaId, setAddingToCopyMediaId] = useState<number | null>(null);
 
-    const {
+  const {
     filteredData,
     filters,
     updateFilters,

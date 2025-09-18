@@ -8,6 +8,10 @@ import { CreateMediaCopyRequest } from '../../../types/media';
 import { mediaService } from '../../../services/mediaService';
 import { useUserMediaColumns } from './userMediaColumns';
 import { useNavigate } from 'react-router-dom';
+import { useFilters } from '../../../hooks/useFilters';
+import { createMediaFilterConfig } from '../../../config/mediaFilters';
+import { createMediaCopiesFilterConfig } from '../../../config/mediaCopyFilters';
+import { FilterPanel } from '../../shared/filters/FilterPanel';
 
 interface UserMediaTableProps {
   media: MediaCopyDto[];
@@ -18,7 +22,7 @@ interface UserMediaTableProps {
 }
 
 export function UserMediaTable({
-  media,
+  media: mediaCopies,
   loading,
   error,
   onRefresh,
@@ -31,6 +35,16 @@ export function UserMediaTable({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | undefined>(undefined);
   const navigate = useNavigate();
+
+  const {
+    filteredData,
+    filters,
+    updateFilters,
+    activeFilterCount
+  } = useFilters({
+    data: mediaCopies,
+    createFilterConfig: createMediaCopiesFilterConfig
+  });
 
   const handleRowClick = (mediaCopy: MediaCopyDto) => {
     setSelectedMedia(mediaCopy.media);
@@ -81,8 +95,13 @@ export function UserMediaTable({
 
   return (
     <>
+          <FilterPanel
+            filters={filters}
+            onFiltersChange={updateFilters}
+            className="mb-4"
+          />
       <TableContainer
-        data={media}
+        data={filteredData}
         columns={columns}
         loading={loading}
         error={error}
