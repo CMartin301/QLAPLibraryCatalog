@@ -208,13 +208,18 @@ export const createMediaFilterConfig = (data: MediaDto[]): FilterConfig<MediaDto
               const multiFilter = filter as MultiSelectFilter;
               if (multiFilter.value.length === 0) return true;
               
-              // Handle tags filtering
+              // Handle tags filtering (AND logic - item must have ALL selected tags)
               if (filter.id === 'tags') {
                 if (!item.tags || item.tags.length === 0) return false;
                 
-                // Check if the item has any of the selected tags
-                return item.tags.some(tag => 
-                  tag.tagName && multiFilter.value.includes(tag.tagName.trim())
+                // Get all tag names for this item
+                const itemTagNames = item.tags
+                  .map(tag => tag.tagName?.trim())
+                  .filter((tagName): tagName is string => Boolean(tagName));
+                
+                // Check if the item has ALL of the selected tags (AND logic)
+                return multiFilter.value.every(selectedTag => 
+                  itemTagNames.includes(selectedTag)
                 );
               }
               const itemValue = getFilterValue(item, filter.id);
