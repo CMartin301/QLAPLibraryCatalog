@@ -100,6 +100,7 @@ public class MediaSearchRequest
         public string? MediaCreator { get; set; }
         public string? OwnerUsername { get; set; }
         public int? OwnerUserId { get; set; }
+        public MediaDto? Media { get; set; }
     }
 
     public class UserMediaCopyDto

@@ -1,18 +1,18 @@
 import { useMemo } from 'react';
 import { createColumnHelper, ColumnDef } from '@tanstack/react-table';
 import { Plus } from 'lucide-react';
-import { Media, MediaCopy, MediaDto } from '../../../types/media';
+import { MediaCopyDto } from '../../../types/media';
 
-const columnHelper = createColumnHelper<MediaDto>();
+const columnHelper = createColumnHelper<MediaCopyDto>();
 
 interface UseUserMediaColumnsProps {
-  onAddCopy: (media: MediaDto) => void;
+  onAddCopy: (media: MediaCopyDto) => void;
 }
 
 export function useUserMediaColumns({ onAddCopy }: UseUserMediaColumnsProps) {
-  return useMemo<ColumnDef<MediaDto, any>[]>(() => [
+  return useMemo<ColumnDef<MediaCopyDto, any>[]>(() => [
     // Title & Creator
-    columnHelper.accessor(row => row.title ?? "—", {
+    columnHelper.accessor(row => row.media?.title ?? "—", {
       id: "title",
       header: "Title",
       cell: info => {
@@ -20,10 +20,10 @@ export function useUserMediaColumns({ onAddCopy }: UseUserMediaColumnsProps) {
         return (
           <div className="flex flex-col min-w-0">
             <p className="font-medium text-gray-900 truncate">
-              {row.title}
+              {row.media?.title}
             </p>
             <p className="text-sm text-gray-500 truncate">
-              {row.creator || "Unknown author"}
+              {row.media?.creator || "Unknown author"}
             </p>
           </div>
         );
@@ -33,7 +33,7 @@ export function useUserMediaColumns({ onAddCopy }: UseUserMediaColumnsProps) {
     }),
 
     // Media Type
-    columnHelper.accessor(row => row.mediaTypeName ?? "Unknown", {
+    columnHelper.accessor(row => row.media?.mediaTypeName ?? "Unknown", {
       id: "mediaType",
       header: "Type",
       cell: info => (
@@ -80,7 +80,7 @@ export function useUserMediaColumns({ onAddCopy }: UseUserMediaColumnsProps) {
               e.stopPropagation();
               onAddCopy(mediaItem);
             }}
-            aria-label={`Add copy of ${mediaItem.title}`}
+            aria-label={`Add copy of ${mediaItem.media?.title}`}
             className="inline-flex items-center px-3 py-1 text-xs font-medium rounded bg-lavender-400 text-white hover:bg-lavender-500 transition-colors gap-1"
           >
             <Plus size={14} />

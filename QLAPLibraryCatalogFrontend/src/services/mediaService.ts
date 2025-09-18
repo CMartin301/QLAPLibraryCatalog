@@ -59,4 +59,8 @@ export const mediaService = {
     const response = await api.get<MediaCopyDto[]>(`/api/MediaCopy/Media/${mediaId}`);
     return response.data;
   },
+  async getUserMediaCopies(): Promise<MediaCopyDto[]> {
+      const response = await api.get<MediaCopyDto[]>(`/api/MediaCopy/User`);
+      return response.data;
+    },
 };

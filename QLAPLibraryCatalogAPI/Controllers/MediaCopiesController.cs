@@ -127,7 +127,7 @@ namespace QLAPLibraryCatalogAPI.Controllers
                 var userID = GetUserId();
                 var media = await _mediaCopiesService.GetUserMediaCopiesAsync(userID);
                 // return Ok(media);
-                return Ok(new { data = media });
+                return Ok(media);
             }
             catch (Exception ex)
             {

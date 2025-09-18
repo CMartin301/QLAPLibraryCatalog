@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { MediaDto } from '../../../types/media';
+import { MediaCopyDto, MediaDto } from '../../../types/media';
 import { TableContainer } from '../../shared/TableContainer';
 import { Modal } from '../../shared/Modal';
 import { AddMediaCopyForm } from '../AddMediaCopyForm';
@@ -10,7 +10,7 @@ import { useUserMediaColumns } from './userMediaColumns';
 import { useNavigate } from 'react-router-dom';
 
 interface UserMediaTableProps {
-  media: MediaDto[];
+  media: MediaCopyDto[];
   loading?: boolean;
   error?: string | undefined;
   onRefresh: () => void;
@@ -32,13 +32,13 @@ export function UserMediaTable({
   const [submitError, setSubmitError] = useState<string | undefined>(undefined);
   const navigate = useNavigate();
 
-  const handleRowClick = (media: MediaDto) => {
-    setSelectedMedia(media);
+  const handleRowClick = (mediaCopy: MediaCopyDto) => {
+    setSelectedMedia(mediaCopy.media);
     setIsMediaModalOpen(true);
   };
 
-  const handleAddCopy = (media: MediaDto) => {
-    setSelectedMediaForCopy(media);
+  const handleAddCopy = (mediaCopy: MediaCopyDto) => {
+    setSelectedMediaForCopy(mediaCopy.media);
     setIsCopyModalOpen(true);
   };
 
@@ -72,6 +72,8 @@ export function UserMediaTable({
       navigate('/network-catalog');
     }
   };
+
+  
 
   const columns = useUserMediaColumns({
     onAddCopy: handleAddCopy

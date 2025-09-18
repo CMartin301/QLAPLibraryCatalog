@@ -3,22 +3,44 @@ import React, { useState, useEffect } from 'react';
 import useAuth from '../../hooks/useAuth';
 import { useMedia } from '../../hooks/useMedia';
 import { UserMediaTable } from '../media/userMediaTable/UserMediaTable';
+import { mediaService } from '../../services/mediaService';
+import { MediaCopyDto } from '../../types/media';
 
 
 const MyLibraryPage: React.FC = () => {
   const { username, userID } = useAuth();
   const [saveMessage, setSaveMessage] = useState<string | undefined>(undefined);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | undefined>(undefined);
+      const [userMedia, setUserMedia] = useState<MediaCopyDto[]>([]);
 
-   const { 
-    media: userMedia, 
-    loading: userMediaLoading, 
-    error: userMediaError, 
-    refetch: refetchUserMedia 
-  } = useMedia(userID, true);
+  //  const { 
+  //   media: userMedia, 
+  //   loading: userMediaLoading, 
+  //   error: userMediaError, 
+  //   refetch: refetchUserMedia 
+  // } = useMedia(userID, true);
 
 
   useEffect(() => {
+    loadMedia();
   }, []);
+
+  const loadMedia = async () => {
+    setIsLoading(true);
+    setError(undefined);
+    
+    try {
+
+      const response = await mediaService.getUserMediaCopies();
+      setUserMedia(response);
+    } catch (err: any) {
+      setError('Failed to load media');
+      console.error('Error loading media:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSaveMessage = (message: string) => {
     setSaveMessage(message);
@@ -26,7 +48,7 @@ const MyLibraryPage: React.FC = () => {
     setTimeout(() => setSaveMessage(undefined), 3000);
   };
 
-  if (userMediaLoading) {
+  if (isLoading) {
     return (
       <div className="container-fluid py-4 bg-pattern">
         <div className="text-center">
@@ -75,10 +97,10 @@ const MyLibraryPage: React.FC = () => {
         <div className="col">
             <UserMediaTable 
               media={userMedia} 
-              onRefresh={refetchUserMedia}
+              onRefresh={loadMedia}
               onSaveMessage={handleSaveMessage}
-              loading={userMediaLoading}
-              error={userMediaError}
+              loading={isLoading}
+              error={error}
             />
          
         </div>
