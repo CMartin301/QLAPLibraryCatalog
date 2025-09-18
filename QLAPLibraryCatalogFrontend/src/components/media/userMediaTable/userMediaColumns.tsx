@@ -27,6 +27,26 @@ export function useUserMediaColumns({ onAddCopy }: UseUserMediaColumnsProps) {
             <p className="text-sm text-gray-500 truncate">
               {row.media?.creator || "Unknown author"}
             </p>
+
+          <div className="flex flex-wrap gap-1 mt-1">
+            {row.media?.mediaTypeName && (
+              <StatusBadge 
+                            config={{
+                              text: row.media?.mediaTypeName,
+                              color: 'purple'
+                            }}
+                          />
+            )}
+            {row.condition && (
+              <StatusBadge 
+                            config={{
+                              text: 'Condition: ' + row.condition,
+                              color: row.condition=="Good"? 'green' : 'yellow'
+                            }}
+                          />
+            )}
+          </div>
+
           </div>
         );
       },
@@ -34,26 +54,33 @@ export function useUserMediaColumns({ onAddCopy }: UseUserMediaColumnsProps) {
       size: 280,
     }),
 
-    // Media Type
-    columnHelper.accessor(row => row.media?.mediaTypeName ?? "Unknown", {
-      id: "mediaType",
-      header: "Type",
-      cell: info => (
-        <span className="text-sm text-gray-900">{info.getValue()}</span>
-      ),
-      enableSorting: true,
-      size: 120,
-    }),
-    // Media Type
-    columnHelper.accessor(row => row.condition ?? "Unknown", {
-      id: "condition",
-      header: "Condition",
-      cell: info => (
-        <span className="text-sm text-gray-900">{info.getValue()}</span>
-      ),
-      enableSorting: true,
-      size: 120,
-    }),
+    // // Media Type
+    // columnHelper.accessor(row => row.media?.mediaTypeName ?? "Unknown", {
+    //   id: "mediaType",
+    //   header: "Type",
+    //   cell: info => (
+    //     // <span className="text-sm text-gray-900">{info.getValue()}</span>
+
+    //                     <StatusBadge 
+    //                                   config={{
+    //                                     text: info.getValue(),
+    //                                     color: 'purple'
+    //                                   }}
+    //                                 />
+    //   ),
+    //   enableSorting: true,
+    //   size: 120,
+    // }),
+    // // Condition
+    // columnHelper.accessor(row => row.condition ?? "Unknown", {
+    //   id: "condition",
+    //   header: "Condition",
+    //   cell: info => (
+    //     <span className="text-sm text-gray-900">{info.getValue()}</span>
+    //   ),
+    //   enableSorting: true,
+    //   size: 120,
+    // }),
 
     // Genre
     columnHelper.accessor(row => row.media?.genre ?? "Unknown", {
@@ -67,7 +94,7 @@ export function useUserMediaColumns({ onAddCopy }: UseUserMediaColumnsProps) {
         return <StatusBadge config={config} />;
       },
       enableSorting: true,
-      size: 140,
+      size: 90,
     }),
 
     // Tags
@@ -85,7 +112,7 @@ export function useUserMediaColumns({ onAddCopy }: UseUserMediaColumnsProps) {
             {tags.map((tag: TagDto) => {
               const config = {
                 text: tag.tagName,
-                color: 'purple' as const
+                color: 'gray' as const
               };
               return <StatusBadge key={tag.tagId} config={config} />;
             })}
@@ -93,16 +120,33 @@ export function useUserMediaColumns({ onAddCopy }: UseUserMediaColumnsProps) {
         );
       },
       enableSorting: false,
-      size: 120,
+      size: 160,
     }),
 
+    // Status
+    columnHelper.accessor(row => row.isAvailable , {
+      id: "status",
+      header: "Status",
+      cell: info => (
+        // <span className="text-sm text-gray-900">{info.getValue()}</span>
+
+                        <StatusBadge 
+                                      config={{
+                                        text: info.getValue() ? 'Available' : 'On Loan',
+                                        color: info.getValue() ? 'green' : 'gray'
+                                      }}
+                                    />
+      ),
+      enableSorting: true,
+      size: 80,
+    }),
 
 
     // Actions
     columnHelper.display({
       id: "actions",
       header: "",
-      size: 160,
+      size: 100,
       cell: info => {
         const mediaItem = info.row.original;
         return (
