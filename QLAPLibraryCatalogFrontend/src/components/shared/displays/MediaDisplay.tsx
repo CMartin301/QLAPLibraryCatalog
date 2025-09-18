@@ -1,8 +1,9 @@
 import React from 'react';
-import { Book, Calendar, Globe, User, Check, Hash, BookOpen, Building } from 'lucide-react';
+import { Book, Calendar, Globe, Check, Hash, BookOpen, Building, Plus } from 'lucide-react';
 import { MediaDto } from '../../../types/media';
 import { TagDto } from '../../../types/tags';
 import { StatusBadge } from '../StatusBadge';
+import Button from '../Button';
 
 interface MediaDisplayProps {
   media: MediaDto;
@@ -20,7 +21,6 @@ export function MediaDisplay({
   selected = false,
   onClick,
   showSelection = false,
-  showCopyCount = true,
   className = ''
 }: MediaDisplayProps) {
   const variantStyles = {
@@ -50,14 +50,6 @@ export function MediaDisplay({
       e.preventDefault();
       onClick();
     }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
   };
 
   const InfoRow = ({ icon: Icon, label, value }: { 
@@ -131,31 +123,45 @@ export function MediaDisplay({
             {/* Badge row - consistent with other variants */}
             <div className="flex flex-wrap items-center gap-2">
               {/* Media type badge */}
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-lavender-100 text-lavender-700">
-                {media.mediaTypeName}
-              </span>
-              
+              {media.mediaTypeName && (
+                <StatusBadge 
+                              config={{
+                                text: media.mediaTypeName,
+                                color: 'purple'
+                              }}
+                            />
+              )}
+                            
               {/* Genre badge */}
               {media.genre && (
-                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                  {media.genre}
-                </span>
+                <StatusBadge 
+                              config={{
+                                text: media.genre,
+                                color: 'gray'
+                              }}
+                            />
               )}
               
               {/* Publication date */}
               {media.publicationDate && (
-                <span className="inline-flex items-center px-1.5 py-0.5 text-xs text-gray-600 gap-1">
-                  <Calendar className="w-3 h-3" aria-hidden="true" />
-                  <span>{new Date(media.publicationDate).getFullYear()}</span>
-                </span>
+                <StatusBadge 
+                              config={{
+                                text: new Date(media.publicationDate).getFullYear().toString(),
+                                color: 'gray',
+                                icon: Calendar
+                              }}
+                            />
               )}
               
-              {/* Language if not English */}
+              {/* Language */}
               {media.language && (
-                <span className="inline-flex items-center px-1.5 py-0.5 text-xs text-gray-600 gap-1">
-                  <Globe className="w-3 h-3" aria-hidden="true" />
-                  <span>{media.language}</span>
-                </span>
+                <StatusBadge 
+                              config={{
+                                text: media.language,
+                                color: 'gray',
+                                icon: Globe
+                              }}
+                            />
               )}
             </div>
 
@@ -186,17 +192,29 @@ export function MediaDisplay({
           </div>
         </div>
         <p className="text-base sm:text-lg text-gray-600 break-words mt-2">Tags</p>
-        <div className="flex flex-wrap gap-1 mt-2">
-                    {media.tags && (
-                      media.tags.map((tag: TagDto) => {
-                      const config = {
-                        text: tag.tagName,
-                        color: 'purple' as const
-                      };
-                      return <StatusBadge key={tag.tagId} config={config} />;
-                    })
-                  )}
-                  </div>
+        <div className="flex items-center justify-between gap-4 mb-4">
+          <div className="flex flex-wrap gap-1 mt-2">
+                      {media.tags && (
+                        media.tags.map((tag: TagDto) => {
+                        const config = {
+                          text: tag.tagName,
+                          color: 'purple' as const
+                        };
+                        return <StatusBadge key={tag.tagId} config={config} />;
+                      })
+                    )}
+                    </div>
+
+                <Button
+                  variant="primary"
+                  size="md"
+                  icon={Plus}
+                  // onClick={() => setIsAddMediaModalOpen(true)}
+                  className="whitespace-nowrap"
+                >
+                  Add Tag
+                </Button>
+        </div>
 
       </div>
     );
@@ -244,32 +262,47 @@ export function MediaDisplay({
           {/* Left: Media type and publication info */}
           <div className="flex flex-wrap items-center gap-2">
             {/* Media type badge */}
-            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-lavender-100 text-lavender-700">
-              {media.mediaTypeName}
-            </span>
+            
+              {media.mediaTypeName && (
+                <StatusBadge 
+                              config={{
+                                text: media.mediaTypeName,
+                                color: 'purple'
+                              }}
+                            />
+              )}
             
             {/* Genre if present */}
             {media.genre && (
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                {media.genre}
-              </span>
-            )}
+                <StatusBadge 
+                              config={{
+                                text: media.genre,
+                                color: 'gray'
+                              }}
+                            />
+              )}
             
             {/* Publication date if present */}
             {media.publicationDate && (
-              <span className="inline-flex items-center px-1.5 py-0.5 text-xs text-gray-600 gap-1">
-                <Calendar className="w-3 h-3" aria-hidden="true" />
-                <span>{new Date(media.publicationDate).getFullYear()}</span>
-              </span>
-            )}
+                <StatusBadge 
+                              config={{
+                                text: new Date(media.publicationDate).getFullYear().toString(),
+                                color: 'gray',
+                                icon: Calendar
+                              }}
+                            />
+              )}
             
             {/* Language if not English */}
-            {media.language && media.language.toLowerCase() !== 'english' && media.language.toLowerCase() !== 'en' && (
-              <span className="inline-flex items-center px-1.5 py-0.5 text-xs text-gray-600 gap-1">
-                <Globe className="w-3 h-3" aria-hidden="true" />
-                <span>{media.language}</span>
-              </span>
-            )}
+            {media.language && (
+                <StatusBadge 
+                              config={{
+                                text: media.language,
+                                color: 'gray',
+                                icon: Globe
+                              }}
+                            />
+              )}
           </div>
         </div>
 

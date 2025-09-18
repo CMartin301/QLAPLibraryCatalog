@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Media, MediaDto } from '../../../types/media';
+import { MediaDto } from '../../../types/media';
 import { TableContainer } from '../../shared/TableContainer';
 import { Modal } from '../../shared/Modal';
 import { AddMediaCopyForm } from '../AddMediaCopyForm';

@@ -7,10 +7,8 @@ import { UserMediaTable } from '../media/userMediaTable/UserMediaTable';
 
 const MyLibraryPage: React.FC = () => {
   const { username, userID } = useAuth();
-  // const [isLoading, setIsLoading] = useState(true);
-  // const [error, setError] = useState<string | null>(null);
-  const [saveMessage, setSaveMessage] = useState<string | null>(null);
-  // const [activeTab, setActiveTab] = useState<'myCollection' | 'addToCollection' | 'borrowRequests' >('myCollection');
+  const [saveMessage, setSaveMessage] = useState<string | undefined>(undefined);
+
    const { 
     media: userMedia, 
     loading: userMediaLoading, 
@@ -18,25 +16,6 @@ const MyLibraryPage: React.FC = () => {
     refetch: refetchUserMedia 
   } = useMedia(userID, true);
 
-  // const { 
-  //   media: allMedia, 
-  //   loading: allMediaLoading, 
-  //   error: allMediaError, 
-  //   refetch: refetchAllMedia 
-  // } = useMedia(null, true);
-  // const { 
-  //   requests: borrowRequests, 
-  //   loading: requestsLoading, 
-  //   error: requestsError, 
-  //   refetch: refetchBorrowRequests 
-  // } = useBorrowRequests(userID, 'received');
-// const isLoading = userMediaLoading || allMediaLoading;
-// const error = userMediaError || allMediaError;
-
-// const handleRefresh = () => {
-//   refetchUserMedia();
-//   refetchAllMedia();
-// };
 
   useEffect(() => {
   }, []);
@@ -44,7 +23,7 @@ const MyLibraryPage: React.FC = () => {
   const handleSaveMessage = (message: string) => {
     setSaveMessage(message);
     // Auto-hide message after 3 seconds
-    setTimeout(() => setSaveMessage(null), 3000);
+    setTimeout(() => setSaveMessage(undefined), 3000);
   };
 
   if (userMediaLoading) {
@@ -84,7 +63,7 @@ const MyLibraryPage: React.FC = () => {
               <button 
                 type="button" 
                 className="btn-close" 
-                onClick={() => setSaveMessage(null)}
+                onClick={() => setSaveMessage(undefined)}
                 aria-label="Close"
               ></button>
             </div>
@@ -92,54 +71,6 @@ const MyLibraryPage: React.FC = () => {
         </div>
       )}
 
-      {/* Tab Navigation */}
-      {/* <div className="row mb-4">
-        <div className="col">
-          <div className="flex border-b border-gray-200">
-            <button
-              className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'myCollection'
-                  ? 'border-lavender-500 text-lavender-600 bg-lavender-50'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-              type="button"
-              role="tab"
-              aria-selected={activeTab === 'myCollection'}
-              onClick={() => setActiveTab('myCollection')}
-            >
-              My Collection ({userMedia.length})
-            </button>
-            <button
-              className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'addToCollection'
-                  ? 'border-lavender-500 text-lavender-600 bg-lavender-50'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-              type="button"
-              role="tab"
-              aria-selected={activeTab === 'addToCollection'}
-              onClick={() => setActiveTab('addToCollection')}
-            >
-              Add to Collection
-            </button>
-            <button
-              className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'borrowRequests'
-                  ? 'border-lavender-500 text-lavender-600 bg-lavender-50'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-              type="button"
-              role="tab"
-              aria-selected={activeTab === 'borrowRequests'}
-              onClick={() => setActiveTab('borrowRequests')}
-            >
-              Borrow Requests
-            </button>
-          </div>
-        </div>
-      </div> */}
-
-      {/* Tab Content */}
       <div className="row">
         <div className="col">
             <UserMediaTable 
@@ -149,35 +80,7 @@ const MyLibraryPage: React.FC = () => {
               loading={userMediaLoading}
               error={userMediaError}
             />
-          {/* {activeTab === 'myCollection' ? (
-            <MediaTable 
-              media={userMedia} 
-              onRefresh={refetchUserMedia}
-              onSaveNewMedia={handleSaveMessage}
-              onSwitchToAddTab={handleSwitchToAddTab}
-              mode='myLibrary'
-              loading={userMediaLoading}
-              error={userMediaError}
-            />
-          ) : activeTab === 'addToCollection' ? (
-            <MediaTable 
-              media={allMedia} 
-              onRefresh={refetchAllMedia}
-              onSaveNewMedia={handleSaveMessage}
-              mode='addToCollection'
-              loading={allMediaLoading}
-              error={allMediaError}
-            />
-          ) : (
-
-            <ReceivedBorrowRequestsTable
-              requests={borrowRequests}
-              onRefresh={refetchBorrowRequests}
-              loading={requestsLoading}
-              error={requestsError}
-            />
-          )} */}
-
+         
         </div>
       </div>
     </div>

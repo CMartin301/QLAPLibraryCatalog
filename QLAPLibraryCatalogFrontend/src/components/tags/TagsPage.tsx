@@ -5,8 +5,6 @@ import { Tag, Search, AlertCircle, RefreshCw, Plus } from 'lucide-react';
 import Button from '../shared/Button';
 import { Modal } from '../shared/Modal';
 import { AddTagForm } from './AddTagForm';
-import { mediaService } from '../../services/mediaService';
-import { MediaFormData, CreateMediaRequest } from '../../types/media';
 import { useTableActions } from '../../hooks/useTableActions';
 
 const TagsPage: React.FC = () => {

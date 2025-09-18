@@ -1,8 +1,4 @@
-import { useEffect, useState } from "react";
-import { useForm, SubmitHandler, Controller } from "react-hook-form";
-import { MediaFormData, MediaType } from "../../types/media";
-import { mediaService } from "../../services/mediaService";
-import { Select } from "../shared/Select";
+import { useForm, SubmitHandler } from "react-hook-form";
 import Button from "../shared/Button";
 import { TagFormData } from "../../types/tags";
 
@@ -13,15 +9,10 @@ interface AddTagFormProps {
 }
 
 export function AddTagForm({ onSubmit, isSubmitting = false, submitError }: AddTagFormProps) {
-  const [mediaTypes, setMediaTypes] = useState<MediaType[]>([]);
-  const [isLoadingTypes, setIsLoadingTypes] = useState(true);
-  const [mediaTypesError, setMediaTypesError] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
-    control, // Add this for Controller
-    reset,
     formState: { errors },
   } = useForm<TagFormData>();
 
@@ -39,16 +30,7 @@ export function AddTagForm({ onSubmit, isSubmitting = false, submitError }: AddT
         </div>
       )}
 
-      {/* Media Types Loading Error */}
-      {mediaTypesError && (
-        <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg" role="alert">
-          <p className="text-yellow-700 text-sm">
-            Warning: {mediaTypesError}. The form may not work correctly.
-          </p>
-        </div>
-      )}
 
-      {/* Media Type & Title Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
         <div>

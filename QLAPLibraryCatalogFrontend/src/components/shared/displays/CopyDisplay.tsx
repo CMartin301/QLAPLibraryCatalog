@@ -157,10 +157,17 @@ export function CopyDisplay({
               <p className="text-sm text-gray-600 mt-1 truncate">by {copy.mediaCreator}</p>
             )}
           </div>
-          {/* Right: Availability and Owner stacked */}
+
           <div className="flex flex-col items-end gap-1 flex-shrink-0">
             {/* Availability badge */}
-            <span
+
+              <StatusBadge 
+                config={{
+                  text: copy.isAvailable ? 'Available' : 'On Loan',
+                  color: copy.isAvailable ? 'green' : 'red'
+                }}
+              />
+            {/* <span
               className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                 copy.isAvailable
                   ? 'bg-green-100 text-green-800'
@@ -168,7 +175,7 @@ export function CopyDisplay({
               }`}
             >
               {copy.isAvailable ? 'Available' : 'On Loan'}
-            </span>
+            </span> */}
 
             {/* Owner info */}
             <div className="flex items-center text-sm text-gray-700 gap-1">

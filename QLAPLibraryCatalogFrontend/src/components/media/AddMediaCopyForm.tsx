@@ -1,5 +1,5 @@
 import { useForm } from 'react-hook-form';
-import { CreateMediaCopyRequest, Media, MediaDto } from '../../types/media';
+import { CreateMediaCopyRequest, MediaDto } from '../../types/media';
 import useAuth from '../../hooks/useAuth';
 import Button from '../shared/Button';
 import { MediaDisplay } from '../shared/displays/MediaDisplay';

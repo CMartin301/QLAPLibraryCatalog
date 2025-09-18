@@ -1,5 +1,4 @@
 // MediaModal.tsx
-import React from 'react';
 import { MediaDto, MediaCopyDto } from '../../types/media';
 import { Modal } from '../shared/Modal';
 import { Users } from 'lucide-react';
