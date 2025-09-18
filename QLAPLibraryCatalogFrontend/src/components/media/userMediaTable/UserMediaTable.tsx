@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Media } from '../../../types/media';
+import { MediaDto } from '../../../types/media';
 import { TableContainer } from '../../shared/TableContainer';
 import { Modal } from '../../shared/Modal';
 import { AddMediaCopyForm } from '../AddMediaCopyForm';
@@ -10,9 +10,9 @@ import { useUserMediaColumns } from './userMediaColumns';
 import { useNavigate } from 'react-router-dom';
 
 interface UserMediaTableProps {
-  media: Media[];
+  media: MediaDto[];
   loading?: boolean;
-  error?: string | null;
+  error?: string | undefined;
   onRefresh: () => void;
   onSaveMessage: (message: string) => void;
 }
@@ -24,27 +24,27 @@ export function UserMediaTable({
   onRefresh,
   onSaveMessage,
 }: UserMediaTableProps) {
-  const [selectedMedia, setSelectedMedia] = useState<Media | null>(null);
+  const [selectedMedia, setSelectedMedia] = useState<MediaDto | undefined>(undefined);
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
-  const [selectedMediaForCopy, setSelectedMediaForCopy] = useState<Media | null>(null);
+  const [selectedMediaForCopy, setSelectedMediaForCopy] = useState<MediaDto | undefined>(undefined);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | undefined>(undefined);
   const navigate = useNavigate();
 
-  const handleRowClick = (media: Media) => {
+  const handleRowClick = (media: MediaDto) => {
     setSelectedMedia(media);
     setIsMediaModalOpen(true);
   };
 
-  const handleAddCopy = (media: Media) => {
+  const handleAddCopy = (media: MediaDto) => {
     setSelectedMediaForCopy(media);
     setIsCopyModalOpen(true);
   };
 
   const handleAddMediaCopy = async (data: CreateMediaCopyRequest) => {
     setIsSubmitting(true);
-    setSubmitError(null);
+    setSubmitError(undefined);
 
     try {
       const copyData = selectedMediaForCopy 
@@ -53,7 +53,7 @@ export function UserMediaTable({
 
       await mediaService.createNewMediaCopy(copyData);
       setIsCopyModalOpen(false);
-      setSelectedMediaForCopy(null);
+      setSelectedMediaForCopy(undefined);
       
       onRefresh();
       const title = selectedMediaForCopy?.title || 'Media';
@@ -98,7 +98,7 @@ export function UserMediaTable({
         isOpen={isMediaModalOpen}
         onClose={() => {
           setIsMediaModalOpen(false);
-          setSelectedMedia(null);
+          setSelectedMedia(undefined);
         }}
         showCopies={true}
       />
@@ -108,7 +108,7 @@ export function UserMediaTable({
         isOpen={isCopyModalOpen}
         onClose={() => {
           setIsCopyModalOpen(false);
-          setSelectedMediaForCopy(null);
+          setSelectedMediaForCopy(undefined);
         }}
         title={selectedMediaForCopy ? `Add Copy of "${selectedMediaForCopy.title}"` : 'Add Copy'}
       >

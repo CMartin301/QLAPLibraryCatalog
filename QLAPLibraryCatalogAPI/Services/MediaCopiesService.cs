@@ -13,6 +13,7 @@ namespace QLAPLibraryCatalogAPI.Services
         Task<IEnumerable<MediaCopyDto>> GetMediaCopiesByMediaIDAsync(int mediaId);
         Task<MediaCopyDto?> GetMediaCopyByIdAsync(int mediaCopyId);
         Task<MediaCopyDto> CreateMediaCopyAsync(CreateMediaCopyDto createMediaCopyDto);
+        Task<IEnumerable<UserMediaCopyDto>> GetUserMediaCopiesAsync(int userID);
         // Task<MediaDto?> UpdateMediaAsync(int id, CreateMediaDto updateMediaDto);
         // Task<bool> DeleteMediaAsync(int id);
 #pragma warning restore 1591
@@ -103,6 +104,23 @@ namespace QLAPLibraryCatalogAPI.Services
             return await GetMediaCopyByIdAsync(mediaCopy.CopyId) ?? throw new InvalidOperationException("Failed to retrieve created media copy");
         }
 
+        /// <summary>
+        /// Get the media info and the copy info for all media user copies
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IEnumerable<UserMediaCopyDto>> GetUserMediaCopiesAsync(int userID)
+        {
+            var query = _context.MediaCopies
+                .Include(m => m.Media)
+                    .ThenInclude(m => m.MediaType)
+                .Include(m => m.CurrentLocationZone)
+                .Include(m => m.HomeLocationZone)
+                .Where(m => m.UserId == userID)
+                .AsQueryable();
+
+            return await query.Select(mediaCopy => MapUserMediaCopy(mediaCopy)).ToListAsync();
+        }
+
         #region Mapping Methods
         /// <summary>
         /// Maps a media copy to a media copy DTO
@@ -111,7 +129,7 @@ namespace QLAPLibraryCatalogAPI.Services
         {
             string? currentLocationZoneName = mediaCopy.CurrentLocationZone != null ? mediaCopy.CurrentLocationZone.ZoneName : null;
             string? homeLocationZoneName = mediaCopy.HomeLocationZone != null ? mediaCopy.HomeLocationZone.ZoneName : null;
-            
+
             return new MediaCopyDto
             {
                 CopyId = mediaCopy.CopyId,
@@ -126,6 +144,41 @@ namespace QLAPLibraryCatalogAPI.Services
                 OwnerUserId = mediaCopy.User.UserId,
                 CurrentLocationZoneName = currentLocationZoneName,
                 HomeLocationZoneName = homeLocationZoneName,
+            };
+        }
+        /// <summary>
+        /// Maps a media copy to a user media copy DTO
+        /// </summary>
+        private static UserMediaCopyDto MapUserMediaCopy(MediaCopy mediacopy)
+        {
+
+            return new UserMediaCopyDto
+            {
+                CopyId = mediacopy.CopyId,
+                UserId = mediacopy.UserId,
+                Condition = mediacopy.Condition,
+                Notes = mediacopy.Notes,
+                IsAvailable = mediacopy.IsAvailable,
+                CurrentLocationZoneName = mediacopy.CurrentLocationZone?.ZoneName,
+                HomeLocationZoneName = mediacopy.HomeLocationZone?.ZoneName,
+
+                MediaId = mediacopy.MediaId,
+                MediaTypeId = mediacopy.Media.MediaTypeId,
+                MediaTypeName = mediacopy.Media.MediaType.Name,
+                Title = mediacopy.Media.Title,
+                Subtitle = mediacopy.Media.Subtitle,
+                Creator = mediacopy.Media.Creator,
+                Publisher = mediacopy.Media.Publisher,
+                PublicationDate = mediacopy.Media.PublicationDate,
+                Language = mediacopy.Media.Language,
+                Genre = mediacopy.Media.Genre,
+                Description = mediacopy.Media.Description,
+                CoverImageUrl = mediacopy.Media.CoverImageUrl,
+                Isbn10 = mediacopy.Media.Isbn10,
+                Isbn13 = mediacopy.Media.Isbn13,
+                PageCount = mediacopy.Media.PageCount,
+                IssueNumber = mediacopy.Media.IssueNumber,
+                Volume = mediacopy.Media.Volume,
             };
         }
         #endregion

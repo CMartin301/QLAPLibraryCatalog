@@ -3,7 +3,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { ChevronDown, ChevronUp, AlertCircle } from 'lucide-react';
 import { CreateBorrowRequestDto } from "../../../types/borrowRequests";
 import { borrowRequestService } from "../../../services/borrowRequestService";
-import { Media, MediaCopyDto, MediaDto } from "../../../types/media";
+import { MediaCopyDto, MediaDto } from "../../../types/media";
 import { ErrorAlert, FormFieldError, SubmitError } from '../../shared/ErrorAlert';
 import { CopyDisplay } from '../../shared/displays/CopyDisplay';
 import { MediaDisplay } from '../../shared/displays/MediaDisplay';
@@ -160,7 +160,7 @@ export function AddBorrowRequestForm({
             aria-labelledby="copy-selection-label"
             aria-required="true"
           >
-            {displayedCopies.map((copy, index) => (
+            {displayedCopies.map((copy) => (
               <div
                 key={copy.copyId}
                 role="radio"

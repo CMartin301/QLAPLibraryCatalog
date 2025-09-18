@@ -1,3 +1,5 @@
+import { TagDto } from "./tags";
+
 // Types for Media objects
 export interface MediaType {
   mediaTypeId: number;
@@ -5,6 +7,17 @@ export interface MediaType {
   displayName: string;
   description: string;
 }
+
+
+// Location-related interfaces
+export interface LocationInfo {
+  zoneId: number;
+  zoneName: string;
+  distance: number;
+  availableCopiesCount: number;
+}
+
+
 export interface MediaDto {
   mediaId: number;
   mediaTypeId: number;
@@ -25,6 +38,14 @@ export interface MediaDto {
   volume: number | null;
   totalCopiesCount: number | null;
   availableCopiesCount: number | null;
+
+  // New location-related properties
+  nearbyLocations?: LocationInfo[];
+  nearestCopyDistance?: number;
+  nearestCopyLocationName?: string;
+
+
+  tags?: TagDto[];
 }
 
 export interface Media {
@@ -111,6 +132,33 @@ export interface MediaCopyDto {
   ownerUserId: number;
 }
 
+export interface UserMediaCopyDto {
+  mediaId: number;
+  mediaTypeId: number;
+  mediaTypeName?: string;
+  title: string;
+  subtitle: string | null;
+  creator: string;
+  publisher: string;
+  publicationDate: string;
+  language: string;
+  genre: string;
+  description: string;
+  coverImageUrl: string;
+  isbn10: string | null;
+  isbn13: string | null;
+  pageCount: number | null;
+  issueNumber: number | null;
+  volume: number | null;
+
+
+  copyId: number;
+  condition: string;
+  isAvailable: boolean;
+  notes?: string;
+  currentLocationZoneName?: string;
+  homeLocationZoneName?: string;
+}
 export interface CreateMediaCopyRequest {
   userId: number;
   mediaId: number;

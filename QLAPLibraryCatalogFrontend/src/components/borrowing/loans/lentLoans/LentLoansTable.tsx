@@ -1,10 +1,7 @@
-import { useMemo, useState } from "react";
-import { createColumnHelper } from "@tanstack/react-table";
+import { useState } from "react";
 import { useTableActions } from "../../../../hooks/useTableActions";
 import { loanService } from "../../../../services/loanService";
 import { LoanWithDetails } from "../../../../types/loans";
-import { getLoanStatusDisplay } from "../../../../utilities/statusDisplayHelpers";
-import { StatusBadge } from "../../../shared/StatusBadge";
 import { TableContainer } from "../../../shared/TableContainer";
 import { ExtendLoanModal } from "../ExtendLoanModal";
 import { LoanModal } from "../LoanModal";
@@ -70,7 +67,7 @@ export function LentLoansTable({ loans, onRefresh, error, loading }: LentLoansTa
     },
     isLoading
   });
-  
+
   return (
     <>
       <TableContainer

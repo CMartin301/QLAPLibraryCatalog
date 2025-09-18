@@ -26,4 +26,5 @@ public partial class Media
     public DateTime? UpdatedAt { get; set; }
     public virtual MediaType MediaType { get; set; } = null!;
     public virtual ICollection<MediaCopy> MediaCopies { get; set; } = new List<MediaCopy>();
+    public virtual ICollection<MediaTag> MediaTags { get; set; } = new HashSet<MediaTag>();
 }

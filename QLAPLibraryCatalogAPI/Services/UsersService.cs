@@ -13,6 +13,7 @@ namespace QLAPLibraryCatalogAPI.Services
         Task<UserDto?> GetUserByIdAsync(int userId);
         Task<UserDto?> GetUserByEmailAsync(string email);
         Task<UserDto> CreateUserAsync(CreateUserDto registerDto);
+        Task<UserDto?> UpdateUserPasswordAsync(int userId, string newPassword);
         Task<UserPreferencesDto?> UpdateUserPreferencesAsync(int userId, UserPreferencesDto preferencesDto);
         Task<bool> DeactivateUserAsync(int userId);
         Task<bool> ReactivateUserAsync(int userId);
@@ -122,6 +123,29 @@ namespace QLAPLibraryCatalogAPI.Services
 
             return await GetUserByIdAsync(user.UserId) ?? throw new InvalidOperationException("Failed to retrieve created user");
         }
+
+        /// <summary>
+        /// Updates user preferences
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="newPassword"></param>
+        /// <returns></returns>
+        public async Task<UserDto?> UpdateUserPasswordAsync(int userId, string newPassword)
+        {
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+
+            if (user == null) return null;
+
+            string passwordHash = _authService.HashPassword(newPassword);
+            user.PasswordHash = passwordHash;
+
+
+            await _context.SaveChangesAsync();
+
+            return await GetUserByIdAsync(user.UserId) ?? throw new InvalidOperationException("Failed to retrieve user");
+        }
+
         /// <summary>
         /// Updates user preferences
         /// </summary>
@@ -220,11 +244,11 @@ namespace QLAPLibraryCatalogAPI.Services
                 UserPreferences = new UserPreferencesDto
                 {
                     UserId = user.UserId,
-                    DefaultLoanDays = user.UserPreferences.DefaultLoanDays,
-                    AutoApproveRequests = user.UserPreferences.AutoApproveRequests,
-                    EmailNotifications = user.UserPreferences.EmailNotifications,
-                    SmsNotifications = user.UserPreferences.SmsNotifications,
-                    NotificationSettings = user.UserPreferences.NotificationSettings,
+                    DefaultLoanDays = user.UserPreferences?.DefaultLoanDays,
+                    AutoApproveRequests = user.UserPreferences?.AutoApproveRequests,
+                    EmailNotifications = user.UserPreferences?.EmailNotifications,
+                    SmsNotifications = user.UserPreferences?.SmsNotifications,
+                    NotificationSettings = user.UserPreferences?.NotificationSettings,
                 }
             };
         }

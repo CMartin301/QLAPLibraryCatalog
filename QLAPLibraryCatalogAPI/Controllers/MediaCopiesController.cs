@@ -12,7 +12,7 @@ namespace QLAPLibraryCatalogAPI.Controllers
     /// <summary>
     /// Controller for media copy functions
     /// </summary>
-    [Authorize] 
+    [Authorize]
     [ApiController]
     [Route("api/MediaCopy")]
     public class MediaCopiesController : ControllerBase
@@ -34,7 +34,7 @@ namespace QLAPLibraryCatalogAPI.Controllers
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userIdClaim))
                 throw new UnauthorizedAccessException("User ID claim not found in token.");
-            
+
             return int.Parse(userIdClaim);
         }
         /// <summary>
@@ -85,7 +85,7 @@ namespace QLAPLibraryCatalogAPI.Controllers
             {
                 var mediaCopy = await _mediaCopiesService.GetMediaCopyByIdAsync(mediaCopyId);
                 if (mediaCopy == null) return NotFound();
-                
+
                 return Ok(mediaCopy);
             }
             catch (Exception ex)
@@ -93,7 +93,7 @@ namespace QLAPLibraryCatalogAPI.Controllers
                 return StatusCode(500, new { error = ex.Message });
             }
         }
-        
+
         /// <summary>
         /// Creates new media copy
         /// </summary>
@@ -105,7 +105,7 @@ namespace QLAPLibraryCatalogAPI.Controllers
             try
             {
                 if (!ModelState.IsValid) return BadRequest(ModelState);
-                
+
                 var createdMediaCopy = await _mediaCopiesService.CreateMediaCopyAsync(createMediaCopyDto);
                 return CreatedAtAction(nameof(GetMediaCopyById), new { mediaCopyId = createdMediaCopy.CopyId }, createdMediaCopy);
             }
@@ -115,39 +115,25 @@ namespace QLAPLibraryCatalogAPI.Controllers
             }
         }
         
-        // [HttpPut("{mediaId}")]
-        // public async Task<IActionResult> UpdateMedia(int mediaId, [FromBody] CreateMediaDto updateMediaDto)
-        // {
-        //     try
-        //     {
-        //         if (!ModelState.IsValid) return BadRequest(ModelState);
-                
-        //         var updatedMedia = await _userMediaCopiesService.UpdateMediaAsync(mediaId, updateMediaDto);
-        //         if (updatedMedia == null) return NotFound();
-                
-        //         return Ok(updatedMedia);
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         return StatusCode(500, new { error = ex.Message });
-        //     }
-        // }
-        
-        // [HttpDelete("{mediaId}")]
-        // public async Task<IActionResult> DeleteMedia(int mediaId)
-        // {
-        //     try
-        //     {
-        //         var result = await _userMediaCopiesService.DeleteMediaAsync(mediaId);
-        //         if (!result) return NotFound();
-                
-        //         return NoContent();
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         return StatusCode(500, new { error = ex.Message });
-        //     }
-        // }
+        /// <summary>
+        /// Gets media info and copy info for all of a user's media copies
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("User")]
+        public async Task<IActionResult> GetUserMediaCopies()
+        {
+            try
+            {
+                var userID = GetUserId();
+                var media = await _mediaCopiesService.GetUserMediaCopiesAsync(userID);
+                // return Ok(media);
+                return Ok(new { data = media });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
 
     }
 }

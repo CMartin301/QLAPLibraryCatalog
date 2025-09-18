@@ -44,11 +44,20 @@ namespace QLAPLibraryCatalogAPI.Controllers
         /// <param name="search"></param>
         /// <returns></returns>
         [HttpGet]
-        public async Task<IActionResult> GetMedia([FromQuery] bool includeCopies = false, [FromQuery] string? search = null)
+        public async Task<IActionResult> GetMedia(
+    [FromQuery] bool includeCopies = false, 
+    [FromQuery] string? search = null,
+    [FromQuery] int? userLocationZoneId = null,
+    [FromQuery] decimal? maxDistanceMiles = null)
         {
             try
             {
-                var media = await _mediaService.GetAllMediaAsync(includeCopies, search);
+                var media = await _mediaService.GetAllMediaAsync(
+                    includeCopies, 
+                    search, 
+                    userLocationZoneId, 
+                    maxDistanceMiles
+                );
                 return Ok(media);
             }
             catch (Exception ex)

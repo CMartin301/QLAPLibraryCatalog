@@ -14,6 +14,7 @@ import UserPreferencesContainer from './components/preferences/UserPreferencesCo
 import BorrowingDashboard from './components/borrowing/BorrowingPage';
 import Dashboard from './components/dashboard/Dashboard';
 import { Toaster } from 'react-hot-toast';   // ⬅️ import here
+import TagsPage from './components/tags/TagsPage';
 
 /**
  * App Layout Component
@@ -101,6 +102,16 @@ function AppRoutes() {
           <ProtectedRoute>
             <AppLayout>
               <UserPreferencesContainer />
+            </AppLayout>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/tags" 
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <TagsPage />
             </AppLayout>
           </ProtectedRoute>
         } 

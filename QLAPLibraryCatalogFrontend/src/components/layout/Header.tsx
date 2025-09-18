@@ -1,7 +1,8 @@
 import { Link, useLocation } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
-import { BookOpen, Home, Book, FolderOpen, LogIn, UserPlus, Handshake } from "lucide-react";
+import { BookOpen, Home, Book, FolderOpen, LogIn, UserPlus, Handshake, Tag } from "lucide-react";
 import { UserMenu } from "./UserMenu";
+import { DropdownItem, HeaderDropdown } from "./HeaderDropdown";
 
 /**
  * Header Component
@@ -9,6 +10,11 @@ import { UserMenu } from "./UserMenu";
 export function Header() {
   const { isLoggedIn } = useAuth();
   const location = useLocation();
+
+  const browseItems: DropdownItem[] = [
+    { label: 'Media', path: '/network-catalog', icon: Book },
+    { label: 'Tags', path: '/tags', icon: Tag }
+  ];
 
   return (
     <header className="bg-charcoal text-white sticky top-0 z-50 shadow-lg">
@@ -31,14 +37,18 @@ export function Header() {
                 to="/dashboard"
                 className={`flex items-center px-3 py-2 rounded-md text-sm font-Media transition-colors ${
                   location.pathname === '/dashboard' 
-                    ? 'bg-lavender-500 text-white' 
+                    ? 'text-white border-l-4 border-lavender-400 bg-charcoal-light' 
                     : 'text-gray-300 hover:text-white hover:bg-charcoal-light'
                 }`}
               >
                 <Home size={18} className="mr-2" />
                 Dashboard
               </Link>
-              <Link
+              <HeaderDropdown 
+                label="Browse" 
+                items={browseItems} 
+              />
+              {/* <Link
                 to="/network-catalog"
                 className={`flex items-center px-3 py-2 rounded-md text-sm font-Media transition-colors ${
                   location.pathname === '/network-catalog' 
@@ -48,12 +58,12 @@ export function Header() {
               >
                 <Book size={18} className="mr-2" />
                 Browse Books
-              </Link>
+              </Link> */}
               <Link
                 to="/my-library"
                 className={`flex items-center px-3 py-2 rounded-md text-sm font-Media transition-colors ${
                   location.pathname === '/my-library' 
-                    ? 'bg-lavender-500 text-white' 
+                    ? 'text-white border-l-4 border-lavender-400 bg-charcoal-light' 
                     : 'text-gray-300 hover:text-white hover:bg-charcoal-light'
                 }`}
               >
@@ -64,8 +74,8 @@ export function Header() {
                 to="/borrowing"
                 className={`flex items-center px-3 py-2 rounded-md text-sm font-Media transition-colors ${
                   location.pathname === '/borrowing' 
-                    ? 'bg-lavender-500 text-white' 
-                    : 'text-gray-300 hover:text-white hover:bg-charcoal-light'
+                  ? 'text-white border-l-4 border-lavender-400 bg-charcoal-light' 
+                  : 'text-gray-300 hover:text-white hover:bg-charcoal-light'
                 }`}
               >
                 <Handshake size={18} className="mr-2" />
