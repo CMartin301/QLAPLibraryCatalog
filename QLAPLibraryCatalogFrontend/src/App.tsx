@@ -15,6 +15,8 @@ import BorrowingDashboard from './components/borrowing/BorrowingPage';
 import Dashboard from './components/dashboard/Dashboard';
 import { Toaster } from 'react-hot-toast';   // ⬅️ import here
 import TagsPage from './components/tags/TagsPage';
+import BorrowRequestsPage from './components/borrowing/borrowRequests/BorrowRequestsPage';
+import LoansPage from './components/borrowing/loans/LoansPage';
 
 /**
  * App Layout Component
@@ -82,6 +84,26 @@ function AppRoutes() {
           <ProtectedRoute>
             <AppLayout>
               <BorrowingDashboard />
+            </AppLayout>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/borrow-requests" 
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <BorrowRequestsPage />
+            </AppLayout>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/loans" 
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <LoansPage />
             </AppLayout>
           </ProtectedRoute>
         } 

@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
-import { BookOpen, Home, Book, FolderOpen, LogIn, UserPlus, Handshake, Tag } from "lucide-react";
+import { BookOpen, Home, Book, FolderOpen, LogIn, UserPlus, Handshake, Tag, BookOpenText, LibraryBig, BookUp, CircleQuestionMark } from "lucide-react";
 import { UserMenu } from "./UserMenu";
 import { DropdownItem, HeaderDropdown } from "./HeaderDropdown";
 
@@ -12,8 +12,12 @@ export function Header() {
   const location = useLocation();
 
   const browseItems: DropdownItem[] = [
-    { label: 'Media', path: '/network-catalog', icon: Book },
-    { label: 'Tags', path: '/tags', icon: Tag }
+    { label: 'Media', path: '/network-catalog', dropdownIcon: Book },
+    { label: 'Tags', path: '/tags', dropdownIcon: Tag }
+  ];
+  const borrowItems: DropdownItem[] = [
+    { label: 'Borrow Requests', path: '/borrow-requests', dropdownIcon: CircleQuestionMark },
+    { label: 'Loans', path: '/loans', dropdownIcon: BookUp }
   ];
 
   return (
@@ -44,9 +48,11 @@ export function Header() {
                 <Home size={18} className="mr-2" />
                 Dashboard
               </Link>
+
               <HeaderDropdown 
                 label="Browse" 
                 items={browseItems} 
+                icon={LibraryBig}
               />
               {/* <Link
                 to="/network-catalog"
@@ -70,7 +76,7 @@ export function Header() {
                 <FolderOpen size={18} className="mr-2" />
                 My Library
               </Link>
-              <Link
+              {/* <Link
                 to="/borrowing"
                 className={`flex items-center px-3 py-2 rounded-md text-sm font-Media transition-colors ${
                   location.pathname === '/borrowing' 
@@ -80,7 +86,13 @@ export function Header() {
               >
                 <Handshake size={18} className="mr-2" />
                 Borrowing
-              </Link>
+              </Link> */}
+
+              <HeaderDropdown 
+                label="Borrowing" 
+                items={borrowItems} 
+                icon={Handshake}
+              />
             </nav>
           )}
 

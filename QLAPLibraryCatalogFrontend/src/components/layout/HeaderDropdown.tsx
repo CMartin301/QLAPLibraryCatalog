@@ -6,17 +6,19 @@ import { useOnClickOutside } from '../../hooks/useOnClickOutside';
 export interface DropdownItem {
   label: string;
   path: string;
-  icon: LucideIcon;
+  dropdownIcon: LucideIcon;
 }
 
 interface HeaderDropdownProps {
   label: string;
+  icon?: LucideIcon;
   items: DropdownItem[];
   className?: string;
 }
 
 export const HeaderDropdown: React.FC<HeaderDropdownProps> = ({ 
   label, 
+  icon,
   items, 
   className = '' 
 }) => {
@@ -46,6 +48,12 @@ export const HeaderDropdown: React.FC<HeaderDropdownProps> = ({
             aria-expanded={isOpen}
             aria-haspopup="true"
             >
+              {icon && (
+                (() => {
+                  const Icon = icon;
+                  return <Icon size={16} className="mr-3" />;
+                })()
+              )}
             {label}
         </button>
 
@@ -55,7 +63,7 @@ export const HeaderDropdown: React.FC<HeaderDropdownProps> = ({
         >
           <div className="py-1" role="menu">
             {items.map((item) => {
-              const Icon = item.icon;
+              const Icon = item.dropdownIcon;
               const isActive = location.pathname === item.path;
               
               return (
