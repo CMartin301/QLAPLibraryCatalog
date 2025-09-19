@@ -13,6 +13,7 @@ namespace QLAPLibraryCatalogAPI.Services
         Task<IEnumerable<MediaCopyDto>> GetMediaCopiesByMediaIDAsync(int mediaId);
         Task<MediaCopyDto?> GetMediaCopyByIdAsync(int mediaCopyId);
         Task<MediaCopyDto> CreateMediaCopyAsync(CreateMediaCopyDto createMediaCopyDto);
+        Task<MediaCopyDto?> UpdateMediaCopyAsync(int mediaCopyId, CreateMediaCopyDto updateMediaCopyDto);
         Task<IEnumerable<MediaCopyDto>> GetUserMediaCopiesAsync(int userID);
         // Task<IEnumerable<UserMediaCopyDto>> GetUserMediaCopiesAsync(int userID);
         // Task<MediaDto?> UpdateMediaAsync(int id, CreateMediaDto updateMediaDto);
@@ -103,6 +104,31 @@ namespace QLAPLibraryCatalogAPI.Services
             await _context.SaveChangesAsync();
 
             return await GetMediaCopyByIdAsync(mediaCopy.CopyId) ?? throw new InvalidOperationException("Failed to retrieve created media copy");
+        }
+
+
+        /// <summary>
+        /// Updates existing media copy
+        /// </summary>
+        /// <param name="mediaCopyId"></param>
+        /// <param name="updateMediaCopyDto"></param>
+        /// <returns></returns>
+        public async Task<MediaCopyDto?> UpdateMediaCopyAsync(int mediaCopyId, CreateMediaCopyDto updateMediaCopyDto)
+        {
+            var existingCopy = await _context.MediaCopies.FindAsync(mediaCopyId);
+            if (existingCopy == null) return null;
+
+            existingCopy.UserId = updateMediaCopyDto.UserId;
+            existingCopy.MediaId = updateMediaCopyDto.MediaId;
+            existingCopy.Condition = updateMediaCopyDto.Condition;
+            existingCopy.Notes = updateMediaCopyDto.Notes;
+            existingCopy.IsAvailable = updateMediaCopyDto.IsAvailable;
+            existingCopy.HomeLocationZoneId = updateMediaCopyDto.HomeLocationZoneId;
+            existingCopy.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return await GetMediaCopyByIdAsync(mediaCopyId);
         }
 
         /// <summary>

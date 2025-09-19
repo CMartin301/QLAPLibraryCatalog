@@ -37,7 +37,7 @@ export function UserMediaModal({
          <CopyDisplay
                   key={mediaCopy.copyId}
                   copy={mediaCopy}
-                  variant="emphasis" // Use your new emphasis variant for modal display
+                  variant="emphasis"
                   className="transition-all hover:shadow-sm"
                 />
 

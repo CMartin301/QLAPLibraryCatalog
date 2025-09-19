@@ -5,7 +5,7 @@ import { StatusBadge } from '../StatusBadge';
 
 interface CopyDisplayProps {
   copy: MediaCopyDto;
-  variant?: 'card' | 'selection' | 'compact' | 'list' | 'emphasis';
+  variant?: 'card' | 'selection' | 'compact' | 'list' | 'emphasis' | 'modal';
   selected?: boolean;
   onClick?: () => void;
   showSelection?: boolean;
@@ -133,6 +133,88 @@ export function CopyDisplay({
       </div>
     );
   }
+
+
+// Modal variant - copy-focused for use alongside MediaDisplay
+if (variant === 'modal') {
+  return (
+    <div className={`p-4 rounded-lg border border-gray-200 bg-gray-50 ${className}`}>
+      <div className="space-y-4">
+        {/* Header: Copy ownership and status */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <User className="w-4 h-4 text-lavender-500" aria-hidden="true" />
+            <span className="font-medium text-gray-900">Your Copy</span>
+          </div>
+          
+          <StatusBadge 
+            config={{
+              text: copy.isAvailable ? 'Available' : 'On Loan',
+              color: copy.isAvailable ? 'green' : 'red'
+            }}
+          />
+        </div>
+
+        {/* Copy Details Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Condition */}
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-gray-700">Condition</label>
+            <StatusBadge 
+              config={{
+                text: copy.condition,
+                color: copy.condition === 'Good' ? 'green' : 
+                       copy.condition === 'Fair' ? 'yellow' : 'red'
+              }}
+            />
+          </div>
+
+          {/* Current Location */}
+          {copy.currentLocationZoneName && (
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-700">Current Location</label>
+              <StatusBadge 
+                config={{
+                  text: copy.currentLocationZoneName,
+                  color: 'blue',
+                  icon: MapPin
+                }}
+              />
+            </div>
+          )}
+
+          {/* Home Location */}
+          {copy.homeLocationZoneName && (
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-700">Home Location</label>
+              <StatusBadge 
+                config={{
+                  text: copy.homeLocationZoneName,
+                  color: 'gray',
+                  icon: Home
+                }}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Notes Section */}
+        <div className="space-y-1">
+          <label className="text-sm font-medium text-gray-700">Notes</label>
+          {copy.notes && copy.notes.trim() !== '' ? (
+            <div className="p-3 bg-white border border-gray-200 rounded text-sm text-gray-900">
+              {copy.notes}
+            </div>
+          ) : (
+            <div className="p-3 bg-white border border-gray-200 rounded text-sm text-gray-500 italic">
+              No notes added
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
   // Original layout for other variants
   return (
