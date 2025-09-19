@@ -24,5 +24,6 @@ namespace QLAPLibraryCatalogAPI.Models
         public int UpdatedBy { get; set; }
 
         public virtual ICollection<MediaTag> MediaTags { get; set; }
+        public virtual ICollection<UserTag> UserTags { get; set; } // Added for user tag relationship
     }
 }

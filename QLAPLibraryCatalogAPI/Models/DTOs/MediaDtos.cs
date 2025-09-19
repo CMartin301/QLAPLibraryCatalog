@@ -1,6 +1,6 @@
 namespace QLAPLibraryCatalogAPI.Models.DTOs
 {
-    // Media Types
+    // Media Types (unchanged)
     public class MediaTypeDto
     {
         public int MediaTypeId { get; set; }
@@ -8,13 +8,15 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
         public string? DisplayName { get; set; }
         public string? Description { get; set; }
     }
+
     public class CreateMediaTypeDto
     {
         public string Name { get; set; } = null!;
         public string? DisplayName { get; set; }
         public string? Description { get; set; }
     }
-    // Media
+
+    // Updated Media DTOs with Genre support
     public class MediaDto
     {
         public int MediaId { get; set; }
@@ -27,7 +29,7 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
         public string? Publisher { get; set; }
         public DateOnly? PublicationDate { get; set; }
         public string? Language { get; set; }
-        public string? Genre { get; set; }
+        public string? Genre { get; set; } // Keep for backward compatibility, but consider deprecating
         public string? Description { get; set; }
         public string? CoverImageUrl { get; set; }
         public string? Isbn10 { get; set; }
@@ -37,16 +39,16 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
         public string? Volume { get; set; }
         public int? TotalCopiesCount { get; set; }
         public int? AvailableCopiesCount { get; set; }
-        // public MediaTypeDto? MediaType { get; set; }
 
-    public List<LocationInfo>? NearbyLocations { get; set; }
-    public decimal? NearestCopyDistance { get; set; }
-    public string? NearestCopyLocationName { get; set; }
+        public List<LocationInfo>? NearbyLocations { get; set; }
+        public decimal? NearestCopyDistance { get; set; }
+        public string? NearestCopyLocationName { get; set; }
 
         public List<TagDto> Tags { get; set; } = new();
+        public List<GenreDto> Genres { get; set; } = new(); // Added genre support
     }
 
-    // New supporting class
+    // Supporting classes (unchanged)
     public class LocationInfo
     {
         public int ZoneId { get; set; }
@@ -55,13 +57,12 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
         public int AvailableCopiesCount { get; set; }
     }
 
-    // Add to your API request handling
     public class MediaSearchRequest
     {
         public bool IncludeCopies { get; set; } = false;
         public string? Search { get; set; }
-        public int? UserLocationZoneId { get; set; }  // Selected zip code
-        public decimal? MaxDistanceMiles { get; set; } = 10;  // Default 10 miles
+        public int? UserLocationZoneId { get; set; }
+        public decimal? MaxDistanceMiles { get; set; } = 10;
     }
 
     public class CreateMediaDto
@@ -73,7 +74,7 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
         public string? Publisher { get; set; }
         public DateOnly? PublicationDate { get; set; }
         public string? Language { get; set; }
-        public string? Genre { get; set; }
+        public string? Genre { get; set; } // Keep for backward compatibility
         public string? Description { get; set; }
         public string? CoverImageUrl { get; set; }
         public string? Isbn10 { get; set; }
@@ -83,8 +84,9 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
         public string? Volume { get; set; }
     }
 
-    // Media Copies
-    public class MediaWithCopies : Media {
+    // Media Copies (unchanged)
+    public class MediaWithCopies : Media 
+    {
         public bool isOwned { get; set; }
         public List<MediaCopy>? userCopies { get; set; }
     }
@@ -127,7 +129,6 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
         public int? PageCount { get; set; }
         public string? IssueNumber { get; set; }
         public string? Volume { get; set; }
-        
 
         public int CopyId { get; set; }
         public int UserId { get; set; }
@@ -146,6 +147,5 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
         public string? Notes { get; set; }
         public bool? IsAvailable { get; set; }
         public int? HomeLocationZoneId { get; set; }
-
     }
 }

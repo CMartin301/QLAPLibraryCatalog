@@ -43,4 +43,48 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
         public DateTime ExpiresAt { get; set; }
         public UserDto User { get; set; } = null!;
     }
+
+
+    /// <summary>
+    /// DTO for returning user profile information
+    /// </summary>
+    public class UserProfileDto
+    {
+        public int UserId { get; set; }
+        public string? ProfileDescription { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        
+        // Optional: Include basic user info
+        public string? Username { get; set; }
+        public string? Email { get; set; }
+        
+        // Optional: Include user tags
+        public List<TagDto> UserTags { get; set; } = new();
+    }
+
+    /// <summary>
+    /// DTO for creating or updating a user profile
+    /// </summary>
+    public class CreateOrUpdateUserProfileDto
+    {
+        public string? ProfileDescription { get; set; }
+    }
+
+    /// <summary>
+    /// DTO for comprehensive user information including profile
+    /// </summary>
+    public class UserWithProfileDto
+    {
+        public int UserId { get; set; }
+        public string Email { get; set; } = null!;
+        public string? Username { get; set; }
+        public bool? EmailVerified { get; set; }
+        public bool? IsActive { get; set; }
+        public DateTime? CreatedAt { get; set; }
+        
+        public UserPreferencesDto? UserPreferences { get; set; }
+        public UserProfileDto? UserProfile { get; set; }
+        public List<TagDto> UserTags { get; set; } = new();
+    }
 }
