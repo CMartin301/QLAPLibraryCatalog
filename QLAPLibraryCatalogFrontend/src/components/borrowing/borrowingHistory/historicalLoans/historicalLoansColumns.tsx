@@ -9,7 +9,7 @@ import { LoanWithDetails } from '../../../../types/loans';
 
   const columnHelper = createColumnHelper<LoanWithDetails>();
 
-interface UseLentLoansColumnsProps {
+interface UseHistoricalLoansColumnsProps {
   handlers: {
     handleReturn: (loanId: number) => void;
     handleExtend: (loan: LoanWithDetails) => void;
@@ -17,10 +17,10 @@ interface UseLentLoansColumnsProps {
   isLoading: boolean | undefined;
 }
 
-export function useLentLoansColumns({ 
+export function useHistoricalLoansColumns({ 
   handlers, 
   isLoading 
-}: UseLentLoansColumnsProps) {
+}: UseHistoricalLoansColumnsProps) {
   const { handleReturn, handleExtend } = handlers;
 
   return useMemo<ColumnDef<LoanWithDetails, any>[]>(() => [

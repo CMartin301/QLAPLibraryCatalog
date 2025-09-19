@@ -33,7 +33,7 @@ export function useBorrowedLoansColumns({
                   {row.mediaTitle || "—"}
                 </p>
                 <p className="text-sm text-gray-500 truncate">
-                  {row.mediaAuthor || "Unknown author"}
+                  {row.mediaCreator || "Unknown author"}
                 </p>
               </div>
             </div>

@@ -3,18 +3,18 @@ import { useTableActions } from "../../../../hooks/useTableActions";
 import { loanService } from "../../../../services/loanService";
 import { LoanWithDetails } from "../../../../types/loans";
 import { TableContainer } from "../../../shared/TableContainer";
-import { ExtendLoanModal } from "../ExtendLoanModal";
-import { LoanModal } from "../LoanModal";
-import { useLentLoansColumns } from "./lentLoansColumns";
+import { ExtendLoanModal } from "../../loans/ExtendLoanModal";
+import { LoanModal } from "../../loans/LoanModal";
+import { useHistoricalLoansColumns } from "./historicalLoansColumns";
 
-interface LentLoansTableProps {
+interface HistoricalLoansTableProps {
   loans: LoanWithDetails[];
   onRefresh: () => void;
   error?: string | null;
   loading?: boolean;
 }
 
-export function LentLoansTable({ loans, onRefresh, error, loading }: LentLoansTableProps) {
+export function HistoricalLoansTable({ loans, onRefresh, error, loading }: HistoricalLoansTableProps) {
   // const tableState = useTableState<LoanWithDetails>();
   const { executeAction, isLoading } = useTableActions();
   const [detailModal, setDetailModal] = useState<{
@@ -60,7 +60,7 @@ export function LentLoansTable({ loans, onRefresh, error, loading }: LentLoansTa
   };
 
 
-  const columns = useLentLoansColumns({
+  const columns = useHistoricalLoansColumns({
     handlers: {
       handleReturn: handleReturn,
       handleExtend: handleExtend
@@ -98,4 +98,4 @@ export function LentLoansTable({ loans, onRefresh, error, loading }: LentLoansTa
   );
 }
 
-export default LentLoansTable;
+export default HistoricalLoansTable;

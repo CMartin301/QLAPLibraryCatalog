@@ -17,6 +17,7 @@ import { Toaster } from 'react-hot-toast';   // ⬅️ import here
 import TagsPage from './components/tags/TagsPage';
 import BorrowRequestsPage from './components/borrowing/borrowRequests/BorrowRequestsPage';
 import LoansPage from './components/borrowing/loans/LoansPage';
+import BorrowingHistoryPage from './components/borrowing/borrowingHistory/BorrowingHistoryPage';
 
 /**
  * App Layout Component
@@ -109,11 +110,21 @@ function AppRoutes() {
         } 
       />
       <Route 
-        path="/network-catalog" 
+        path="/loans" 
         element={
           <ProtectedRoute>
             <AppLayout>
-              <NetworkCatalogPage />
+              <LoansPage />
+            </AppLayout>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/borrowing-history" 
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <BorrowingHistoryPage />
             </AppLayout>
           </ProtectedRoute>
         } 

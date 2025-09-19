@@ -114,7 +114,7 @@ export function useReceivedBorrowRequestsColumns({
 
           return (
             <span className="text-xs text-gray-400">
-              No actions
+              {/* No actions */}
             </span>
           );
         },

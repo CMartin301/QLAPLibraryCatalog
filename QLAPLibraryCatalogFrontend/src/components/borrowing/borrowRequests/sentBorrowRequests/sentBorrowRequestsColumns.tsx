@@ -103,9 +103,9 @@ export function useSentBorrowRequestsColumns({
 
           return (
             <span className="text-xs text-gray-400">
-              {request.status === "approved" 
+              {/* {request.status === "approved" 
                 ? "Ready to pickup" 
-                : "No actions"}
+                : "No actions"} */}
             </span>
           );
         },
