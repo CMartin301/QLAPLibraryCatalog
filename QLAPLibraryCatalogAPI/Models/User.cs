@@ -26,4 +26,7 @@ public partial class User
     public virtual ICollection<MediaCopy> MediaCopies { get; set; } = new List<MediaCopy>();
 
     public virtual UserPreferences? UserPreferences { get; set; }
+    public virtual UserProfile? UserProfile { get; set; } // Added for user profile
+
+    public virtual ICollection<UserTag> UserTags { get; set; } = new HashSet<UserTag>();
 }

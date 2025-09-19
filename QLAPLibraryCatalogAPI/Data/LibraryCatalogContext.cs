@@ -16,40 +16,64 @@ public partial class LibraryCatalogContext : DbContext
     {
     }
 
+    // Existing DbSets
     public virtual DbSet<BorrowRequest> BorrowRequests { get; set; }
-
     public virtual DbSet<Loan> Loans { get; set; }
     public virtual DbSet<LocationZone> LocationZones { get; set; }
-
     public virtual DbSet<MediaCopy> MediaCopies { get; set; }
-
     public virtual DbSet<MediaType> MediaTypes { get; set; }
-
     public virtual DbSet<Media> Media { get; set; }
-
     public virtual DbSet<User> Users { get; set; }
-
     public virtual DbSet<UserPreferences> UserPreferences { get; set; }
     public virtual DbSet<Tag> Tags { get; set; }
     public virtual DbSet<MediaTag> MediaTags { get; set; }
+
+    // New DbSets for the missing entities
+    public virtual DbSet<Genre> Genres { get; set; }
+    public virtual DbSet<MediaGenre> MediaGenres { get; set; }
+    public virtual DbSet<UserProfile> UserProfiles { get; set; }
+    public virtual DbSet<UserTag> UserTags { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseNpgsql("Name=ConnectionStrings:DefaultConnection");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Existing configurations (keeping your current setup)
+        ConfigureBorrowRequest(modelBuilder);
+        ConfigureLoan(modelBuilder);
+        ConfigureMediaCopy(modelBuilder);
+        ConfigureLocationZone(modelBuilder);
+        ConfigureMediaType(modelBuilder);
+        ConfigureMedia(modelBuilder);
+        ConfigureUser(modelBuilder);
+        ConfigureUserPreferences(modelBuilder);
+        ConfigureTag(modelBuilder);
+        ConfigureMediaTag(modelBuilder);
+
+        // New entity configurations
+        ConfigureGenre(modelBuilder);
+        ConfigureMediaGenre(modelBuilder);
+        ConfigureUserProfile(modelBuilder);
+        ConfigureUserTag(modelBuilder);
+
+        OnModelCreatingPartial(modelBuilder);
+    }
+
+    // Breaking down configurations into separate methods for better maintainability
+    private static void ConfigureBorrowRequest(ModelBuilder modelBuilder)
+    {
         modelBuilder.Entity<BorrowRequest>(entity =>
         {
             entity.HasKey(e => e.RequestId).HasName("borrow_requests_pkey");
-
             entity.ToTable("borrow_requests");
 
+            // Indexes
             entity.HasIndex(e => e.BorrowerId, "idx_borrow_requests_borrower_id");
-
             entity.HasIndex(e => e.CopyId, "idx_borrow_requests_copy_id");
-
             entity.HasIndex(e => e.Status, "idx_borrow_requests_status");
 
+            // Properties
             entity.Property(e => e.RequestId).HasColumnName("request_id");
             entity.Property(e => e.ApprovedAt).HasColumnName("approved_at");
             entity.Property(e => e.BorrowerId).HasColumnName("borrower_id");
@@ -70,6 +94,7 @@ public partial class LibraryCatalogContext : DbContext
                 .HasDefaultValueSql("now()")
                 .HasColumnName("updated_at");
 
+            // Relationships
             entity.HasOne(d => d.Borrower).WithMany(p => p.BorrowRequests)
                 .HasForeignKey(d => d.BorrowerId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -80,15 +105,16 @@ public partial class LibraryCatalogContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("borrow_requests_copy_id_fkey");
         });
+    }
 
+    private static void ConfigureLoan(ModelBuilder modelBuilder)
+    {
         modelBuilder.Entity<Loan>(entity =>
         {
             entity.HasKey(e => e.LoanId).HasName("loans_pkey");
-
             entity.ToTable("loans");
 
             entity.HasIndex(e => e.RequestId, "idx_loans_request_id");
-
             entity.HasIndex(e => e.RequestId, "loans_request_id_key").IsUnique();
 
             entity.Property(e => e.LoanId).HasColumnName("loan_id");
@@ -102,25 +128,34 @@ public partial class LibraryCatalogContext : DbContext
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("updated_at");
-    entity.Property(e => e.BorrowerReturnedAt).HasColumnName("borrower_returned_at");
-    entity.Property(e => e.LenderConfirmedReturnAt).HasColumnName("lender_confirmed_return_at");
-    entity.Property(e => e.BorrowerReturnNotes).HasColumnName("borrower_return_notes");
-    entity.Property(e => e.LenderReturnNotes).HasColumnName("lender_return_notes");
+            entity.Property(e => e.BorrowerReturnedAt).HasColumnName("borrower_returned_at");
+            entity.Property(e => e.LenderConfirmedReturnAt).HasColumnName("lender_confirmed_return_at");
+            entity.Property(e => e.BorrowerReturnNotes).HasColumnName("borrower_return_notes");
+            entity.Property(e => e.LenderReturnNotes).HasColumnName("lender_return_notes");
 
             entity.HasOne(d => d.Request).WithOne(p => p.Loan)
                 .HasForeignKey<Loan>(d => d.RequestId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("loans_request_id_fkey");
         });
+    }
 
+    // I'll continue with the remaining configurations in the next part...
+    // This is getting long, so let me break it into smaller pieces for better readability
+
+    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+
+
+// Add these methods to your LibraryCatalogContext class
+
+private static void ConfigureMediaCopy(ModelBuilder modelBuilder)
+    {
         modelBuilder.Entity<MediaCopy>(entity =>
         {
             entity.HasKey(e => e.CopyId).HasName("user_media_copies_pkey");
-
             entity.ToTable("media_copies");
 
             entity.HasIndex(e => e.MediaId, "idx_user_media_copies_media_id");
-
             entity.HasIndex(e => e.UserId, "idx_user_media_copies_user_id");
 
             entity.Property(e => e.CopyId)
@@ -146,7 +181,6 @@ public partial class LibraryCatalogContext : DbContext
             entity.Property(e => e.HomeLocationZoneId)
                 .HasColumnName("home_location_zone_id");
 
-
             entity.HasOne(d => d.Media).WithMany(p => p.MediaCopies)
                 .HasForeignKey(d => d.MediaId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -156,6 +190,7 @@ public partial class LibraryCatalogContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("user_media_copies_user_id_fkey");
+
             entity.HasOne(d => d.CurrentLocationZone).WithMany(p => p.CurrentLocationCopies)
                 .HasForeignKey(d => d.CurrentLocationZoneId)
                 .OnDelete(DeleteBehavior.SetNull)
@@ -166,11 +201,13 @@ public partial class LibraryCatalogContext : DbContext
                 .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("media_copies_home_location_zone_fkey");
         });
+    }
 
+    private static void ConfigureLocationZone(ModelBuilder modelBuilder)
+    {
         modelBuilder.Entity<LocationZone>(entity =>
         {
             entity.HasKey(e => e.ZoneId).HasName("location_zones_pkey");
-
             entity.ToTable("location_zones");
 
             entity.Property(e => e.ZoneId).HasColumnName("zone_id");
@@ -193,10 +230,13 @@ public partial class LibraryCatalogContext : DbContext
                 .HasDefaultValueSql("now()")
                 .HasColumnName("updated_at");
         });
+    }
+
+    private static void ConfigureMediaType(ModelBuilder modelBuilder)
+    {
         modelBuilder.Entity<MediaType>(entity =>
         {
             entity.HasKey(e => e.MediaTypeId).HasName("media_types_pkey");
-
             entity.ToTable("media_types");
 
             entity.HasIndex(e => e.Name, "media_types_name_key").IsUnique();
@@ -219,15 +259,16 @@ public partial class LibraryCatalogContext : DbContext
                 .HasDefaultValueSql("now()")
                 .HasColumnName("updated_at");
         });
+    }
 
+    private static void ConfigureMedia(ModelBuilder modelBuilder)
+    {
         modelBuilder.Entity<Media>(entity =>
         {
             entity.HasKey(e => e.MediaId).HasName("media_pkey");
-
             entity.ToTable("media");
 
             entity.HasIndex(e => e.MediaTypeId, "idx_media_media_type_id");
-
             entity.HasIndex(e => e.Title, "idx_media_title");
 
             entity.Property(e => e.MediaId).HasColumnName("media_id");
@@ -284,19 +325,20 @@ public partial class LibraryCatalogContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("media_media_type_id_fkey");
         });
+    }
 
+    // Add these remaining configuration methods to your LibraryCatalogContext class
+
+    private static void ConfigureUser(ModelBuilder modelBuilder)
+    {
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasKey(e => e.UserId).HasName("users_pkey");
-
             entity.ToTable("users");
 
             entity.HasIndex(e => e.Email, "idx_users_email");
-
             entity.HasIndex(e => e.Username, "idx_users_username");
-
             entity.HasIndex(e => e.Email, "users_email_key").IsUnique();
-
             entity.HasIndex(e => e.Username, "users_username_key").IsUnique();
 
             entity.Property(e => e.UserId).HasColumnName("user_id");
@@ -322,15 +364,16 @@ public partial class LibraryCatalogContext : DbContext
                 .HasMaxLength(50)
                 .HasColumnName("username");
         });
+    }
 
+    private static void ConfigureUserPreferences(ModelBuilder modelBuilder)
+    {
         modelBuilder.Entity<UserPreferences>(entity =>
         {
             entity.HasKey(e => e.PreferenceId).HasName("user_preferences_pkey");
-
             entity.ToTable("user_preferences");
 
             entity.HasIndex(e => e.UserId, "idx_user_preferences_user_id");
-
             entity.HasIndex(e => e.UserId, "user_preferences_user_id_key").IsUnique();
 
             entity.Property(e => e.PreferenceId).HasColumnName("preference_id");
@@ -362,11 +405,13 @@ public partial class LibraryCatalogContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("user_preferences_user_id_fkey");
         });
+    }
 
+    private static void ConfigureTag(ModelBuilder modelBuilder)
+    {
         modelBuilder.Entity<Tag>(entity =>
         {
             entity.HasKey(e => e.TagId).HasName("tags_pkey");
-
             entity.ToTable("tags");
 
             entity.HasIndex(e => e.TagName, "idx_tags_name");
@@ -387,11 +432,13 @@ public partial class LibraryCatalogContext : DbContext
                 .HasColumnName("updated_at");
             entity.Property(e => e.UpdatedBy).HasColumnName("updated_by");
         });
+    }
 
+    private static void ConfigureMediaTag(ModelBuilder modelBuilder)
+    {
         modelBuilder.Entity<MediaTag>(entity =>
         {
             entity.HasKey(e => new { e.MediaId, e.TagId }).HasName("media_tags_pkey");
-
             entity.ToTable("media_tags");
 
             entity.HasIndex(e => e.MediaId, "idx_media_tags_media_id");
@@ -414,9 +461,127 @@ public partial class LibraryCatalogContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("media_tags_tag_id_fkey");
         });
+    }
+// Replace the ConfigureGenre method in your LibraryCatalogContext with this version
+// that matches your existing database structure
 
-        OnModelCreatingPartial(modelBuilder);
+private static void ConfigureGenre(ModelBuilder modelBuilder)
+{
+    modelBuilder.Entity<Genre>(entity =>
+    {
+        entity.HasKey(e => e.GenreId).HasName("genre_pkey");
+        entity.ToTable("genres");
+
+        // Indexes to match your existing structure
+        entity.HasIndex(e => e.GenreName, "idx_genre_name");
+        entity.HasIndex(e => e.CreatedAt, "idx_genre_created_at");
+        entity.HasIndex(e => e.UpdatedAt, "idx_genre_updated_at");
+        entity.HasIndex(e => e.IsActive, "idx_genres_is_active");
+        entity.HasIndex(e => e.GenreName, "genre_genre_name_key").IsUnique();
+
+        // Properties to match your existing database
+        entity.Property(e => e.GenreId)
+            .HasDefaultValueSql("nextval('genre_genre_id_seq'::regclass)")
+            .HasColumnName("genre_id");
+        
+        entity.Property(e => e.GenreName)
+            .HasMaxLength(100) // Match your existing 100-char limit
+            .HasColumnName("genre_name");
+            
+        entity.Property(e => e.Description)
+            .HasColumnName("description");
+            
+        entity.Property(e => e.IsActive)
+            .HasDefaultValue(true)
+            .HasColumnName("is_active");
+            
+        entity.Property(e => e.CreatedAt)
+            .HasDefaultValueSql("CURRENT_TIMESTAMP")
+            .HasColumnName("created_at");
+            
+        entity.Property(e => e.CreatedBy)
+            .HasColumnName("created_by");
+            
+        entity.Property(e => e.UpdatedAt)
+            .HasDefaultValueSql("CURRENT_TIMESTAMP")
+            .HasColumnName("updated_at");
+            
+        entity.Property(e => e.UpdatedBy)
+            .HasColumnName("updated_by");
+    });
+}
+
+    private static void ConfigureMediaGenre(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<MediaGenre>(entity =>
+        {
+            entity.HasKey(e => new { e.MediaId, e.GenreId }).HasName("media_genres_pkey");
+            entity.ToTable("media_genres");
+
+            entity.HasIndex(e => e.MediaId, "idx_media_genres_media_id");
+            entity.HasIndex(e => e.GenreId, "idx_media_genres_genre_id");
+
+            entity.Property(e => e.MediaId).HasColumnName("media_id");
+            entity.Property(e => e.GenreId).HasColumnName("genre_id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnName("created_at");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+
+            entity.HasOne(d => d.Media).WithMany(p => p.MediaGenres)
+                .HasForeignKey(d => d.MediaId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("media_genres_media_id_fkey");
+
+            entity.HasOne(d => d.Genre).WithMany(p => p.MediaGenres)
+                .HasForeignKey(d => d.GenreId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("media_genres_genre_id_fkey");
+        });
     }
 
-    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+    private static void ConfigureUserProfile(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<UserProfile>(entity =>
+        {
+            entity.HasKey(e => e.UserId).HasName("user_profiles_pkey");
+            entity.ToTable("user_profiles");
+
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.ProfileDescription).HasColumnName("profile_description");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnName("created_at");
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnName("updated_at");
+
+            entity.HasOne(d => d.User).WithOne(p => p.UserProfile)
+                .HasForeignKey<UserProfile>(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("user_profiles_user_id_fkey");
+        });
+    }
+
+    private static void ConfigureUserTag(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<UserTag>(entity =>
+        {
+            entity.HasKey(e => new { e.UserId, e.TagId }).HasName("user_tags_pkey");
+            entity.ToTable("user_tags");
+
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.TagId).HasColumnName("tag_id");
+
+            entity.HasOne(d => d.User).WithMany(p => p.UserTags)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("user_tags_user_id_fkey");
+
+            entity.HasOne(d => d.Tag).WithMany(p => p.UserTags)
+                .HasForeignKey(d => d.TagId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("user_tags_tag_id_fkey");
+        });
+    }
 }

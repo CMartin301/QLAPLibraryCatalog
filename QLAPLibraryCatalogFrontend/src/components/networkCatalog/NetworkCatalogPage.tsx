@@ -37,7 +37,7 @@ const NetworkCatalogPage: React.FC = () => {
 
   useEffect(() => {
     loadMedia();
-  }, []);
+  }, [locationParams, searchTerm]);
 
   const loadMedia = async () => {
     setIsLoading(true);
@@ -56,7 +56,9 @@ const NetworkCatalogPage: React.FC = () => {
       };
 
       const response = await mediaService.getMedia(searchParams);
+
       setMedia(response);
+  console.log(response);
     } catch (err: any) {
       setError('Failed to load media');
       console.error('Error loading media:', err);

@@ -42,6 +42,8 @@ namespace QLAPLibraryCatalogAPI.Controllers
         /// </summary>
         /// <param name="includeCopies"></param>
         /// <param name="search"></param>
+        /// <param name="userLocationZoneId"></param>
+        /// <param name="maxDistanceMiles"></param>
         /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> GetMedia(

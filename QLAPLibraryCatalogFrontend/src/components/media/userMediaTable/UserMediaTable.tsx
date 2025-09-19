@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { MediaDto } from '../../../types/media';
+import { MediaCopyDto, MediaDto } from '../../../types/media';
 import { TableContainer } from '../../shared/TableContainer';
 import { Modal } from '../../shared/Modal';
 import { AddMediaCopyForm } from '../AddMediaCopyForm';
@@ -8,9 +8,14 @@ import { CreateMediaCopyRequest } from '../../../types/media';
 import { mediaService } from '../../../services/mediaService';
 import { useUserMediaColumns } from './userMediaColumns';
 import { useNavigate } from 'react-router-dom';
+import { useFilters } from '../../../hooks/useFilters';
+import { createMediaFilterConfig } from '../../../config/mediaFilters';
+import { createMediaCopiesFilterConfig } from '../../../config/mediaCopyFilters';
+import { FilterPanel } from '../../shared/filters/FilterPanel';
+import { UserMediaModal } from '../UserMediaModal';
 
 interface UserMediaTableProps {
-  media: MediaDto[];
+  media: MediaCopyDto[];
   loading?: boolean;
   error?: string | undefined;
   onRefresh: () => void;
@@ -18,13 +23,13 @@ interface UserMediaTableProps {
 }
 
 export function UserMediaTable({
-  media,
+  media: mediaCopies,
   loading,
   error,
   onRefresh,
   onSaveMessage,
 }: UserMediaTableProps) {
-  const [selectedMedia, setSelectedMedia] = useState<MediaDto | undefined>(undefined);
+  const [selectedMedia, setSelectedMedia] = useState<MediaCopyDto | undefined>(undefined);
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
   const [selectedMediaForCopy, setSelectedMediaForCopy] = useState<MediaDto | undefined>(undefined);
@@ -32,13 +37,23 @@ export function UserMediaTable({
   const [submitError, setSubmitError] = useState<string | undefined>(undefined);
   const navigate = useNavigate();
 
-  const handleRowClick = (media: MediaDto) => {
-    setSelectedMedia(media);
+  const {
+    filteredData,
+    filters,
+    updateFilters,
+    activeFilterCount
+  } = useFilters({
+    data: mediaCopies,
+    createFilterConfig: createMediaCopiesFilterConfig
+  });
+
+  const handleRowClick = (mediaCopy: MediaCopyDto) => {
+    setSelectedMedia(mediaCopy);
     setIsMediaModalOpen(true);
   };
 
-  const handleAddCopy = (media: MediaDto) => {
-    setSelectedMediaForCopy(media);
+  const handleAddCopy = (mediaCopy: MediaCopyDto) => {
+    setSelectedMediaForCopy(mediaCopy.media);
     setIsCopyModalOpen(true);
   };
 
@@ -73,14 +88,21 @@ export function UserMediaTable({
     }
   };
 
+  
+
   const columns = useUserMediaColumns({
     onAddCopy: handleAddCopy
   });
 
   return (
     <>
+          <FilterPanel
+            filters={filters}
+            onFiltersChange={updateFilters}
+            className="mb-4"
+          />
       <TableContainer
-        data={media}
+        data={filteredData}
         columns={columns}
         loading={loading}
         error={error}
@@ -93,14 +115,13 @@ export function UserMediaTable({
       />
 
       {/* Media Detail Modal */}
-      <MediaModal
-        media={selectedMedia}
+      <UserMediaModal
+        mediaCopy={selectedMedia}
         isOpen={isMediaModalOpen}
         onClose={() => {
           setIsMediaModalOpen(false);
           setSelectedMedia(undefined);
         }}
-        showCopies={true}
       />
 
       {/* Add Copy Modal */}

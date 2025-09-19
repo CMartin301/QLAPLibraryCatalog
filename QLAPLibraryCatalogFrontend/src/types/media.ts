@@ -47,6 +47,12 @@ export interface MediaDto {
 
   tags?: TagDto[];
 }
+export interface LocationInfo {
+  zoneId: number;
+  zoneName: string;
+  distance: number;
+  availableCopiesCount: number;
+}
 
 export interface Media {
   mediaId: number;
@@ -130,34 +136,18 @@ export interface MediaCopyDto {
   // Owner fields (following your BorrowRequestDto pattern)
   ownerUsername: string;
   ownerUserId: number;
+
+  media?: MediaDto;
 }
 
 export interface UserMediaCopyDto {
-  mediaId: number;
-  mediaTypeId: number;
-  mediaTypeName?: string;
-  title: string;
-  subtitle: string | null;
-  creator: string;
-  publisher: string;
-  publicationDate: string;
-  language: string;
-  genre: string;
-  description: string;
-  coverImageUrl: string;
-  isbn10: string | null;
-  isbn13: string | null;
-  pageCount: number | null;
-  issueNumber: number | null;
-  volume: number | null;
-
-
   copyId: number;
   condition: string;
   isAvailable: boolean;
   notes?: string;
   currentLocationZoneName?: string;
   homeLocationZoneName?: string;
+  
 }
 export interface CreateMediaCopyRequest {
   userId: number;

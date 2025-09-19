@@ -113,6 +113,25 @@ namespace QLAPLibraryCatalogAPI.Controllers
             {
                 return StatusCode(500, new { error = ex.Message });
             }
+        }/// <summary>
+        /// Updates media copy
+        /// </summary>
+        /// <param name="createMediaCopyDto"></param>
+        /// <returns></returns>
+        [HttpPut]
+        public async Task<IActionResult> UpdateMediaCopy([FromBody] CreateMediaCopyDto createMediaCopyDto)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+
+                var updatedMediaCopy = await _mediaCopiesService.CreateMediaCopyAsync(createMediaCopyDto);
+                return CreatedAtAction(nameof(GetMediaCopyById), new { mediaCopyId = updatedMediaCopy.CopyId }, updatedMediaCopy);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
         }
         
         /// <summary>
@@ -127,7 +146,7 @@ namespace QLAPLibraryCatalogAPI.Controllers
                 var userID = GetUserId();
                 var media = await _mediaCopiesService.GetUserMediaCopiesAsync(userID);
                 // return Ok(media);
-                return Ok(new { data = media });
+                return Ok(media);
             }
             catch (Exception ex)
             {

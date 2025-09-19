@@ -1,18 +1,20 @@
 import { useMemo } from 'react';
 import { createColumnHelper, ColumnDef } from '@tanstack/react-table';
 import { Plus } from 'lucide-react';
-import { Media, MediaCopy, MediaDto } from '../../../types/media';
+import { MediaCopyDto } from '../../../types/media';
+import { StatusBadge } from '../../shared/StatusBadge';
+import { TagDto } from '../../../types/tags';
 
-const columnHelper = createColumnHelper<MediaDto>();
+const columnHelper = createColumnHelper<MediaCopyDto>();
 
 interface UseUserMediaColumnsProps {
-  onAddCopy: (media: MediaDto) => void;
+  onAddCopy: (media: MediaCopyDto) => void;
 }
 
 export function useUserMediaColumns({ onAddCopy }: UseUserMediaColumnsProps) {
-  return useMemo<ColumnDef<MediaDto, any>[]>(() => [
+  return useMemo<ColumnDef<MediaCopyDto, any>[]>(() => [
     // Title & Creator
-    columnHelper.accessor(row => row.title ?? "—", {
+    columnHelper.accessor(row => row.media?.title ?? "—", {
       id: "title",
       header: "Title",
       cell: info => {
@@ -20,11 +22,31 @@ export function useUserMediaColumns({ onAddCopy }: UseUserMediaColumnsProps) {
         return (
           <div className="flex flex-col min-w-0">
             <p className="font-medium text-gray-900 truncate">
-              {row.title}
+              {row.media?.title}
             </p>
             <p className="text-sm text-gray-500 truncate">
-              {row.creator || "Unknown author"}
+              {row.media?.creator || "Unknown author"}
             </p>
+
+          <div className="flex flex-wrap gap-1 mt-1">
+            {row.media?.mediaTypeName && (
+              <StatusBadge 
+                            config={{
+                              text: row.media?.mediaTypeName,
+                              color: 'purple'
+                            }}
+                          />
+            )}
+            {row.condition && (
+              <StatusBadge 
+                            config={{
+                              text: 'Condition: ' + row.condition,
+                              color: row.condition=="Good"? 'green' : 'yellow'
+                            }}
+                          />
+            )}
+          </div>
+
           </div>
         );
       },
@@ -32,46 +54,99 @@ export function useUserMediaColumns({ onAddCopy }: UseUserMediaColumnsProps) {
       size: 280,
     }),
 
-    // Media Type
-    columnHelper.accessor(row => row.mediaTypeName ?? "Unknown", {
-      id: "mediaType",
-      header: "Type",
-      cell: info => (
-        <span className="text-sm text-gray-900">{info.getValue()}</span>
-      ),
+    // // Media Type
+    // columnHelper.accessor(row => row.media?.mediaTypeName ?? "Unknown", {
+    //   id: "mediaType",
+    //   header: "Type",
+    //   cell: info => (
+    //     // <span className="text-sm text-gray-900">{info.getValue()}</span>
+
+    //                     <StatusBadge 
+    //                                   config={{
+    //                                     text: info.getValue(),
+    //                                     color: 'purple'
+    //                                   }}
+    //                                 />
+    //   ),
+    //   enableSorting: true,
+    //   size: 120,
+    // }),
+    // // Condition
+    // columnHelper.accessor(row => row.condition ?? "Unknown", {
+    //   id: "condition",
+    //   header: "Condition",
+    //   cell: info => (
+    //     <span className="text-sm text-gray-900">{info.getValue()}</span>
+    //   ),
+    //   enableSorting: true,
+    //   size: 120,
+    // }),
+
+    // Genre
+    columnHelper.accessor(row => row.media?.genre ?? "Unknown", {
+      id: "genre",
+      header: "Genre",
+      cell: info => {
+        const config = {
+          text: info.getValue(),
+          color: 'purple' as const
+        };
+        return <StatusBadge config={config} />;
+      },
       enableSorting: true,
-      size: 120,
+      size: 90,
     }),
 
-    // // Number of Copies
-    // columnHelper.accessor(row => row.copies?.length ?? 0, {
-    //   id: "copiesCount",
-    //   header: "My Copies",
-    //   cell: info => {
-    //     const count = info.getValue();
-    //     const row = info.row.original;
-    //     const availableCount = row.copies?.filter((c: MediaCopy) => c.isAvailable).length ?? 0;
+    // Tags
+    columnHelper.accessor(row => row.media?.tags ?? "", {
+      id: "tags",
+      header: "Tags",
+      cell: info => {
+        const tags = info.getValue();
+        if (!tags || tags.length === 0) {
+          return <span className="text-sm text-gray-400">No tags</span>;
+        }
         
-    //     return (
-    //       <div className="text-sm text-gray-900">
-    //         {count} total 
-    //         {count > 0 && (
-    //           <span className="text-green-600 ml-1">
-    //             ({availableCount} available)
-    //           </span>
-    //         )}
-    //       </div>
-    //     );
-    //   },
-    //   enableSorting: true,
-    //   size: 140,
-    // }),
+        return (
+          <div className="flex flex-wrap gap-1">
+            {tags.map((tag: TagDto) => {
+              const config = {
+                text: tag.tagName,
+                color: 'gray' as const
+              };
+              return <StatusBadge key={tag.tagId} config={config} />;
+            })}
+          </div>
+        );
+      },
+      enableSorting: false,
+      size: 160,
+    }),
+
+    // Status
+    columnHelper.accessor(row => row.isAvailable , {
+      id: "status",
+      header: "Status",
+      cell: info => (
+        // <span className="text-sm text-gray-900">{info.getValue()}</span>
+
+                        <StatusBadge 
+                                      config={{
+                                        text: info.getValue() ? 'Available' : 'On Loan',
+                                        color: info.getValue() ? 'green' : 'gray'
+                                      }}
+                                    />
+      ),
+      enableSorting: true,
+      size: 80,
+    }),
+
 
     // Actions
     columnHelper.display({
       id: "actions",
       header: "",
-      size: 160,
+      size: 100,
       cell: info => {
         const mediaItem = info.row.original;
         return (
@@ -80,7 +155,7 @@ export function useUserMediaColumns({ onAddCopy }: UseUserMediaColumnsProps) {
               e.stopPropagation();
               onAddCopy(mediaItem);
             }}
-            aria-label={`Add copy of ${mediaItem.title}`}
+            aria-label={`Add copy of ${mediaItem.media?.title}`}
             className="inline-flex items-center px-3 py-1 text-xs font-medium rounded bg-lavender-400 text-white hover:bg-lavender-500 transition-colors gap-1"
           >
             <Plus size={14} />

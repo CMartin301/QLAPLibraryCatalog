@@ -13,7 +13,9 @@ namespace QLAPLibraryCatalogAPI.Services
         Task<IEnumerable<MediaCopyDto>> GetMediaCopiesByMediaIDAsync(int mediaId);
         Task<MediaCopyDto?> GetMediaCopyByIdAsync(int mediaCopyId);
         Task<MediaCopyDto> CreateMediaCopyAsync(CreateMediaCopyDto createMediaCopyDto);
-        Task<IEnumerable<UserMediaCopyDto>> GetUserMediaCopiesAsync(int userID);
+        Task<MediaCopyDto?> UpdateMediaCopyAsync(int mediaCopyId, CreateMediaCopyDto updateMediaCopyDto);
+        Task<IEnumerable<MediaCopyDto>> GetUserMediaCopiesAsync(int userID);
+        // Task<IEnumerable<UserMediaCopyDto>> GetUserMediaCopiesAsync(int userID);
         // Task<MediaDto?> UpdateMediaAsync(int id, CreateMediaDto updateMediaDto);
         // Task<bool> DeleteMediaAsync(int id);
 #pragma warning restore 1591
@@ -104,22 +106,68 @@ namespace QLAPLibraryCatalogAPI.Services
             return await GetMediaCopyByIdAsync(mediaCopy.CopyId) ?? throw new InvalidOperationException("Failed to retrieve created media copy");
         }
 
+
+        /// <summary>
+        /// Updates existing media copy
+        /// </summary>
+        /// <param name="mediaCopyId"></param>
+        /// <param name="updateMediaCopyDto"></param>
+        /// <returns></returns>
+        public async Task<MediaCopyDto?> UpdateMediaCopyAsync(int mediaCopyId, CreateMediaCopyDto updateMediaCopyDto)
+        {
+            var existingCopy = await _context.MediaCopies.FindAsync(mediaCopyId);
+            if (existingCopy == null) return null;
+
+            existingCopy.UserId = updateMediaCopyDto.UserId;
+            existingCopy.MediaId = updateMediaCopyDto.MediaId;
+            existingCopy.Condition = updateMediaCopyDto.Condition;
+            existingCopy.Notes = updateMediaCopyDto.Notes;
+            existingCopy.IsAvailable = updateMediaCopyDto.IsAvailable;
+            existingCopy.HomeLocationZoneId = updateMediaCopyDto.HomeLocationZoneId;
+            existingCopy.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return await GetMediaCopyByIdAsync(mediaCopyId);
+        }
+
         /// <summary>
         /// Get the media info and the copy info for all media user copies
         /// </summary>
         /// <returns></returns>
-        public async Task<IEnumerable<UserMediaCopyDto>> GetUserMediaCopiesAsync(int userID)
+        public async Task<IEnumerable<MediaCopyDto>> GetUserMediaCopiesAsync(int userID)
         {
             var query = _context.MediaCopies
                 .Include(m => m.Media)
                     .ThenInclude(m => m.MediaType)
+                .Include(m => m.Media)
+                    .ThenInclude(m => m.MediaTags)
+                        .ThenInclude(m => m.Tag)
                 .Include(m => m.CurrentLocationZone)
                 .Include(m => m.HomeLocationZone)
+                .Include(m => m.User)
                 .Where(m => m.UserId == userID)
                 .AsQueryable();
 
             return await query.Select(mediaCopy => MapUserMediaCopy(mediaCopy)).ToListAsync();
         }
+
+        // /// <summary>
+        // /// Get the media info and the copy info for all media user copies
+        // /// </summary>
+        // /// <returns></returns>
+        // public async Task<IEnumerable<UserMediaCopyDto>> GetUserMediaCopiesAsync(int userID)
+        // {
+        //     var query = _context.MediaCopies
+        //         .Include(m => m.Media)
+        //             .ThenInclude(m => m.MediaType)
+        //         .Include(m => m.CurrentLocationZone)
+        //         .Include(m => m.HomeLocationZone)
+        //         .Where(m => m.UserId == userID)
+        //         .AsQueryable();
+
+        //     return await query.Select(mediaCopy => MapUserMediaCopy(mediaCopy)).ToListAsync();
+        // }
 
         #region Mapping Methods
         /// <summary>
@@ -149,36 +197,50 @@ namespace QLAPLibraryCatalogAPI.Services
         /// <summary>
         /// Maps a media copy to a user media copy DTO
         /// </summary>
-        private static UserMediaCopyDto MapUserMediaCopy(MediaCopy mediacopy)
+        private static MediaCopyDto MapUserMediaCopy(MediaCopy mediaCopy)
         {
+            string? currentLocationZoneName = mediaCopy.CurrentLocationZone != null ? mediaCopy.CurrentLocationZone.ZoneName : null;
+            string? homeLocationZoneName = mediaCopy.HomeLocationZone != null ? mediaCopy.HomeLocationZone.ZoneName : null;
 
-            return new UserMediaCopyDto
+            return new MediaCopyDto
             {
-                CopyId = mediacopy.CopyId,
-                UserId = mediacopy.UserId,
-                Condition = mediacopy.Condition,
-                Notes = mediacopy.Notes,
-                IsAvailable = mediacopy.IsAvailable,
-                CurrentLocationZoneName = mediacopy.CurrentLocationZone?.ZoneName,
-                HomeLocationZoneName = mediacopy.HomeLocationZone?.ZoneName,
-
-                MediaId = mediacopy.MediaId,
-                MediaTypeId = mediacopy.Media.MediaTypeId,
-                MediaTypeName = mediacopy.Media.MediaType.Name,
-                Title = mediacopy.Media.Title,
-                Subtitle = mediacopy.Media.Subtitle,
-                Creator = mediacopy.Media.Creator,
-                Publisher = mediacopy.Media.Publisher,
-                PublicationDate = mediacopy.Media.PublicationDate,
-                Language = mediacopy.Media.Language,
-                Genre = mediacopy.Media.Genre,
-                Description = mediacopy.Media.Description,
-                CoverImageUrl = mediacopy.Media.CoverImageUrl,
-                Isbn10 = mediacopy.Media.Isbn10,
-                Isbn13 = mediacopy.Media.Isbn13,
-                PageCount = mediacopy.Media.PageCount,
-                IssueNumber = mediacopy.Media.IssueNumber,
-                Volume = mediacopy.Media.Volume,
+                CopyId = mediaCopy.CopyId,
+                UserId = mediaCopy.UserId,
+                MediaId = mediaCopy.MediaId,
+                Condition = mediaCopy.Condition,
+                Notes = mediaCopy.Notes,
+                IsAvailable = mediaCopy.IsAvailable,
+                MediaTitle = mediaCopy.Media.Title,
+                MediaCreator = mediaCopy.Media.Creator,
+                OwnerUsername = mediaCopy.User.Username,
+                OwnerUserId = mediaCopy.User.UserId,
+                CurrentLocationZoneName = currentLocationZoneName,
+                HomeLocationZoneName = homeLocationZoneName,
+                Media = new MediaDto
+                {
+                    MediaId = mediaCopy.Media.MediaId,
+                    MediaTypeId = mediaCopy.Media.MediaTypeId,
+                    MediaTypeName = mediaCopy.Media.MediaType.DisplayName,
+                    Title = mediaCopy.Media.Title,
+                    Subtitle = mediaCopy.Media.Subtitle,
+                    Creator = mediaCopy.Media.Creator,
+                    Publisher = mediaCopy.Media.Publisher,
+                    PublicationDate = mediaCopy.Media.PublicationDate,
+                    Language = mediaCopy.Media.Language,
+                    Genre = mediaCopy.Media.Genre,
+                    Description = mediaCopy.Media.Description,
+                    CoverImageUrl = mediaCopy.Media.CoverImageUrl,
+                    Isbn10 = mediaCopy.Media.Isbn10,
+                    Isbn13 = mediaCopy.Media.Isbn13,
+                    PageCount = mediaCopy.Media.PageCount,
+                    IssueNumber = mediaCopy.Media.IssueNumber,
+                    Volume = mediaCopy.Media.Volume,
+                    Tags = mediaCopy.Media.MediaTags.Select(mediaTag => new TagDto
+                        {
+                            TagId = mediaTag.TagId,
+                            TagName = mediaTag.Tag.TagName
+                        }).ToList()
+                }
             };
         }
         #endregion
