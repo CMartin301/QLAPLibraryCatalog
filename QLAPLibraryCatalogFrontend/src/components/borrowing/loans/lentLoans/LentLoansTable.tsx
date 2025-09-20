@@ -68,7 +68,6 @@ export function LentLoansTable({ loans, onRefresh, error, loading }: LentLoansTa
     isLoading
   });
 
-  console.log(loans);
   return (
     <>
       <TableContainer

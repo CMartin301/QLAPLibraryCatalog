@@ -45,6 +45,12 @@ export function useHistoricalLoansColumns({
           enableSorting: true,
           size: 260,
         }),
+        columnHelper.accessor("ownerUsername", {
+          header: "Owner",
+          cell: (info) => <span className="text-sm text-gray-900">{info.getValue()}</span>,
+          enableSorting: true,
+          size: 150,
+        }),
         columnHelper.accessor("borrowerUsername", {
           header: "Borrower",
           cell: (info) => <span className="text-sm text-gray-900">{info.getValue()}</span>,
@@ -57,82 +63,80 @@ export function useHistoricalLoansColumns({
           enableSorting: true,
           size: 120,
         }),
-        columnHelper.accessor("dueDate", {
-          header: "Due Date",
+        // columnHelper.accessor("dueDate", {
+        //   header: "Due Date",
+        //   cell: (info) => <span className="text-sm text-gray-900">{info.getValue()}</span>,
+        //   enableSorting: true,
+        //   size: 120,
+        // }),
+        columnHelper.accessor("returnedDate", {
+          header: "Returned Date",
           cell: (info) => <span className="text-sm text-gray-900">{info.getValue()}</span>,
           enableSorting: true,
           size: 120,
         }),
-        columnHelper.accessor("status", {
-          header: "Status",
-          size: 160,
-          cell: (info) => {
-            const config = getLoanStatusDisplay(info.row.original);
-            return <StatusBadge config={config} />;
-          },
-          enableSorting: true,
-        }),
-        columnHelper.display({
-          id: "actions",
-          header: "",
-          size: 220,
-          cell: (info) => {
-            const loan = info.row.original;
+
+        // columnHelper.display({
+        //   id: "actions",
+        //   header: "",
+        //   size: 220,
+        //   cell: (info) => {
+        //     const loan = info.row.original;
             
-            // No actions if loan is officially returned
-            if (loan.status === 'returned') {
-              return (
-                <span className="text-xs text-gray-400">
-                  No Actions
-                </span>
-              );
-            }
+        //     // No actions if loan is officially returned
+        //     if (loan.status === 'returned') {
+        //       return (
+        //         <span className="text-xs text-gray-400">
+        //           No Actions
+        //         </span>
+        //       );
+        //     }
   
-            const canMarkReturned = loan.lenderConfirmedReturnAt === null;
-            const canExtend = loan.status === 'active' && !loan.borrowerReturnedAt;
+        //     const canMarkReturned = loan.lenderConfirmedReturnAt === null;
+        //     const canExtend = loan.status === 'active' && !loan.borrowerReturnedAt;
   
-            if (!canMarkReturned && !canExtend) {
-              return (
-                <span className="text-xs text-gray-400">
-                  No Actions
-                </span>
-              );
-            }
+        //     if (!canMarkReturned && !canExtend) {
+        //       return (
+        //         <span className="text-xs text-gray-400">
+        //           No Actions
+        //         </span>
+        //       );
+        //     }
   
-            return (
-              <div className="flex gap-2">
-                {canMarkReturned && (
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation(); 
-                        handleReturn(loan.loanId);
-                      }} 
-                      disabled={isLoading}
-                      loading={isLoading}
-                      aria-label={`Mark loan as returned`}
-                    >
-                      {isLoading ? "Processing..." : "Confirm Return"}
-                    </Button>
-                )}
-                {canExtend && (
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation(); 
-                        handleExtend(loan);
-                      }} 
-                      disabled={isLoading}
-                      aria-label={`Extend loan`}
-                    >
-                      Extend Loan
-                    </Button>
-                )}
-              </div>
-            );
-          },
-        }),
+        //     return (
+        //       <div className="flex gap-2">
+        //         {canMarkReturned && (
+        //             <Button
+        //               variant="primary"
+        //               size="sm"
+        //               onClick={(e) => {
+        //                 e.stopPropagation(); 
+        //                 handleReturn(loan.loanId);
+        //               }} 
+        //               disabled={isLoading}
+        //               loading={isLoading}
+        //               aria-label={`Mark loan as returned`}
+        //             >
+        //               {isLoading ? "Processing..." : "Confirm Return"}
+        //             </Button>
+        //         )}
+        //         {canExtend && (
+        //             <Button
+        //               variant="primary"
+        //               size="sm"
+        //               onClick={(e) => {
+        //                 e.stopPropagation(); 
+        //                 handleExtend(loan);
+        //               }} 
+        //               disabled={isLoading}
+        //               aria-label={`Extend loan`}
+        //             >
+        //               Extend Loan
+        //             </Button>
+        //         )}
+        //       </div>
+        //     );
+        //   },
+        // }),
   ], [isLoading, handleReturn, handleExtend]);
 }

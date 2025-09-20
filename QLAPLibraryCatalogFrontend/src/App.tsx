@@ -70,6 +70,26 @@ function AppRoutes() {
         } 
       />
       <Route 
+        path="/network-catalog" 
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <NetworkCatalogPage />
+            </AppLayout>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/tags" 
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <TagsPage />
+            </AppLayout>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
         path="/my-library" 
         element={
           <ProtectedRoute>
@@ -110,16 +130,6 @@ function AppRoutes() {
         } 
       />
       <Route 
-        path="/loans" 
-        element={
-          <ProtectedRoute>
-            <AppLayout>
-              <LoansPage />
-            </AppLayout>
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
         path="/borrowing-history" 
         element={
           <ProtectedRoute>
@@ -135,16 +145,6 @@ function AppRoutes() {
           <ProtectedRoute>
             <AppLayout>
               <UserPreferencesContainer />
-            </AppLayout>
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/tags" 
-        element={
-          <ProtectedRoute>
-            <AppLayout>
-              <TagsPage />
             </AppLayout>
           </ProtectedRoute>
         } 

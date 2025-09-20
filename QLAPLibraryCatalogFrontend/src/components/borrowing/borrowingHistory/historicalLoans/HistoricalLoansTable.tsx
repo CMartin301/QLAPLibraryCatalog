@@ -68,7 +68,6 @@ export function HistoricalLoansTable({ loans, onRefresh, error, loading }: Histo
     isLoading
   });
 
-  console.log(loans);
   return (
     <>
       <TableContainer
