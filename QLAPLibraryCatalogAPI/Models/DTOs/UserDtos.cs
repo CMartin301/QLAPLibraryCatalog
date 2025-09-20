@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace QLAPLibraryCatalogAPI.Models.DTOs
 {
     public class UserDto
@@ -54,13 +56,14 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
         public string? ProfileDescription { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
-        
+
         // Optional: Include basic user info
         public string? Username { get; set; }
         public string? Email { get; set; }
-        
+
         // Optional: Include user tags
         public List<TagDto> UserTags { get; set; } = new();
+        public List<UserPronounDto> UserPronouns { get; set; } = new();
     }
 
     /// <summary>
@@ -82,9 +85,48 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
         public bool? EmailVerified { get; set; }
         public bool? IsActive { get; set; }
         public DateTime? CreatedAt { get; set; }
-        
+
         public UserPreferencesDto? UserPreferences { get; set; }
         public UserProfileDto? UserProfile { get; set; }
         public List<TagDto> UserTags { get; set; } = new();
     }
+    
+    /// <summary>
+/// DTO for pronoun set information
+/// </summary>
+public class PronounSetDto
+{
+    public int PronounId { get; set; }
+    public string PronounText { get; set; } = null!;
+    public int DisplayOrder { get; set; }
+    public bool IsCommon { get; set; }
+}
+
+/// <summary>
+/// DTO for creating/updating user pronouns
+/// </summary>
+public class UpdateUserPronounsDto
+{
+    public List<UserPronounDto> Pronouns { get; set; } = new();
+}
+
+/// <summary>
+/// DTO for user pronoun with display order
+/// </summary>
+public class UserPronounDto
+{
+    public int PronounId { get; set; }
+    public string PronounText { get; set; } = null!;
+    public int DisplayOrder { get; set; }
+}
+
+/// <summary>
+/// DTO for creating a custom pronoun set
+/// </summary>
+public class CreatePronounSetDto
+{
+    [Required]
+    [StringLength(50)]
+    public string PronounText { get; set; } = null!;
+}
 }

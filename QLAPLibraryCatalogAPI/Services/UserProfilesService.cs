@@ -18,6 +18,10 @@ namespace QLAPLibraryCatalogAPI.Services
         Task<bool> AddUserTagAsync(int userId, int tagId);
         Task<bool> RemoveUserTagAsync(int userId, int tagId);
         Task<IEnumerable<TagDto>> GetUserTagsAsync(int userId);
+        Task<IEnumerable<UserPronounDto>> GetUserPronounsAsync(int userId);
+        Task<bool> UpdateUserPronounsAsync(int userId, UpdateUserPronounsDto pronounsDto);
+        Task<IEnumerable<PronounSetDto>> GetCommonPronounSetsAsync();
+        Task<PronounSetDto> CreateCustomPronounSetAsync(CreatePronounSetDto createDto);
 #pragma warning restore 1591
     }
 
@@ -40,6 +44,9 @@ namespace QLAPLibraryCatalogAPI.Services
                 .Include(up => up.User)
                     .ThenInclude(u => u.UserTags)
                         .ThenInclude(ut => ut.Tag)
+                .Include(up => up.User)
+                    .ThenInclude(u => u.UserPronouns)
+                        .ThenInclude(ut => ut.PronounSet)
                 .Where(up => up.UserId == userId)
                 .Select(profile => MapUserProfile(profile))
                 .FirstOrDefaultAsync();
@@ -178,6 +185,137 @@ namespace QLAPLibraryCatalogAPI.Services
                 .ToListAsync();
         }
 
+        /// <summary>
+/// Gets user's pronouns
+/// </summary>
+public async Task<IEnumerable<UserPronounDto>> GetUserPronounsAsync(int userId)
+{
+    return await _context.UserPronouns
+        .Include(up => up.PronounSet)
+        .Where(up => up.UserId == userId)
+        .Where(up => up.PronounSet.IsActive)
+        .OrderBy(up => up.DisplayOrder)
+        .ThenBy(up => up.PronounSet.DisplayOrder)
+        .Select(up => new UserPronounDto
+        {
+            PronounId = up.PronounId,
+            PronounText = up.PronounSet.PronounText,
+            DisplayOrder = up.DisplayOrder
+        })
+        .ToListAsync();
+}
+
+/// <summary>
+/// Updates user's pronouns (replaces all existing pronouns)
+/// </summary>
+public async Task<bool> UpdateUserPronounsAsync(int userId, UpdateUserPronounsDto pronounsDto)
+{
+    using var transaction = await _context.Database.BeginTransactionAsync();
+    
+    try
+    {
+        // Verify user exists
+        var userExists = await _context.Users.AnyAsync(u => u.UserId == userId && u.IsActive == true);
+        if (!userExists) return false;
+
+        // Remove existing pronouns
+        var existingPronouns = await _context.UserPronouns
+            .Where(up => up.UserId == userId)
+            .ToListAsync();
+        
+        _context.UserPronouns.RemoveRange(existingPronouns);
+
+        // Add new pronouns
+        foreach (var pronounDto in pronounsDto.Pronouns)
+        {
+            // Verify pronoun set exists
+            var pronounExists = await _context.PronounSets
+                .AnyAsync(ps => ps.PronounId == pronounDto.PronounId && ps.IsActive);
+            
+            if (!pronounExists) return false;
+
+            var userPronoun = new UserPronoun
+            {
+                UserId = userId,
+                PronounId = pronounDto.PronounId,
+                DisplayOrder = pronounDto.DisplayOrder,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.UserPronouns.Add(userPronoun);
+        }
+
+        await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
+        return true;
+    }
+    catch
+    {
+        await transaction.RollbackAsync();
+        return false;
+    }
+}
+
+/// <summary>
+/// Gets common pronoun sets for dropdown/selection
+/// </summary>
+public async Task<IEnumerable<PronounSetDto>> GetCommonPronounSetsAsync()
+{
+    return await _context.PronounSets
+        .Where(ps => ps.IsActive && ps.IsCommon)
+        .OrderBy(ps => ps.DisplayOrder)
+        .Select(ps => new PronounSetDto
+        {
+            PronounId = ps.PronounId,
+            PronounText = ps.PronounText,
+            DisplayOrder = ps.DisplayOrder,
+            IsCommon = ps.IsCommon
+        })
+        .ToListAsync();
+}
+
+/// <summary>
+/// Creates a custom pronoun set
+/// </summary>
+public async Task<PronounSetDto> CreateCustomPronounSetAsync(CreatePronounSetDto createDto)
+{
+    // Check if pronoun already exists (case-insensitive)
+    var existing = await _context.PronounSets
+        .FirstOrDefaultAsync(ps => ps.PronounText.ToLower() == createDto.PronounText.ToLower());
+
+    if (existing != null)
+    {
+        return new PronounSetDto
+        {
+            PronounId = existing.PronounId,
+            PronounText = existing.PronounText,
+            DisplayOrder = existing.DisplayOrder,
+            IsCommon = existing.IsCommon
+        };
+    }
+
+    var newPronounSet = new PronounSet
+    {
+        PronounText = createDto.PronounText.Trim(),
+        DisplayOrder = 0,
+        IsCommon = false,
+        IsActive = true,
+        CreatedAt = DateTime.UtcNow,
+        UpdatedAt = DateTime.UtcNow
+    };
+
+    _context.PronounSets.Add(newPronounSet);
+    await _context.SaveChangesAsync();
+
+    return new PronounSetDto
+    {
+        PronounId = newPronounSet.PronounId,
+        PronounText = newPronounSet.PronounText,
+        DisplayOrder = newPronounSet.DisplayOrder,
+        IsCommon = newPronounSet.IsCommon
+    };
+}
+
         #region Mapping Methods
         private static UserProfileDto MapUserProfile(UserProfile profile)
         {
@@ -193,7 +331,16 @@ namespace QLAPLibraryCatalogAPI.Services
                 {
                     TagId = ut.Tag.TagId,
                     TagName = ut.Tag.TagName
-                }).ToList() ?? new List<TagDto>()
+                }).ToList() ?? new List<TagDto>(),
+        // Add this line:
+        UserPronouns = profile.User?.UserPronouns?.Where(up => up.PronounSet.IsActive)
+            .OrderBy(up => up.DisplayOrder)
+            .Select(up => new UserPronounDto
+            {
+                PronounId = up.PronounId,
+                PronounText = up.PronounSet.PronounText,
+                DisplayOrder = up.DisplayOrder
+            }).ToList() ?? new List<UserPronounDto>()
             };
         }
 
