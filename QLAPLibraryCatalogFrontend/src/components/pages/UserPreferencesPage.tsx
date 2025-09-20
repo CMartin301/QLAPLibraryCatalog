@@ -18,7 +18,7 @@ const defaultPreferences: UserPreferences = {
   notificationSettings: null
 };
 
-function UserPreferencesContainer({ onSave }: UserPreferencesProps) {
+function UserPreferencesPage({ onSave }: UserPreferencesProps) {
   const [preferences, setPreferences] = useState<UserPreferences>(defaultPreferences);
   const [isDirty, setIsDirty] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -283,4 +283,4 @@ function UserPreferencesContainer({ onSave }: UserPreferencesProps) {
   );
 }
 
-export default UserPreferencesContainer;
+export default UserPreferencesPage;

@@ -10,7 +10,6 @@ import Footer from './components/layout/Footer';
 import Header from './components/layout/Header';
 import MyLibraryPage from './components/myLibrary/MyLibraryPage';
 import NetworkCatalogPage from './components/networkCatalog/NetworkCatalogPage';
-import UserPreferencesContainer from './components/preferences/UserPreferencesContainer';
 import BorrowingDashboard from './components/borrowing/BorrowingPage';
 import Dashboard from './components/dashboard/Dashboard';
 import { Toaster } from 'react-hot-toast';   // ⬅️ import here
@@ -18,6 +17,8 @@ import TagsPage from './components/tags/TagsPage';
 import BorrowRequestsPage from './components/borrowing/borrowRequests/BorrowRequestsPage';
 import LoansPage from './components/borrowing/loans/LoansPage';
 import BorrowingHistoryPage from './components/borrowing/borrowingHistory/BorrowingHistoryPage';
+import UserProfilePage from './components/pages/UserProfilePage';
+import UserPreferencesPage from './components/pages/UserPreferencesPage';
 
 /**
  * App Layout Component
@@ -140,11 +141,21 @@ function AppRoutes() {
         } 
       />
       <Route 
-        path="/preferences" 
+        path="/user-profile" 
         element={
           <ProtectedRoute>
             <AppLayout>
-              <UserPreferencesContainer />
+              <UserProfilePage />
+            </AppLayout>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/user-preferences" 
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <UserPreferencesPage />
             </AppLayout>
           </ProtectedRoute>
         } 
