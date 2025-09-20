@@ -10,9 +10,6 @@ import {
   Tag, 
   Calendar,
   BookOpen,
-  MessageCircle,
-  Mail,
-  MapPin,
   Clock
 } from 'lucide-react';
 import Button from '../shared/Button';
@@ -20,6 +17,7 @@ import { Modal } from '../shared/Modal';
 import { TagDto } from '../../types/tags';
 import StatCard from '../shared/StatCard';
 import EditUserProfileForm from '../user/EditUserProfileForm';
+import { StatusBadge } from '../shared/StatusBadge';
 
 
 interface UserProfilePageProps {
@@ -91,8 +89,6 @@ const formatPronounsDisplay = (userPronouns: UserPronoun[]): string => {
       // TODO: Replace with actual service call
       const updated = await userProfileService.createOrUpdateMyProfile(data);
       
-      // For now, simulate the update
-      // const updated = { ...profile, ...data, updatedAt: new Date().toISOString() };
       setProfile(updated);
       setIsEditModalOpen(false);
       return updated;
@@ -164,11 +160,22 @@ const formatPronounsDisplay = (userPronouns: UserPronoun[]): string => {
                 <h1 className="text-2xl font-bold text-[var(--color-text)] truncate">
                   {profile.username || 'Anonymous User'}
                 </h1>
-                {profile.userPronouns && profile.userPronouns.length > 0 && (
+                {/* {profile.userPronouns && profile.userPronouns.length > 0 && (
                   <span className="text-sm text-[var(--color-muted)] bg-[var(--color-background)] px-2 py-1 rounded">
                     {formatPronounsDisplay(profile.userPronouns)}
                   </span>
-                )}
+                )} */}
+                  {profile.userPronouns && profile.userPronouns.length && profile.userPronouns.map((pronoun) => (
+                        <StatusBadge 
+                          config={{
+                            text: pronoun.pronounText,
+                            color: 'purple',
+                            icon: undefined
+                          }}
+                          size="md"
+                        />
+                    ))}
+
               </div>
               
               {/* User Details */}
