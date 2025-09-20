@@ -31,38 +31,6 @@ const defaultProfile: ExtendedUserProfile = {
   isOwnProfile: true
 };
 
-const getPlaceholderProfile = (userId: number, isOwnProfile: boolean): ExtendedUserProfile => ({
-  userId,
-  username: isOwnProfile ? 'johndoe' : 'bookworm_sarah',
-  email: isOwnProfile ? 'john.doe@example.com' : undefined,
-  location: isOwnProfile ? 'Seattle, WA' : 'Portland, OR',
-  profileDescription: isOwnProfile 
-    ? 'Avid reader and book collector with a passion for science fiction and fantasy. Always happy to lend books and discover new authors!'
-    : 'Literature enthusiast specializing in contemporary fiction and poetry. I love discussing books and sharing recommendations with fellow readers.',
-  joinedDate: isOwnProfile ? '2023-03-15' : '2023-07-22',
-  createdAt: isOwnProfile ? '2023-03-15T10:30:00Z' : '2023-07-22T14:20:00Z',
-  updatedAt: isOwnProfile ? '2024-01-10T16:45:00Z' : '2024-02-05T11:15:00Z',
-  mediaItemCount: isOwnProfile ? 47 : 23,
-  loanCount: isOwnProfile ? 12 : 8,
-  reviewCount: isOwnProfile ? 34 : 15,
-  averageRating: isOwnProfile ? 4.7 : 4.5,
-  userTags: [
-    { tagId: 1, tagName: 'Science Fiction' },
-    { tagId: 2, tagName: 'Fantasy' },
-    { tagId: 3, tagName: 'Mystery' },
-    ...(isOwnProfile ? [{ tagId: 4, tagName: 'Non-Fiction' }] : [])
-  ],
-  // Update pronouns to use the new structure
-  userPronouns: isOwnProfile 
-    ? [
-        { pronounId: 1, pronounText: 'he/him', displayOrder: 1 },
-        { pronounId: 3, pronounText: 'they/them', displayOrder: 2 }
-      ]
-    : [
-        { pronounId: 2, pronounText: 'she/her', displayOrder: 1 }
-      ],
-  isOwnProfile
-});
 
 interface UserProfilePageProps {
   userId?: number; // If provided, shows another user's profile
@@ -129,8 +97,6 @@ const formatPronounsDisplay = (userPronouns: UserPronoun[]): string => {
     console.error('Failed to load profile:', err);
     setError('Failed to load profile');
     // Use placeholder data as fallback
-    const placeholderData = getPlaceholderProfile(profileUserId, isOwnProfile);
-    setProfile(placeholderData);
   } finally {
     setIsLoading(false);
   }
@@ -212,28 +178,15 @@ const formatPronounsDisplay = (userPronouns: UserPronoun[]): string => {
                 <h1 className="text-2xl font-bold text-[var(--color-text)] truncate">
                   {profile.username || 'Anonymous User'}
                 </h1>
-{profile.userPronouns && profile.userPronouns.length > 0 && (
-  <span className="text-sm text-[var(--color-muted)] bg-[var(--color-background)] px-2 py-1 rounded">
-    {formatPronounsDisplay(profile.userPronouns)}
-  </span>
-)}
+                {profile.userPronouns && profile.userPronouns.length > 0 && (
+                  <span className="text-sm text-[var(--color-muted)] bg-[var(--color-background)] px-2 py-1 rounded">
+                    {formatPronounsDisplay(profile.userPronouns)}
+                  </span>
+                )}
               </div>
               
               {/* User Details */}
               <div className="space-y-1 text-sm text-[var(--color-muted)]">
-                {profile.email && isOwnProfile && (
-                  <div className="flex items-center gap-2">
-                    <Mail size={14} />
-                    <span>{profile.email}</span>
-                  </div>
-                )}
-                
-                {profile.location && (
-                  <div className="flex items-center gap-2">
-                    <MapPin size={14} />
-                    <span>{profile.location}</span>
-                  </div>
-                )}
                 
                 {profile.joinedDate && (
                   <div className="flex items-center gap-2">
@@ -278,28 +231,6 @@ const formatPronounsDisplay = (userPronouns: UserPronoun[]): string => {
           to={isOwnProfile ? "/my-loans" : `/users/${profile.userId}/loans`}
         />
         
-        <StatCard
-          icon={MessageCircle}
-          title="Reviews"
-          value={profile.reviewCount || 0}
-          description="Books reviewed"
-          to={isOwnProfile ? "/my-reviews" : `/users/${profile.userId}/reviews`}
-        />
-        
-        <div className="bg-[var(--color-card)] rounded-lg border border-[var(--color-border)] p-6 shadow-sm">
-          <div className="flex items-center">
-            <div className="flex-shrink-0 p-3 bg-yellow-100 rounded-lg">
-              <Tag className="w-6 h-6 text-yellow-600" />
-            </div>
-            <div className="ml-4 flex-1">
-              <div className="text-2xl font-bold text-[var(--color-text)]">
-                {profile.averageRating ? `${profile.averageRating}/5` : 'N/A'}
-              </div>
-              <div className="text-sm font-medium text-gray-600">Average Rating</div>
-              <div className="text-xs text-gray-500 mt-1">From reviews</div>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* About Section */}
