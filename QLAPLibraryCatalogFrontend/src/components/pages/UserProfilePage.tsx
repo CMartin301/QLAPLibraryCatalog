@@ -1,7 +1,7 @@
 // components/UserProfile/UserProfilePage.tsx
 import React, { useEffect, useState } from 'react';
 import { userProfileService } from '../../services/userProfileService';
-import { UserProfile, CreateOrUpdateUserProfile } from '../../types/userProfile';
+import { UserProfile, CreateOrUpdateUserProfile, UserPronoun, ExtendedUserProfile } from '../../types/userProfile';
 import useAuth from '../../hooks/useAuth';
 import { 
   Edit, 
@@ -21,34 +21,20 @@ import { TagDto } from '../../types/tags';
 import StatCard from '../shared/StatCard';
 import EditUserProfileForm from '../user/EditUserProfileForm';
 
-// Extended interface for richer profile data (placeholder for future implementation)
-interface ExtendedUserProfile extends UserProfile {
-  email?: string;
-  pronouns?: string;
-  location?: string;
-  joinedDate?: string;
-  mediaItemCount?: number;
-  loanCount?: number;
-  reviewCount?: number;
-  averageRating?: number;
-  isOwnProfile?: boolean;
-}
-
 const defaultProfile: ExtendedUserProfile = {
   userId: 0,
   profileDescription: '',
   createdAt: '',
   updatedAt: '',
   userTags: [],
+  userPronouns: [], // Add this line
   isOwnProfile: true
 };
 
-// Placeholder data for development (remove when connecting to real services)
 const getPlaceholderProfile = (userId: number, isOwnProfile: boolean): ExtendedUserProfile => ({
   userId,
   username: isOwnProfile ? 'johndoe' : 'bookworm_sarah',
-  email: isOwnProfile ? 'john.doe@example.com' : undefined, // Only show email for own profile
-  pronouns: isOwnProfile ? 'he/him' : 'she/her',
+  email: isOwnProfile ? 'john.doe@example.com' : undefined,
   location: isOwnProfile ? 'Seattle, WA' : 'Portland, OR',
   profileDescription: isOwnProfile 
     ? 'Avid reader and book collector with a passion for science fiction and fantasy. Always happy to lend books and discover new authors!'
@@ -66,6 +52,15 @@ const getPlaceholderProfile = (userId: number, isOwnProfile: boolean): ExtendedU
     { tagId: 3, tagName: 'Mystery' },
     ...(isOwnProfile ? [{ tagId: 4, tagName: 'Non-Fiction' }] : [])
   ],
+  // Update pronouns to use the new structure
+  userPronouns: isOwnProfile 
+    ? [
+        { pronounId: 1, pronounText: 'he/him', displayOrder: 1 },
+        { pronounId: 3, pronounText: 'they/them', displayOrder: 2 }
+      ]
+    : [
+        { pronounId: 2, pronounText: 'she/her', displayOrder: 1 }
+      ],
   isOwnProfile
 });
 
@@ -84,33 +79,62 @@ function UserProfilePage({ userId: targetUserId }: UserProfilePageProps) {
   const isOwnProfile = !targetUserId || targetUserId === userID;
   const profileUserId = targetUserId || userID || 0;
 
+  // Add this helper function inside the component or as a utility function
+const formatPronounsDisplay = (userPronouns: UserPronoun[]): string => {
+  if (!userPronouns || userPronouns.length === 0) return '';
+  
+  return userPronouns
+    .sort((a, b) => a.displayOrder - b.displayOrder)
+    .map(p => p.pronounText)
+    .join(' / ');
+};
+
   useEffect(() => {
     if (profileUserId) loadProfile();
   }, [profileUserId, isOwnProfile]);
-
   const loadProfile = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      // For now, use placeholder data
-      // TODO: Replace with actual service calls
-      if (isOwnProfile) {
-        // const data = await userProfileService.getMyProfile();
-        const placeholderData = getPlaceholderProfile(profileUserId, true);
-        setProfile(placeholderData);
-      } else {
-        // const data = await userProfileService.getUserProfile(profileUserId);
-        const placeholderData = getPlaceholderProfile(profileUserId, false);
-        setProfile(placeholderData);
-      }
-    } catch (err: any) {
-      console.error('Failed to load profile:', err);
-      setError('Failed to load profile');
-      setProfile({ ...defaultProfile, userId: profileUserId, isOwnProfile });
-    } finally {
-      setIsLoading(false);
+  setIsLoading(true);
+  setError(null);
+  try {
+    if (isOwnProfile) {
+      const data = await userProfileService.getMyProfile();
+      setProfile({
+        ...data,
+        email: data.email || undefined, // Convert null to undefined
+        isOwnProfile: true,
+        // Add placeholder data for fields not yet implemented
+        mediaItemCount: 47,
+        loanCount: 12,
+        reviewCount: 34,
+        averageRating: 4.7,
+        location: 'Seattle, WA', // TODO: Get from backend
+        joinedDate: data.createdAt // Use profile creation as join date for now
+      });
+    } else {
+      const data = await userProfileService.getUserProfile(profileUserId);
+      setProfile({
+        ...data,
+        email: data.email || undefined, // Convert null to undefined
+        isOwnProfile: false,
+        // Add placeholder data for fields not yet implemented
+        mediaItemCount: 23,
+        loanCount: 8,
+        reviewCount: 15,
+        averageRating: 4.5,
+        location: 'Portland, OR', // TODO: Get from backend
+        joinedDate: data.createdAt
+      });
     }
-  };
+  } catch (err: any) {
+    console.error('Failed to load profile:', err);
+    setError('Failed to load profile');
+    // Use placeholder data as fallback
+    const placeholderData = getPlaceholderProfile(profileUserId, isOwnProfile);
+    setProfile(placeholderData);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const handleEditSubmit = async (data: CreateOrUpdateUserProfile) => {
     try {
@@ -188,11 +212,11 @@ function UserProfilePage({ userId: targetUserId }: UserProfilePageProps) {
                 <h1 className="text-2xl font-bold text-[var(--color-text)] truncate">
                   {profile.username || 'Anonymous User'}
                 </h1>
-                {profile.pronouns && (
-                  <span className="text-sm text-[var(--color-muted)] bg-[var(--color-background)] px-2 py-1 rounded">
-                    {profile.pronouns}
-                  </span>
-                )}
+{profile.userPronouns && profile.userPronouns.length > 0 && (
+  <span className="text-sm text-[var(--color-muted)] bg-[var(--color-background)] px-2 py-1 rounded">
+    {formatPronounsDisplay(profile.userPronouns)}
+  </span>
+)}
               </div>
               
               {/* User Details */}

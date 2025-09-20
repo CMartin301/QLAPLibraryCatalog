@@ -1,6 +1,6 @@
 // services/userProfileService.ts
 import api from './apiService';
-import { UserProfile, UserWithProfile, CreateOrUpdateUserProfile } from '../types/userProfile';
+import { UserProfile, UserWithProfile, CreateOrUpdateUserProfile, CreatePronounSet, PronounSet, UpdateUserPronouns, UserPronoun } from '../types/userProfile';
 import { TagDto } from '../types/tags';
 
 export const userProfileService = {
@@ -44,5 +44,24 @@ export const userProfileService = {
 
   async removeTagFromMyProfile(tagId: number): Promise<void> {
     await api.delete(`/api/UserProfile/Tags/${tagId}`);
-  }
+  },
+  // Add these new service methods
+async getMyPronouns(): Promise<UserPronoun[]> {
+  const response = await api.get<UserPronoun[]>('/api/UserProfile/Pronouns');
+  return response.data;
+},
+
+async updateMyPronouns(pronouns: UpdateUserPronouns): Promise<void> {
+  await api.put('/api/UserProfile/Pronouns', pronouns);
+},
+
+async getCommonPronouns(): Promise<PronounSet[]> {
+  const response = await api.get<PronounSet[]>('/api/UserProfile/Pronouns/Common');
+  return response.data;
+},
+
+async createCustomPronoun(pronoun: CreatePronounSet): Promise<PronounSet> {
+  const response = await api.post<PronounSet>('/api/UserProfile/Pronouns/Custom', pronoun);
+  return response.data;
+}
 };
