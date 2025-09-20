@@ -151,8 +151,8 @@ export function LoanDisplay({
             <h2 className="text-lg sm:text-xl font-bold text-gray-900 break-words">
               {loan.borrowerUsername} borrowed "{loan.mediaTitle}"
             </h2>
-            {loan.mediaAuthor && (
-              <p className="text-sm text-gray-600 mt-1">by {loan.mediaAuthor}</p>
+            {loan.mediaCreator && (
+              <p className="text-sm text-gray-600 mt-1">by {loan.mediaCreator}</p>
             )}
 
           </div>
@@ -315,8 +315,8 @@ export function LoanDisplay({
             <h3 className="text-base font-semibold text-gray-900 break-words">
               {loan.borrowerUsername} borrowed "{loan.mediaTitle}"
             </h3>
-            {loan.mediaAuthor && (
-              <p className="text-sm text-gray-600 mt-1 truncate">by {loan.mediaAuthor}</p>
+            {loan.mediaCreator && (
+              <p className="text-sm text-gray-600 mt-1 truncate">by {loan.mediaCreator}</p>
             )}
           </div>
 

@@ -15,6 +15,9 @@ import BorrowingDashboard from './components/borrowing/BorrowingPage';
 import Dashboard from './components/dashboard/Dashboard';
 import { Toaster } from 'react-hot-toast';   // ⬅️ import here
 import TagsPage from './components/tags/TagsPage';
+import BorrowRequestsPage from './components/borrowing/borrowRequests/BorrowRequestsPage';
+import LoansPage from './components/borrowing/loans/LoansPage';
+import BorrowingHistoryPage from './components/borrowing/borrowingHistory/BorrowingHistoryPage';
 
 /**
  * App Layout Component
@@ -67,6 +70,26 @@ function AppRoutes() {
         } 
       />
       <Route 
+        path="/network-catalog" 
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <NetworkCatalogPage />
+            </AppLayout>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/tags" 
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <TagsPage />
+            </AppLayout>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
         path="/my-library" 
         element={
           <ProtectedRoute>
@@ -87,11 +110,31 @@ function AppRoutes() {
         } 
       />
       <Route 
-        path="/network-catalog" 
+        path="/borrow-requests" 
         element={
           <ProtectedRoute>
             <AppLayout>
-              <NetworkCatalogPage />
+              <BorrowRequestsPage />
+            </AppLayout>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/loans" 
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <LoansPage />
+            </AppLayout>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/borrowing-history" 
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <BorrowingHistoryPage />
             </AppLayout>
           </ProtectedRoute>
         } 
@@ -102,16 +145,6 @@ function AppRoutes() {
           <ProtectedRoute>
             <AppLayout>
               <UserPreferencesContainer />
-            </AppLayout>
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/tags" 
-        element={
-          <ProtectedRoute>
-            <AppLayout>
-              <TagsPage />
             </AppLayout>
           </ProtectedRoute>
         } 

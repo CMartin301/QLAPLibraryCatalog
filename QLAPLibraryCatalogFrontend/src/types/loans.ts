@@ -31,7 +31,7 @@ export interface LoanWithDetails {
   // Media information
   mediaTitle: string;
   mediaType: string;
-  mediaAuthor?: string | null;
+  mediaCreator?: string | null;
   mediaGenre?: string | null;
   
   // User information
