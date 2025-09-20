@@ -1,6 +1,6 @@
 // services/userProfileService.ts
 import api from './apiService';
-import { UserProfile, UserWithProfile, CreateOrUpdateUserProfile, CreatePronounSet, PronounSet, UpdateUserPronouns, UserPronoun } from '../types/userProfile';
+import { UserProfile, CreateOrUpdateUserProfile, CreatePronounSet, PronounSet, UpdateUserPronouns, UserPronoun } from '../types/userProfile';
 import { TagDto } from '../types/tags';
 
 export const userProfileService = {
@@ -9,8 +9,8 @@ export const userProfileService = {
     return response.data;
   },
 
-  async getMyCompleteProfile(): Promise<UserWithProfile> {
-    const response = await api.get<UserWithProfile>('/api/UserProfile/Complete');
+  async getMyCompleteProfile(): Promise<UserProfile> {
+    const response = await api.get<UserProfile>('/api/UserProfile/Complete');
     return response.data;
   },
 
@@ -19,8 +19,8 @@ export const userProfileService = {
     return response.data;
   },
 
-  async getUserWithProfile(userId: number): Promise<UserWithProfile> {
-    const response = await api.get<UserWithProfile>(`/api/UserProfile/User/${userId}/Complete`);
+  async getUserWithProfile(userId: number): Promise<UserProfile> {
+    const response = await api.get<UserProfile>(`/api/UserProfile/User/${userId}/Complete`);
     return response.data;
   },
 

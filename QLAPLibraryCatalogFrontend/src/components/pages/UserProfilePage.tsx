@@ -1,7 +1,7 @@
 // components/UserProfile/UserProfilePage.tsx
 import React, { useEffect, useState } from 'react';
 import { userProfileService } from '../../services/userProfileService';
-import { UserProfile, CreateOrUpdateUserProfile, UserPronoun, ExtendedUserProfile } from '../../types/userProfile';
+import { UserProfile, CreateOrUpdateUserProfile, UserPronoun } from '../../types/userProfile';
 import useAuth from '../../hooks/useAuth';
 import { 
   Edit, 
@@ -21,16 +21,6 @@ import { TagDto } from '../../types/tags';
 import StatCard from '../shared/StatCard';
 import EditUserProfileForm from '../user/EditUserProfileForm';
 
-const defaultProfile: ExtendedUserProfile = {
-  userId: 0,
-  profileDescription: '',
-  createdAt: '',
-  updatedAt: '',
-  userTags: [],
-  userPronouns: [], // Add this line
-  isOwnProfile: true
-};
-
 
 interface UserProfilePageProps {
   userId?: number; // If provided, shows another user's profile
@@ -38,7 +28,7 @@ interface UserProfilePageProps {
 
 function UserProfilePage({ userId: targetUserId }: UserProfilePageProps) {
   const { userID } = useAuth();
-  const [profile, setProfile] = useState<ExtendedUserProfile>(defaultProfile);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -73,9 +63,6 @@ const formatPronounsDisplay = (userPronouns: UserPronoun[]): string => {
         // Add placeholder data for fields not yet implemented
         mediaItemCount: 47,
         loanCount: 12,
-        reviewCount: 34,
-        averageRating: 4.7,
-        location: 'Seattle, WA', // TODO: Get from backend
         joinedDate: data.createdAt // Use profile creation as join date for now
       });
     } else {
@@ -87,9 +74,6 @@ const formatPronounsDisplay = (userPronouns: UserPronoun[]): string => {
         // Add placeholder data for fields not yet implemented
         mediaItemCount: 23,
         loanCount: 8,
-        reviewCount: 15,
-        averageRating: 4.5,
-        location: 'Portland, OR', // TODO: Get from backend
         joinedDate: data.createdAt
       });
     }
@@ -105,10 +89,10 @@ const formatPronounsDisplay = (userPronouns: UserPronoun[]): string => {
   const handleEditSubmit = async (data: CreateOrUpdateUserProfile) => {
     try {
       // TODO: Replace with actual service call
-      // const updated = await userProfileService.createOrUpdateMyProfile(data);
+      const updated = await userProfileService.createOrUpdateMyProfile(data);
       
       // For now, simulate the update
-      const updated = { ...profile, ...data, updatedAt: new Date().toISOString() };
+      // const updated = { ...profile, ...data, updatedAt: new Date().toISOString() };
       setProfile(updated);
       setIsEditModalOpen(false);
       return updated;
@@ -145,7 +129,7 @@ const formatPronounsDisplay = (userPronouns: UserPronoun[]): string => {
     );
   }
 
-  if (error && !profile.userId) {
+  if (error && !profile) {
     return (
       <div className="max-w-6xl mx-auto p-6">
         <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg">
@@ -160,6 +144,8 @@ const formatPronounsDisplay = (userPronouns: UserPronoun[]): string => {
       </div>
     );
   }
+
+  if (!profile) return <p>No profile</p>
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
@@ -317,6 +303,8 @@ const formatPronounsDisplay = (userPronouns: UserPronoun[]): string => {
       )}
     </div>
   );
+
 }
+
 
 export default UserProfilePage;
