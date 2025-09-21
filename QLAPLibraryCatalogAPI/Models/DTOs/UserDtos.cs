@@ -60,6 +60,8 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
         // Optional: Include basic user info
         public string? Username { get; set; }
         public string? Email { get; set; }
+        public int? MediaItemCount  { get; set; }
+        public int? LoanCount  { get; set; }
 
         // Optional: Include user tags
         public List<TagDto> UserTags { get; set; } = new();

@@ -9,10 +9,10 @@ export const userProfileService = {
     return response.data;
   },
 
-  async getMyCompleteProfile(): Promise<UserProfile> {
-    const response = await api.get<UserProfile>('/api/UserProfile/Complete');
-    return response.data;
-  },
+  // async getMyCompleteProfile(): Promise<UserProfile> {
+  //   const response = await api.get<UserProfile>('/api/UserProfile/Complete');
+  //   return response.data;
+  // },
 
   async getUserProfile(userId: number): Promise<UserProfile> {
     const response = await api.get<UserProfile>(`/api/UserProfile/User/${userId}`);

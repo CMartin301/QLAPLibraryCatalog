@@ -10,26 +10,13 @@ export interface UserProfile {
   profileDescription: string | null;
   createdAt: string;
   updatedAt: string;
-  joinedDate?: string;
   mediaItemCount?: number;
   loanCount?: number;
   isOwnProfile?: boolean;
   userTags: TagDto[];
-  userPronouns: UserPronoun[]; // Add this line
+  userPronouns: UserPronoun[]; 
 }
 
-
-// export interface UserWithProfile {
-//   userId: number;
-//   email: string;
-//   username?: string | null;
-//   emailVerified?: boolean;
-//   isActive?: boolean;
-//   createdAt?: string | null;
-//   userPreferences?: any; // you can refine this with your existing UserPreferences type
-//   userProfile?: UserProfile;
-//   userTags: TagDto[];
-// }
 
 export interface CreateOrUpdateUserProfile {
   profileDescription?: string | null;

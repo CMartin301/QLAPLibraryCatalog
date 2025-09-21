@@ -40,6 +40,9 @@ namespace QLAPLibraryCatalogAPI.Services
         /// </summary>
         public async Task<UserProfileDto?> GetUserProfileAsync(int userId)
         {
+
+            var totalBooks = await _context.MediaCopies.CountAsync(c => c.UserId == userId);
+
             return await _context.UserProfiles
                 .Include(up => up.User)
                     .ThenInclude(u => u.UserTags)
@@ -332,15 +335,14 @@ public async Task<PronounSetDto> CreateCustomPronounSetAsync(CreatePronounSetDto
                     TagId = ut.Tag.TagId,
                     TagName = ut.Tag.TagName
                 }).ToList() ?? new List<TagDto>(),
-        // Add this line:
-        UserPronouns = profile.User?.UserPronouns?.Where(up => up.PronounSet.IsActive)
-            .OrderBy(up => up.DisplayOrder)
-            .Select(up => new UserPronounDto
-            {
-                PronounId = up.PronounId,
-                PronounText = up.PronounSet.PronounText,
-                DisplayOrder = up.DisplayOrder
-            }).ToList() ?? new List<UserPronounDto>()
+                UserPronouns = profile.User?.UserPronouns?.Where(up => up.PronounSet.IsActive)
+                    .OrderBy(up => up.DisplayOrder)
+                    .Select(up => new UserPronounDto
+                    {
+                        PronounId = up.PronounId,
+                        PronounText = up.PronounSet.PronounText,
+                        DisplayOrder = up.DisplayOrder
+                    }).ToList() ?? new List<UserPronounDto>()
             };
         }
 

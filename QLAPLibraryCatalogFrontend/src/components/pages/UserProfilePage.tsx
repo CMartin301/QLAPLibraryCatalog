@@ -1,7 +1,7 @@
 // components/UserProfile/UserProfilePage.tsx
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { userProfileService } from '../../services/userProfileService';
-import { UserProfile, CreateOrUpdateUserProfile, UserPronoun } from '../../types/userProfile';
+import { UserProfile, CreateOrUpdateUserProfile } from '../../types/userProfile';
 import useAuth from '../../hooks/useAuth';
 import { 
   Edit, 
@@ -35,76 +35,46 @@ function UserProfilePage({ userId: targetUserId }: UserProfilePageProps) {
   const isOwnProfile = !targetUserId || targetUserId === userID;
   const profileUserId = targetUserId || userID || 0;
 
-  // Add this helper function inside the component or as a utility function
-const formatPronounsDisplay = (userPronouns: UserPronoun[]): string => {
-  if (!userPronouns || userPronouns.length === 0) return '';
-  
-  return userPronouns
-    .sort((a, b) => a.displayOrder - b.displayOrder)
-    .map(p => p.pronounText)
-    .join(' / ');
-};
-
   useEffect(() => {
     if (profileUserId) loadProfile();
   }, [profileUserId, isOwnProfile]);
+
   const loadProfile = async () => {
   setIsLoading(true);
   setError(null);
   try {
-    if (isOwnProfile) {
       const data = await userProfileService.getMyProfile();
-      setProfile({
-        ...data,
-        email: data.email || undefined, // Convert null to undefined
-        isOwnProfile: true,
-        // Add placeholder data for fields not yet implemented
-        mediaItemCount: 47,
-        loanCount: 12,
-        joinedDate: data.createdAt // Use profile creation as join date for now
-      });
-    } else {
-      const data = await userProfileService.getUserProfile(profileUserId);
-      setProfile({
-        ...data,
-        email: data.email || undefined, // Convert null to undefined
-        isOwnProfile: false,
-        // Add placeholder data for fields not yet implemented
-        mediaItemCount: 23,
-        loanCount: 8,
-        joinedDate: data.createdAt
-      });
-    }
+      setProfile(data);
   } catch (err: any) {
     console.error('Failed to load profile:', err);
     setError('Failed to load profile');
-    // Use placeholder data as fallback
+
   } finally {
     setIsLoading(false);
   }
 };
 
-  const handleEditSubmit = async (data: CreateOrUpdateUserProfile) => {
-    try {
-      // TODO: Replace with actual service call
-      const updated = await userProfileService.createOrUpdateMyProfile(data);
-      
-      setProfile(updated);
-      setIsEditModalOpen(false);
-      return updated;
-    } catch (err: any) {
-      throw err;
+const handleEditSubmit = async ( data: CreateOrUpdateUserProfile ): Promise<UserProfile> => {
+  try {
+    const updated = await userProfileService.createOrUpdateMyProfile(data);
+    if (!updated) {
+      throw new Error("Failed to update profile");
     }
-  };
 
-  const formatDate = (dateString: string) => {
-    if (!dateString) return 'Not set';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
+    setIsEditModalOpen(false);
+
+    // Reload profile after modal closes
+    setTimeout(() => {
+      loadProfile();
+    }, 100);
+
+    return updated;
+  } catch (err) {
+    throw err;
+  }
+};
+
+
 
   const formatJoinDate = (dateString: string) => {
     if (!dateString) return 'Unknown';
@@ -160,31 +130,29 @@ const formatPronounsDisplay = (userPronouns: UserPronoun[]): string => {
                 <h1 className="text-2xl font-bold text-[var(--color-text)] truncate">
                   {profile.username || 'Anonymous User'}
                 </h1>
-                {/* {profile.userPronouns && profile.userPronouns.length > 0 && (
-                  <span className="text-sm text-[var(--color-muted)] bg-[var(--color-background)] px-2 py-1 rounded">
-                    {formatPronounsDisplay(profile.userPronouns)}
-                  </span>
-                )} */}
-                  {profile.userPronouns && profile.userPronouns.length && profile.userPronouns.map((pronoun) => (
-                        <StatusBadge 
-                          config={{
-                            text: pronoun.pronounText,
-                            color: 'purple',
-                            icon: undefined
-                          }}
-                          size="md"
-                        />
-                    ))}
+                {profile.userPronouns && profile.userPronouns.length > 0 && 
+                  profile.userPronouns.map((pronoun) => (
+                    <StatusBadge
+                      key={pronoun.pronounId}
+                      config={{
+                        text: pronoun.pronounText,
+                        color: 'purple',
+                        icon: undefined
+                      }}
+                      size="md"
+                    />
+                ))}
+
 
               </div>
               
               {/* User Details */}
               <div className="space-y-1 text-sm text-[var(--color-muted)]">
                 
-                {profile.joinedDate && (
+                {profile.createdAt && (
                   <div className="flex items-center gap-2">
                     <Calendar size={14} />
-                    <span>Joined {formatJoinDate(profile.joinedDate)}</span>
+                    <span>Joined {formatJoinDate(profile.createdAt)}</span>
                   </div>
                 )}
               </div>
@@ -247,52 +215,48 @@ const formatPronounsDisplay = (userPronouns: UserPronoun[]): string => {
           )}
         </div>
       </div>
-
-      {/* Tags Section */}
-      {profile.userTags && profile.userTags.length > 0 && (
-        <div className="bg-[var(--color-card)] rounded-lg shadow-sm border border-[var(--color-border)] p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <Tag className="text-[var(--color-primary)]" size={20} />
-            <h2 className="text-lg font-semibold text-[var(--color-text)]">
-              {isOwnProfile ? 'My Interests' : 'Interests'}
-            </h2>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {profile.userTags.map((tag: TagDto) => (
-              <span
-                key={tag.tagId}
-                className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium 
-                         bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)] 
-                         transition-colors cursor-pointer"
-              >
-                {tag.tagName}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Profile Metadata (only for own profile) */}
-      {isOwnProfile && (
-        <div className="bg-[var(--color-card)] rounded-lg shadow-sm border border-[var(--color-border)] p-6">
-          <h2 className="text-lg font-semibold text-[var(--color-text)] mb-4">Profile Information</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div>
-              <label className="block text-[var(--color-muted)] font-medium mb-1">
-                Profile Created
-              </label>
-              <p className="text-[var(--color-text)]">{formatDate(profile.createdAt)}</p>
-            </div>
-            <div>
-              <label className="block text-[var(--color-muted)] font-medium mb-1">
-                Last Updated
-              </label>
-              <p className="text-[var(--color-text)]">{formatDate(profile.updatedAt)}</p>
-            </div>
-          </div>
-        </div>
-      )}
-
+{/* User Interests Section - Always show */}
+<div className="bg-[var(--color-card)] rounded-lg shadow-sm border border-[var(--color-border)] p-6">
+  <div className="flex items-center justify-between mb-4">
+    <div className="flex items-center gap-3">
+      <Tag className="text-[var(--color-primary)]" size={20} />
+      <h2 className="text-lg font-semibold text-[var(--color-text)]">
+        {isOwnProfile ? 'My Interests' : 'Interests'}
+      </h2>
+    </div>
+    {isOwnProfile && profile.userTags.length === 0 && (
+      <Button
+        variant="primary"
+        size="sm"
+        onClick={() => setIsEditModalOpen(true)}
+      >
+        Add Interests
+      </Button>
+    )}
+  </div>
+  
+  {profile.userTags && profile.userTags.length > 0 ? (
+    <div className="flex flex-wrap gap-2">
+      {profile.userTags.map((tag: TagDto) => (
+        <span
+          key={tag.tagId}
+          className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium 
+                   bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)] 
+                   transition-colors cursor-pointer"
+        >
+          {tag.tagName}
+        </span>
+      ))}
+    </div>
+  ) : (
+    <p className="text-[var(--color-muted)] italic">
+      {isOwnProfile 
+        ? 'No interests added yet. Click "Add Interests" to get started.'
+        : 'This user hasn\'t added any interests yet.'
+      }
+    </p>
+  )}
+</div>
       {/* Edit Profile Modal */}
       {isOwnProfile && (
         <Modal

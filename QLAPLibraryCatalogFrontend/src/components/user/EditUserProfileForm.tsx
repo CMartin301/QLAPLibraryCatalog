@@ -6,16 +6,15 @@ import { userProfileService } from '../../services/userProfileService';
 import Button from '../shared/Button';
 import { StatusBadge } from '../shared/StatusBadge';
 import { Save, X, Plus, Trash2 } from 'lucide-react';
+import { TagDto } from '../../types/tags';
+import { tagService } from '../../services/tagService';
 
 // Extended form data for future implementation
 interface ExtendedProfileFormData extends CreateOrUpdateUserProfile {
-  location?: string;
 }
 
 interface EditUserProfileFormProps {
-  profile: UserProfile & {
-    location?: string;
-  };
+  profile: UserProfile 
   onSubmit: (data: ExtendedProfileFormData) => Promise<UserProfile>;
   onCancel: () => void;
 }
@@ -30,6 +29,31 @@ function EditUserProfileForm({ profile, onSubmit, onCancel }: EditUserProfileFor
   const [customPronounText, setCustomPronounText] = useState('');
   const [isAddingCustom, setIsAddingCustom] = useState(false);
   const [pronounsLoading, setPronounsLoading] = useState(true);
+  const [isEditingPronounOrder, setIsEditingPronounOrder] = useState(false);
+
+  // Tag-related state
+const [allTags, setAllTags] = useState<TagDto[]>([]);
+const [selectedTags, setSelectedTags] = useState<TagDto[]>([]);
+const [tagsLoading, setTagsLoading] = useState(true);
+
+
+const loadTagData = async () => {
+  try {
+    setTagsLoading(true);
+    const [allTagsData, userTagsData] = await Promise.all([
+      tagService.getTags(),
+      userProfileService.getMyTags()
+    ]);
+    
+    setAllTags(allTagsData);
+    setSelectedTags(userTagsData || profile.userTags || []);
+  } catch (error) {
+    console.error('Failed to load tag data:', error);
+    setSelectedTags(profile.userTags || []);
+  } finally {
+    setTagsLoading(false);
+  }
+};
 
   const {
     register,
@@ -38,15 +62,25 @@ function EditUserProfileForm({ profile, onSubmit, onCancel }: EditUserProfileFor
     formState: { errors, isDirty }
   } = useForm<ExtendedProfileFormData>({
     defaultValues: {
-      profileDescription: profile.profileDescription || '',
-      location: profile.location || ''
+      profileDescription: profile.profileDescription || ''
     }
   });
 
   // Load common pronouns and user's current pronouns
   useEffect(() => {
     loadPronounData();
+    loadTagData();
   }, []);
+
+  const handleAddTag = (tag: TagDto) => {
+  const isAlreadySelected = selectedTags.some(t => t.tagId === tag.tagId);
+  if (isAlreadySelected) return;
+  setSelectedTags([...selectedTags, tag]);
+};
+
+const handleRemoveTag = (tagId: number) => {
+  setSelectedTags(selectedTags.filter(t => t.tagId !== tagId));
+};
 
   const loadPronounData = async () => {
     try {
@@ -129,40 +163,6 @@ function EditUserProfileForm({ profile, onSubmit, onCancel }: EditUserProfileFor
     setSelectedPronouns(newPronouns);
   };
 
-  // Drag and drop handlers
-  const handleDragStart = (e: React.DragEvent, index: number) => {
-    e.dataTransfer.setData('text/plain', index.toString());
-    e.dataTransfer.effectAllowed = 'move';
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-  };
-
-  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
-    e.preventDefault();
-    const dragIndex = parseInt(e.dataTransfer.getData('text/plain'));
-    
-    if (dragIndex === dropIndex) return;
-    
-    const newPronouns = [...selectedPronouns];
-    const draggedPronoun = newPronouns[dragIndex];
-    
-    // Remove from original position
-    newPronouns.splice(dragIndex, 1);
-    
-    // Insert at new position
-    newPronouns.splice(dropIndex, 0, draggedPronoun);
-    
-    // Update display orders
-    newPronouns.forEach((pronoun, idx) => {
-      pronoun.displayOrder = idx;
-    });
-    
-    setSelectedPronouns(newPronouns);
-  };
-
   const handleFormSubmit: SubmitHandler<ExtendedProfileFormData> = async (data) => {
     setIsSubmitting(true);
     setSubmitError(null);
@@ -181,7 +181,26 @@ function EditUserProfileForm({ profile, onSubmit, onCancel }: EditUserProfileFor
           pronouns: selectedPronouns
         });
       }
-      
+    
+// Update tags if they've changed
+const currentTagIds = (profile.userTags || []).map(t => t.tagId).sort();
+const selectedTagIds = selectedTags.map(t => t.tagId).sort();
+const tagsChanged = JSON.stringify(currentTagIds) !== JSON.stringify(selectedTagIds);
+
+if (tagsChanged) {
+  // Remove tags that are no longer selected
+  const tagsToRemove = currentTagIds.filter(id => !selectedTagIds.includes(id));
+  for (const tagId of tagsToRemove) {
+    await userProfileService.removeTagFromMyProfile(tagId);
+  }
+  
+  // Add new tags
+  const tagsToAdd = selectedTagIds.filter(id => !currentTagIds.includes(id));
+  for (const tagId of tagsToAdd) {
+    await userProfileService.addTagToMyProfile(tagId);
+  }
+}
+
       // Success handled by parent component (modal closes)
     } catch (err: any) {
       console.error('Failed to update profile:', err);
@@ -192,10 +211,12 @@ function EditUserProfileForm({ profile, onSubmit, onCancel }: EditUserProfileFor
   };
 
   // Check if form has changes (including pronouns)
-  const hasChanges = isDirty || 
-    JSON.stringify((profile.userPronouns || []).map(p => p.pronounId).sort()) !== 
-    JSON.stringify(selectedPronouns.map(p => p.pronounId).sort());
-
+// Check if form has changes (including pronouns and tags)
+const hasChanges = isDirty || 
+  JSON.stringify((profile.userPronouns || []).map(p => p.pronounId).sort()) !== 
+  JSON.stringify(selectedPronouns.map(p => p.pronounId).sort()) ||
+  JSON.stringify((profile.userTags || []).map(t => t.tagId).sort()) !== 
+  JSON.stringify(selectedTags.map(t => t.tagId).sort());
   // Watch the description field to show character count
   const descriptionValue = watch('profileDescription', '');
   const descriptionLength = descriptionValue?.length || 0;
@@ -226,85 +247,104 @@ function EditUserProfileForm({ profile, onSubmit, onCancel }: EditUserProfileFor
           ) : (
             <div className="space-y-3">
               {/* Selected Pronouns */}
-              {selectedPronouns.length > 0 && (
-                <div className="space-y-2">
-                  <p className="text-xs text-[var(--color-muted)]">Selected pronouns (drag to reorder or use arrow buttons):</p>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedPronouns.map((pronoun, index) => (
-                      <div
-                        key={pronoun.pronounId}
-                        draggable
-                        onDragStart={(e) => handleDragStart(e, index)}
-                        onDragOver={handleDragOver}
-                        onDrop={(e) => handleDrop(e, index)}
-                        className="relative group cursor-move"
-                      >
-                        <StatusBadge 
-                          config={{
-                            text: pronoun.pronounText,
-                            color: 'purple',
-                            icon: undefined
-                          }}
-                          size="lg"
-                        />
-                        
-                        {/* Control buttons - only show on hover */}
-                        <div className="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <div className="flex items-center gap-0.5 bg-white rounded border shadow-sm">
-                            {index > 0 && (
-                              <button
-                                type="button"
-                                onClick={() => handleReorderPronoun(index, 'up')}
-                                className="p-0.5 text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-gray-100"
-                                title="Move up"
-                              >
-                                ↑
-                              </button>
-                            )}
-                            {index < selectedPronouns.length - 1 && (
-                              <button
-                                type="button"
-                                onClick={() => handleReorderPronoun(index, 'down')}
-                                className="p-0.5 text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-gray-100"
-                                title="Move down"
-                              >
-                                ↓
-                              </button>
-                            )}
-                            <button
-                              type="button"
-                              onClick={() => handleRemovePronoun(pronoun.pronounId)}
-                              className="p-0.5 text-xs text-red-500 hover:text-red-700 hover:bg-red-50"
-                              title="Remove"
-                            >
-                              <Trash2 size={10} />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {/* Available Common Pronouns */}
-              <div>
-                <p className="text-xs text-[var(--color-muted)] mb-2">Add from common options:</p>
-                <div className="flex flex-wrap gap-2">
-                  {commonPronouns
-                    .filter(pronoun => !selectedPronouns.some(p => p.pronounId === pronoun.pronounId))
-                    .map(pronoun => (
-                      <button
-                        key={pronoun.pronounId}
-                        type="button"
-                        onClick={() => handleAddPronoun(pronoun)}
-                        className="px-3 py-1 text-sm bg-[var(--color-primary)] text-white rounded hover:bg-[var(--color-primary-hover)] transition-colors"
-                      >
-                        + {pronoun.pronounText}
-                      </button>
-                    ))}
-                </div>
-              </div>
+{selectedPronouns.length > 0 && (
+  <div className="space-y-2">
+    <div className="flex items-center justify-between">
+      <button
+        type="button"
+        onClick={() => setIsEditingPronounOrder(!isEditingPronounOrder)}
+        className="text-xs text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] underline"
+      >
+        {isEditingPronounOrder ? 'Done editing order' : 'Edit order'}
+      </button>
+    </div>
+    
+    <div className="flex flex-wrap gap-2">
+      {selectedPronouns.map((pronoun, index) => (
+        <div key={pronoun.pronounId} className="relative inline-flex items-center">
+          <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-lavender-100 text-lavender-500 pr-8">
+            {/* Show order number only in edit mode */}
+            {isEditingPronounOrder && (
+              <select
+                value={index}
+                onChange={(e) => {
+                  const newIndex = parseInt(e.target.value);
+                  if (newIndex === index) return;
+                  
+                  const newPronouns = [...selectedPronouns];
+                  const [movedPronoun] = newPronouns.splice(index, 1);
+                  newPronouns.splice(newIndex, 0, movedPronoun);
+                  
+                  // Update display orders
+                  newPronouns.forEach((p, idx) => {
+                    p.displayOrder = idx;
+                  });
+                  
+                  setSelectedPronouns(newPronouns);
+                }}
+                className="text-xs bg-transparent border-none mr-2 w-8 text-lavender-600 font-medium
+                           focus:outline-none cursor-pointer"
+              >
+                {selectedPronouns.map((_, idx) => (
+                  <option key={idx} value={idx}>
+                    {idx + 1}
+                  </option>
+                ))}
+              </select>
+            )}
+            
+            {/* Pronoun Text */}
+            {pronoun.pronounText}
+            
+            {/* Remove Button - always visible */}
+            <button
+              type="button"
+              onClick={() => handleRemovePronoun(pronoun.pronounId)}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-lavender-700 hover:text-red-600 
+                         transition-colors w-4 h-4 flex items-center justify-center text-sm font-bold"
+              title="Remove this pronoun"
+            >
+              ×
+            </button>
+          </span>
+        </div>
+      ))}
+    </div>
+    
+    <p className="text-xs text-[var(--color-muted)]">
+      {isEditingPronounOrder 
+        ? 'Click the numbers to change display order. Click "Done editing order" when finished.'
+        : ''
+        // : 'Click × to remove pronouns, or "Edit order" to change the display sequence.'
+      }
+    </p>
+  </div>
+)}
+              {/* Available Pronouns Dropdown */}
+<div className="flex gap-2">
+  <select
+    className="flex-1 px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm
+               focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+    onChange={(e) => {
+      const pronounId = parseInt(e.target.value);
+      const pronoun = commonPronouns.find(p => p.pronounId === pronounId);
+      if (pronoun) {
+        handleAddPronoun(pronoun);
+        e.target.value = ''; // Reset dropdown
+      }
+    }}
+    defaultValue=""
+  >
+    <option value="" disabled>Select pronouns to add...</option>
+    {commonPronouns
+      .filter(pronoun => !selectedPronouns.some(p => p.pronounId === pronoun.pronounId))
+      .map(pronoun => (
+        <option key={pronoun.pronounId} value={pronoun.pronounId}>
+          {pronoun.pronounText}
+        </option>
+      ))}
+  </select>
+</div>
               
               {/* Custom Pronoun Input */}
               <div>
@@ -364,40 +404,6 @@ function EditUserProfileForm({ profile, onSubmit, onCancel }: EditUserProfileFor
           </p>
         </div>
 
-        {/* Location */}
-        <div>
-          <label 
-            htmlFor="location" 
-            className="block text-sm font-medium text-[var(--color-muted)] mb-2"
-          >
-            Location
-          </label>
-          <input
-            id="location"
-            type="text"
-            {...register('location', {
-              maxLength: { 
-                value: 100, 
-                message: 'Location must be less than 100 characters' 
-              }
-            })}
-            placeholder="e.g., Seattle, WA"
-            className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm
-                       focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]
-                       disabled:opacity-50 disabled:bg-gray-50"
-            disabled={isSubmitting}
-            aria-describedby={errors.location ? 'location-error' : undefined}
-            aria-invalid={errors.location ? 'true' : 'false'}
-          />
-          {errors.location && (
-            <p id="location-error" className="text-red-500 text-xs mt-1" role="alert">
-              {errors.location.message}
-            </p>
-          )}
-          <p className="text-xs text-[var(--color-muted)] mt-1">
-            Your general location (city, state/region)
-          </p>
-        </div>
       </div>
 
       {/* About Me Section */}
@@ -438,15 +444,82 @@ function EditUserProfileForm({ profile, onSubmit, onCancel }: EditUserProfileFor
           
           {/* Character count */}
           <div className="flex justify-between items-center mt-1">
-            <p id="profileDescription-help" className="text-xs text-[var(--color-muted)]">
-              Share your reading interests and personality
-            </p>
             <p className={`text-xs ${descriptionLength > 900 ? 'text-amber-600' : 'text-[var(--color-muted)]'}`}>
               {descriptionLength}/1000
             </p>
           </div>
         </div>
       </div>
+
+      {/* User Interests Tags */}
+<div>
+  <label className="block text-sm font-medium text-[var(--color-muted)] mb-2">
+    Interests & Tags
+  </label>
+  
+  {tagsLoading ? (
+    <div className="text-sm text-[var(--color-muted)]">Loading tags...</div>
+  ) : (
+    <div className="space-y-3">
+      {/* Selected Tags */}
+      {selectedTags.length > 0 && (
+        <div className="space-y-2">
+          <div className="flex flex-wrap gap-2">
+          {selectedTags.map((tag) => (
+  <div key={tag.tagId} className="relative inline-flex items-center">
+    <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800 pr-8">
+      {/* Tag Name */}
+      {tag.tagName}
+      
+      {/* Remove Button */}
+      <button
+        type="button"
+        onClick={() => handleRemoveTag(tag.tagId)}
+        className="absolute right-2 top-1/2 transform -translate-y-1/2 text-blue-700 hover:text-red-600 
+                   transition-colors w-4 h-4 flex items-center justify-center text-sm font-bold"
+        title="Remove this tag"
+      >
+        ×
+      </button>
+    </span>
+  </div>
+))}
+          </div>
+        </div>
+      )}
+      
+      {/* Available Tags Dropdown */}
+      <div className="flex gap-2">
+        <select
+          className="flex-1 px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm
+                     focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+          onChange={(e) => {
+            const tagId = parseInt(e.target.value);
+            const tag = allTags.find(t => t.tagId === tagId);
+            if (tag) {
+              handleAddTag(tag);
+              e.target.value = ''; // Reset dropdown
+            }
+          }}
+          defaultValue=""
+        >
+          <option value="" disabled>Select an interest to add...</option>
+          {allTags
+            .filter(tag => !selectedTags.some(t => t.tagId === tag.tagId))
+            .map(tag => (
+              <option key={tag.tagId} value={tag.tagId}>
+                {tag.tagName}
+              </option>
+            ))}
+        </select>
+      </div>
+    </div>
+  )}
+  
+  <p className="text-xs text-[var(--color-muted)] mt-2">
+    Add tags to help others discover your interests and preferences.
+  </p>
+</div>
 
       {/* Action Buttons */}
       <div className="flex justify-end gap-3 pt-4 border-t border-[var(--color-border)]">
