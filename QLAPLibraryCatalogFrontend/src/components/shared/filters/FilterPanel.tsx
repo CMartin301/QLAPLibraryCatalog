@@ -1,17 +1,25 @@
 import React, { useState } from 'react';
-import { RotateCcw, ChevronDown, ChevronUp, Settings } from 'lucide-react';
+import { RotateCcw, ChevronDown, ChevronUp, Settings, Search } from 'lucide-react';
 import { Filter } from '../../../types/filters';
 import { FilterComponent } from './FilterComponents';
 
 interface FilterPanelProps {
   filters: Filter[];
   onFiltersChange: (filters: Filter[]) => void;
+  // Add these new props
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
+  searchPlaceholder?: string;
+
   className?: string;
 }
 
 export function FilterPanel({ 
   filters, 
   onFiltersChange,
+  searchValue,
+onSearchChange,
+searchPlaceholder,
   className = '' 
 }: FilterPanelProps) {
   // State for advanced filters visibility
@@ -55,17 +63,40 @@ export function FilterPanel({
   return (
     <div className={className}>
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+
+
         {/* Primary Filters Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {primaryFilters.map(filter => (
-            <div key={filter.id}>
-              <FilterComponent 
-                filter={filter} 
-                onChange={handleFilterChange}
-              />
-            </div>
-          ))}
-        </div>
+        {/* Primary Filters Grid with Search */}
+<div className="grid grid-cols-1 sm:grid-cols-3 sm:grid-cols-3 gap-4">
+  {/* Search */}
+  {onSearchChange && (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        Search
+      </label>
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+        <input
+          type="text"
+          placeholder={searchPlaceholder || "Search..."}
+          value={searchValue || ""}
+          onChange={(e) => onSearchChange(e.target.value)}
+          className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-lavender-500 focus:border-lavender-500"
+        />
+      </div>
+    </div>
+  )}
+
+  {/* Primary Filters */}
+  {primaryFilters.map(filter => (
+    <div key={filter.id}>
+      <FilterComponent 
+        filter={filter} 
+        onChange={handleFilterChange}
+      />
+    </div>
+  ))}
+</div>
 
         {/* Advanced Filters Section */}
         {advancedFilters.length > 0 && (

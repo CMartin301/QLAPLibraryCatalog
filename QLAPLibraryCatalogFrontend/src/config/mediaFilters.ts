@@ -1,4 +1,5 @@
 import { FilterConfig, Filter, SelectFilter, MultiSelectFilter, BooleanFilter, RangeFilter } from '../types/filters';
+import { LocationZoneDto } from '../types/locations';
 import { MediaDto } from '../types/media';
 
 // Helper function to get unique values from media array
@@ -28,13 +29,10 @@ const getValueCounts = (data: MediaDto[], accessor: (item: MediaDto) => string |
 };
 
 // Create initial filter configuration based on available data
-export const createMediaFilterConfig = (data: MediaDto[]): FilterConfig<MediaDto> => {
+export const createMediaFilterConfig = (data: MediaDto[], locationZones: LocationZoneDto[] = []): FilterConfig<MediaDto> => {
   // Get unique values and counts for each filterable field
   const mediaTypes = getUniqueValues(data, item => item.mediaTypeName);
   const mediaTypeCounts = getValueCounts(data, item => item.mediaTypeName);
-  
-  const genres = getUniqueValues(data, item => item.genre);
-  const genreCounts = getValueCounts(data, item => item.genre);
   
   const languages = getUniqueValues(data, item => item.language);
   const languageCounts = getValueCounts(data, item => item.language);
@@ -49,6 +47,8 @@ export const createMediaFilterConfig = (data: MediaDto[]): FilterConfig<MediaDto
   
   const minYear = years.length > 0 ? Math.min(...years) : 1900;
   const maxYear = years.length > 0 ? Math.max(...years) : new Date().getFullYear();
+
+  
 
   const filters: Filter[] = [
     // Media Type filter
@@ -209,8 +209,43 @@ export const createMediaFilterConfig = (data: MediaDto[]): FilterConfig<MediaDto
     }));
 })()
     } as MultiSelectFilter,
-  ];
 
+// Location Zone filter
+{
+  id: 'locationZone',
+  label: 'Location',
+  type: 'select',
+  active: false,
+  priority: 'primary',
+  value: null,
+  options: [] // Will be populated dynamically
+} as SelectFilter,
+
+// Distance filter  
+{
+  id: 'distance',
+  label: 'Distance',
+  type: 'select',
+  active: false,
+  priority: 'primary',
+  value: null,
+  options: [
+    { value: '5', label: 'Within 5 miles', count: 0 },
+    { value: '10', label: 'Within 10 miles', count: 0 },
+    { value: '20', label: 'Within 20 miles', count: 0 },
+    { value: '50', label: 'Within 50 miles', count: 0 }
+  ]
+} as SelectFilter,
+  ];
+  // Update location filter options with actual location zones
+  const locationFilter = filters.find(f => f.id === 'locationZone') as SelectFilter;
+  if (locationFilter) {
+    locationFilter.options = locationZones.map(zone => ({
+      value: zone.zoneId.toString(),
+      label: zone.zoneName,
+      count: 0 // You could calculate actual counts if needed
+    }));
+  }
   return {
     filters,
     applyFilters: (data: MediaDto[], activeFilters: Filter[]) => {

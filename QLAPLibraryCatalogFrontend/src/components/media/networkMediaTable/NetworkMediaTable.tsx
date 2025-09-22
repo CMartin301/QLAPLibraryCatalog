@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Media, CreateMediaRequest, MediaFormData, CreateMediaCopyRequest, MediaCopyDto, MediaDto } from '../../../types/media';
 import { TableContainer } from '../../shared/TableContainer';
 import { Modal } from '../../shared/Modal';
@@ -13,6 +13,7 @@ import { useNetworkMediaColumns } from './networkMediaColumns';
 import { createMediaFilterConfig } from '../../../config/mediaFilters';
 import { useFilters } from '../../../hooks/useFilters';
 import { FilterPanel } from '../../shared/filters/FilterPanel';
+import { LocationZoneDto } from '../../../types/locations';
 
 interface NetworkMediaTableProps {
   media: MediaDto[];
@@ -20,6 +21,7 @@ interface NetworkMediaTableProps {
   error?: string | null;
   onRefresh: () => void;
   mode?: 'catalog' | 'addToCollection';
+  locationZones?: LocationZoneDto[]; // Add this
 }
 
 export function NetworkMediaTable({
@@ -27,10 +29,12 @@ export function NetworkMediaTable({
   loading,
   error,
   onRefresh,
-  mode = 'catalog'
+  mode = 'catalog',
+  locationZones = [] 
 }: NetworkMediaTableProps) {
   const { userID } = useAuth();
-  const { executeAction, isLoading: actionLoading } = useTableActions();
+  const { executeAction, isLoading: actionLoading } = useTableActions();// Add this with your other state
+const [searchTerm, setSearchTerm] = useState('');
   
   // Modal states
   const [selectedMedia, setSelectedMedia] = useState<MediaDto | undefined>(undefined);
@@ -45,17 +49,23 @@ export function NetworkMediaTable({
   // const [requestModalData, setRequestModalData] = useState<number | undefined>(undefined);
 
   const [addingToCopyMediaId, setAddingToCopyMediaId] = useState<number | null>(null);
-
-  const {
-    filteredData,
-    filters,
-    updateFilters,
-    activeFilterCount
-  } = useFilters({
-    data: media,
-    createFilterConfig: createMediaFilterConfig
-  });
-
+// Add this before your useFilters call:
+const createFilterConfigCallback = useCallback(
+  (data: MediaDto[]) => createMediaFilterConfig(data, locationZones),
+  [locationZones] // Only recreate if locationZones changes
+);
+// Update your useFilters call:
+const {
+  filteredData,
+  filters,
+  updateFilters,
+  activeFilterCount
+} = useFilters({
+  data: media,
+  createFilterConfig: createFilterConfigCallback, // Use the memoized version
+  searchTerm,
+  searchFields: ['title', 'creator', 'description', 'publisher']
+});
   const handleRowClick = async (media: MediaDto) => {
     try{
     const enrichedCopies = await mediaService.getMediaCopiesByMediaID(media.mediaId);
@@ -186,22 +196,27 @@ const handleBorrowRequestSubmit = async () => {
   return (
     <>
       <FilterPanel
-        filters={filters}
-        onFiltersChange={updateFilters}
-        className="mb-4"
-      />
+  filters={filters}
+  onFiltersChange={updateFilters}
+  searchValue={searchTerm}
+  onSearchChange={setSearchTerm}
+  searchPlaceholder="Search catalog..."
+  className="mb-4"
+/>
       <TableContainer
-        data={filteredData}
-        columns={columns}
-        loading={loading}
-        error={error}
-        onRefresh={onRefresh}
-        emptyMessage="No books found"
-        searchPlaceholder="Search catalog..."
-        actionButton={actionButton}
-        onRowClick={handleRowClick}
-        rowClassName="cursor-pointer hover:bg-gray-50"
-      />
+  data={filteredData}
+  columns={columns}
+  loading={loading}
+  error={error}
+  onRefresh={onRefresh}
+  emptyMessage="No books found"
+  searchPlaceholder="Search catalog..." // This won't be used anymore
+  actionButton={actionButton}
+  onRowClick={handleRowClick}
+  rowClassName="cursor-pointer hover:bg-gray-50"
+  // Add this to hide the built-in search
+  showSearch={false}
+/>
  
       {/* Media Detail Modal */}
       <MediaModal
