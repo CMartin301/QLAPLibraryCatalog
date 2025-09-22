@@ -52,49 +52,58 @@ export function useNetworkMediaColumns({
         <span className="text-sm text-gray-900">{info.getValue()}</span>
       ),
       enableSorting: true,
-      size: 120,
+      size: 60,
     }),
 
-    // Genre
-    columnHelper.accessor(row => row.genre ?? "Unknown", {
-      id: "genre",
-      header: "Genre",
-      cell: info => {
-        const config = {
-          text: info.getValue(),
-          color: 'purple' as const
-        };
-        return <StatusBadge config={config} />;
-      },
-      enableSorting: true,
-      size: 140,
-    }),
+    // // Genre
+    // columnHelper.accessor(row => row.genre ?? "Unknown", {
+    //   id: "genre",
+    //   header: "Genre",
+    //   cell: info => {
+    //     const config = {
+    //       text: info.getValue(),
+    //       color: 'purple' as const
+    //     };
+    //     return <StatusBadge config={config} />;
+    //   },
+    //   enableSorting: true,
+    //   size: 140,
+    // }),
 
     // Tags
     columnHelper.accessor(row => row.tags ?? "", {
       id: "tags",
-      header: "Genre and Tags",
+      header: "Genres and Tags",
       cell: info => {
-        const row = info.row.original;
-        const tags = info.getValue();
-        // if (!tags || tags.length === 0) {
-        //   return <span className="text-sm text-gray-400">No tags</span>;
-        // }
+    const tags = info.getValue();
+    if (!tags || tags.length === 0) {
+      return <span className="text-sm text-gray-400">No tags</span>;
+    }
+    
+    return (
+      <div className="flex flex-wrap gap-1">
+        {/* Display genre tags first */}
+        {tags.filter((tag: TagDto) => tag.isGenre).map((tag: TagDto) => {
+          const config = {
+            text: tag.tagName,
+            color: 'purple' as const
+          };
+          return <StatusBadge key={tag.tagId} config={config} />;
+        })}
         
-        return (
-          <div className="flex flex-wrap gap-1">
-            {tags.map((tag: TagDto) => {
-              const config = {
-                text: tag.tagName,
-                color: 'gray' as const
-              };
-              return <StatusBadge key={tag.tagId} config={config} />;
-            })}
-          </div>
-        );
+        {/* Then display non-genre tags */}
+        {tags.filter((tag: TagDto) => !tag.isGenre).map((tag: TagDto) => {
+          const config = {
+            text: tag.tagName,
+            color: 'gray' as const
+          };
+          return <StatusBadge key={tag.tagId} config={config} />;
+        })}
+      </div>
+    );
       },
       enableSorting: false,
-      size: 120,
+      size: 200,
     }),
 
 
@@ -128,7 +137,7 @@ export function useNetworkMediaColumns({
         );
       },
       enableSorting: true,
-      size: 110,
+      size: 80,
     }),
     // Availability
     columnHelper.accessor(row => row.availableCopiesCount ?? 0, {
@@ -144,7 +153,7 @@ export function useNetworkMediaColumns({
         return <StatusBadge config={config} />;
       },
       enableSorting: false,
-      size: 120,
+      size: 80,
     }),
 
     // Actions

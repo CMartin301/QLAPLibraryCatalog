@@ -137,7 +137,6 @@ namespace QLAPLibraryCatalogAPI.Services
                 Publisher = createMediaDto.Publisher,
                 PublicationDate = createMediaDto.PublicationDate,
                 Language = createMediaDto.Language,
-                Genre = createMediaDto.Genre,
                 Description = createMediaDto.Description,
                 CoverImageUrl = createMediaDto.CoverImageUrl,
                 Isbn10 = createMediaDto.Isbn10,
@@ -173,7 +172,6 @@ namespace QLAPLibraryCatalogAPI.Services
             existingMedia.Publisher = updateMediaDto.Publisher;
             existingMedia.PublicationDate = updateMediaDto.PublicationDate;
             existingMedia.Language = updateMediaDto.Language;
-            existingMedia.Genre = updateMediaDto.Genre;
             existingMedia.Description = updateMediaDto.Description;
             existingMedia.CoverImageUrl = updateMediaDto.CoverImageUrl;
             existingMedia.Isbn10 = updateMediaDto.Isbn10;
@@ -244,7 +242,6 @@ namespace QLAPLibraryCatalogAPI.Services
         Publisher = m.Publisher,
         PublicationDate = m.PublicationDate,
         Language = m.Language,
-        Genre = m.Genre,
         Description = m.Description,
         CoverImageUrl = m.CoverImageUrl,
         Isbn10 = m.Isbn10,
@@ -311,7 +308,6 @@ namespace QLAPLibraryCatalogAPI.Services
                 Publisher = m.Publisher,
                 PublicationDate = m.PublicationDate,
                 Language = m.Language,
-                Genre = m.Genre,
                 Description = m.Description,
                 CoverImageUrl = m.CoverImageUrl,
                 Isbn10 = m.Isbn10,

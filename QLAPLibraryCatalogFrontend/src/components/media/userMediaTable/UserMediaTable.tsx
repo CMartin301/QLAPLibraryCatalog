@@ -48,6 +48,7 @@ export function UserMediaTable({
   });
 
   const handleRowClick = (mediaCopy: MediaCopyDto) => {
+    console.log(mediaCopy.media)
     setSelectedMedia(mediaCopy);
     setIsMediaModalOpen(true);
   };
@@ -116,6 +117,7 @@ export function UserMediaTable({
 
       {/* Media Detail Modal */}
       <UserMediaModal
+        
         mediaCopy={selectedMedia}
         isOpen={isMediaModalOpen}
         onClose={() => {

@@ -72,6 +72,7 @@ export function NetworkMediaTable({
   };
 
   const handleAddToCollection = (mediaItem: MediaDto) => {
+    console.log(mediaItem.tags);
     setAddingToCopyMediaId(mediaItem.mediaId);
     setSelectedMediaForCopy(mediaItem);
     setIsCopyModalOpen(true);
