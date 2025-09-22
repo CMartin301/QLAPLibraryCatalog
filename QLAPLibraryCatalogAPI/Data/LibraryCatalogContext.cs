@@ -27,10 +27,6 @@ public partial class LibraryCatalogContext : DbContext
     public virtual DbSet<UserPreferences> UserPreferences { get; set; }
     public virtual DbSet<Tag> Tags { get; set; }
     public virtual DbSet<MediaTag> MediaTags { get; set; }
-
-    // New DbSets for the missing entities
-    public virtual DbSet<Genre> Genres { get; set; }
-    public virtual DbSet<MediaGenre> MediaGenres { get; set; }
     public virtual DbSet<UserProfile> UserProfiles { get; set; }
     public virtual DbSet<UserTag> UserTags { get; set; }
     public virtual DbSet<PronounSet> PronounSets { get; set; }
@@ -52,8 +48,6 @@ public partial class LibraryCatalogContext : DbContext
         ConfigureUserPreferences(modelBuilder);
         ConfigureTag(modelBuilder);
         ConfigureMediaTag(modelBuilder);
-        ConfigureGenre(modelBuilder);
-        ConfigureMediaGenre(modelBuilder);
         ConfigureUserProfile(modelBuilder);
         ConfigureUserTag(modelBuilder);
         ConfigurePronounSet(modelBuilder);
@@ -433,6 +427,10 @@ public partial class LibraryCatalogContext : DbContext
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnName("updated_at");
             entity.Property(e => e.UpdatedBy).HasColumnName("updated_by");
+            entity.Property(e => e.IsGenre)
+                .HasColumnName("is_genre");
+            entity.Property(e => e.Description)
+                .HasColumnName("description");
         });
     }
 
@@ -467,80 +465,6 @@ public partial class LibraryCatalogContext : DbContext
     // Replace the ConfigureGenre method in your LibraryCatalogContext with this version
     // that matches your existing database structure
 
-    private static void ConfigureGenre(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<Genre>(entity =>
-        {
-            entity.HasKey(e => e.GenreId).HasName("genre_pkey");
-            entity.ToTable("genres");
-
-            // Indexes to match your existing structure
-            entity.HasIndex(e => e.GenreName, "idx_genre_name");
-            entity.HasIndex(e => e.CreatedAt, "idx_genre_created_at");
-            entity.HasIndex(e => e.UpdatedAt, "idx_genre_updated_at");
-            entity.HasIndex(e => e.IsActive, "idx_genres_is_active");
-            entity.HasIndex(e => e.GenreName, "genre_genre_name_key").IsUnique();
-
-            // Properties to match your existing database
-            entity.Property(e => e.GenreId)
-                .HasDefaultValueSql("nextval('genre_genre_id_seq'::regclass)")
-                .HasColumnName("genre_id");
-
-            entity.Property(e => e.GenreName)
-                .HasMaxLength(100) // Match your existing 100-char limit
-                .HasColumnName("genre_name");
-
-            entity.Property(e => e.Description)
-                .HasColumnName("description");
-
-            entity.Property(e => e.IsActive)
-                .HasDefaultValue(true)
-                .HasColumnName("is_active");
-
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnName("created_at");
-
-            entity.Property(e => e.CreatedBy)
-                .HasColumnName("created_by");
-
-            entity.Property(e => e.UpdatedAt)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnName("updated_at");
-
-            entity.Property(e => e.UpdatedBy)
-                .HasColumnName("updated_by");
-        });
-    }
-
-    private static void ConfigureMediaGenre(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<MediaGenre>(entity =>
-        {
-            entity.HasKey(e => new { e.MediaId, e.GenreId }).HasName("media_genres_pkey");
-            entity.ToTable("media_genres");
-
-            entity.HasIndex(e => e.MediaId, "idx_media_genres_media_id");
-            entity.HasIndex(e => e.GenreId, "idx_media_genres_genre_id");
-
-            entity.Property(e => e.MediaId).HasColumnName("media_id");
-            entity.Property(e => e.GenreId).HasColumnName("genre_id");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnName("created_at");
-            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
-
-            entity.HasOne(d => d.Media).WithMany(p => p.MediaGenres)
-                .HasForeignKey(d => d.MediaId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("media_genres_media_id_fkey");
-
-            entity.HasOne(d => d.Genre).WithMany(p => p.MediaGenres)
-                .HasForeignKey(d => d.GenreId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("media_genres_genre_id_fkey");
-        });
-    }
 
     private static void ConfigureUserProfile(ModelBuilder modelBuilder)
     {

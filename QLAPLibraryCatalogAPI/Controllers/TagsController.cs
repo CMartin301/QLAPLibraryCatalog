@@ -9,7 +9,7 @@ namespace QLAPLibraryCatalogAPI.Controllers
     /// <summary>
     /// Controller for all tag functions
     /// </summary>
-    [Authorize] 
+    [Authorize]
     [ApiController]
     [Route("api/Tag")]
     public class TagsController : ControllerBase
@@ -18,7 +18,7 @@ namespace QLAPLibraryCatalogAPI.Controllers
         /// <summary> Constructor </summary>
         public TagsController(ITagsService tagsService)
         {
-           _tagsService = tagsService; 
+            _tagsService = tagsService;
         }
         /// <summary>
         /// Returns userID from authentication scheme/ JWT
@@ -31,7 +31,7 @@ namespace QLAPLibraryCatalogAPI.Controllers
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userIdClaim))
                 throw new UnauthorizedAccessException("User ID claim not found in token.");
-            
+
             return int.Parse(userIdClaim);
         }
         /// <summary>
@@ -110,6 +110,70 @@ namespace QLAPLibraryCatalogAPI.Controllers
                 return StatusCode(500, new { error = ex.Message });
             }
         }
+        
+        /// <summary>
+/// Gets all genre tags (tags where IsGenre = true)
+/// </summary>
+/// <returns></returns>
+[HttpGet("Genres")]
+public async Task<IActionResult> GetGenres()
+{
+    try
+    {
+        var items = await _tagsService.GetGenresAsync();
+        return Ok(items);
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, new { error = ex.Message });
+    }
+}
+
+/// <summary>
+/// Updates an existing tag
+/// </summary>
+/// <param name="tagId"></param>
+/// <param name="updateTagDto"></param>
+/// <returns></returns>
+[HttpPut("{tagId}")]
+public async Task<IActionResult> UpdateTag(int tagId, [FromBody] UpdateTagDto updateTagDto)
+{
+    try
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+        
+        int userId = GetUserId();
+        var updatedTag = await _tagsService.UpdateTagAsync(tagId, userId, updateTagDto);
+        if (updatedTag == null) return NotFound();
+        
+        return Ok(updatedTag);
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, new { error = ex.Message });
+    }
+}
+
+/// <summary>
+/// Deletes a tag
+/// </summary>
+/// <param name="tagId"></param>
+/// <returns></returns>
+[HttpDelete("{tagId}")]
+public async Task<IActionResult> DeleteTag(int tagId)
+{
+    try
+    {
+        var result = await _tagsService.DeleteTagAsync(tagId);
+        if (!result) return NotFound();
+        
+        return NoContent();
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, new { error = ex.Message });
+    }
+}
 
     }
 }

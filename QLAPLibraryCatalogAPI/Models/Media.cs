@@ -27,5 +27,4 @@ public partial class Media
     public virtual MediaType MediaType { get; set; } = null!;
     public virtual ICollection<MediaCopy> MediaCopies { get; set; } = new List<MediaCopy>();
     public virtual ICollection<MediaTag> MediaTags { get; set; } = new HashSet<MediaTag>();
-    public virtual ICollection<MediaGenre> MediaGenres { get; set; } = new HashSet<MediaGenre>(); 
 }

@@ -14,6 +14,9 @@ namespace QLAPLibraryCatalogAPI.Services
         Task<TagDto?> GetTagByIDAsync(int tagID);
         Task<TagDto> AddTagAsync(int userID, CreateTagDto tag);
         Task<bool> AddMediaTagAsync(int userID, int mediaID, int tagID);
+Task<IEnumerable<TagDto>> GetGenresAsync();
+Task<TagDto?> UpdateTagAsync(int tagId, int userId, UpdateTagDto updateTag);
+Task<bool> DeleteTagAsync(int tagId);
 #pragma warning restore 1591
     }
     /// <summary>
@@ -62,9 +65,12 @@ namespace QLAPLibraryCatalogAPI.Services
         {
             var createdTag = new Tag
             {
-                TagName = tag.TagName,
-                CreatedBy = userID,
-                CreatedAt = DateTime.UtcNow
+        TagName = tag.TagName,
+        IsGenre = tag.IsGenre,          // Add this line
+        Description = tag.Description,   // Add this line
+        CreatedBy = userID,
+        CreatedAt = DateTime.UtcNow,
+        UpdatedAt = DateTime.UtcNow   
             };
 
             _context.Tags.Add(createdTag);
@@ -96,6 +102,43 @@ namespace QLAPLibraryCatalogAPI.Services
 
             return true;
         }
+        
+        
+// Add to TagsService class:
+public async Task<IEnumerable<TagDto>> GetGenresAsync()
+{
+    var q = _context.Tags
+        .Include(m => m.MediaTags)
+        .Where(t => t.IsGenre == true)
+        .AsQueryable();
+
+    return await q.Select(r => MapTag(r)).ToListAsync();
+}
+
+public async Task<TagDto?> UpdateTagAsync(int tagId, int userId, UpdateTagDto updateTag)
+{
+    var existingTag = await _context.Tags.FindAsync(tagId);
+    if (existingTag == null) return null;
+
+    existingTag.TagName = updateTag.TagName;
+    existingTag.IsGenre = updateTag.IsGenre;
+    existingTag.Description = updateTag.Description;
+    existingTag.UpdatedBy = userId;
+    existingTag.UpdatedAt = DateTime.UtcNow;
+
+    await _context.SaveChangesAsync();
+    return await GetTagByIDAsync(tagId);
+}
+
+public async Task<bool> DeleteTagAsync(int tagId)
+{
+    var tag = await _context.Tags.FindAsync(tagId);
+    if (tag == null) return false;
+
+    _context.Tags.Remove(tag);
+    await _context.SaveChangesAsync();
+    return true;
+}
 
         #region Mapping Methods
         private static TagDto MapTag(Tag tag)
@@ -105,7 +148,9 @@ namespace QLAPLibraryCatalogAPI.Services
             {
                 TagId = tag.TagId,
                 TagName = tag.TagName,
-                MediaTagCount = tagCount
+                MediaTagCount = tagCount,
+                IsGenre = tag.IsGenre,          // Add this line
+                Description = tag.Description    // Add this line
             };
         }
         #endregion

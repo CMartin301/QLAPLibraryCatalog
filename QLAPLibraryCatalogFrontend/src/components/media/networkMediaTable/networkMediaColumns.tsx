@@ -73,19 +73,20 @@ export function useNetworkMediaColumns({
     // Tags
     columnHelper.accessor(row => row.tags ?? "", {
       id: "tags",
-      header: "Tags",
+      header: "Genre and Tags",
       cell: info => {
+        const row = info.row.original;
         const tags = info.getValue();
-        if (!tags || tags.length === 0) {
-          return <span className="text-sm text-gray-400">No tags</span>;
-        }
+        // if (!tags || tags.length === 0) {
+        //   return <span className="text-sm text-gray-400">No tags</span>;
+        // }
         
         return (
           <div className="flex flex-wrap gap-1">
             {tags.map((tag: TagDto) => {
               const config = {
                 text: tag.tagName,
-                color: 'purple' as const
+                color: 'gray' as const
               };
               return <StatusBadge key={tag.tagId} config={config} />;
             })}

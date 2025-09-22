@@ -229,38 +229,41 @@ namespace QLAPLibraryCatalogAPI.Services
         /// <summary>
         /// Maps a media into a media DTO
         /// </summary>
-        private static MediaDto MapMedia(Media m)
+       private static MediaDto MapMedia(Media m)
+{
+    int? totalCopiesCount = m.MediaCopies.Count();
+    int? availableCopiesCount = m.MediaCopies.Where(c => c.IsAvailable == true).Count();
+    return new MediaDto
+    {
+        MediaId = m.MediaId,
+        MediaTypeId = m.MediaTypeId,
+        MediaTypeName = m.MediaType.DisplayName,
+        Title = m.Title,
+        Subtitle = m.Subtitle,
+        Creator = m.Creator,
+        Publisher = m.Publisher,
+        PublicationDate = m.PublicationDate,
+        Language = m.Language,
+        Genre = m.Genre,
+        Description = m.Description,
+        CoverImageUrl = m.CoverImageUrl,
+        Isbn10 = m.Isbn10,
+        Isbn13 = m.Isbn13,
+        PageCount = m.PageCount,
+        IssueNumber = m.IssueNumber,
+        Volume = m.Volume,
+        TotalCopiesCount = totalCopiesCount,
+        AvailableCopiesCount = availableCopiesCount,
+        Tags = m.MediaTags.Select(mediaTag => new TagDto
         {
-            int? totalCopiesCount = m.MediaCopies.Count();
-            int? availableCopiesCount = m.MediaCopies.Where(c => c.IsAvailable == true).Count();
-            return new MediaDto
-            {
-                MediaId = m.MediaId,
-                MediaTypeId = m.MediaTypeId,
-                MediaTypeName = m.MediaType.DisplayName,
-                Title = m.Title,
-                Subtitle = m.Subtitle,
-                Creator = m.Creator,
-                Publisher = m.Publisher,
-                PublicationDate = m.PublicationDate,
-                Language = m.Language,
-                Genre = m.Genre,
-                Description = m.Description,
-                CoverImageUrl = m.CoverImageUrl,
-                Isbn10 = m.Isbn10,
-                Isbn13 = m.Isbn13,
-                PageCount = m.PageCount,
-                IssueNumber = m.IssueNumber,
-                Volume = m.Volume,
-                TotalCopiesCount = totalCopiesCount,
-                AvailableCopiesCount = availableCopiesCount,
-                Tags = m.MediaTags.Select(mediaTag => new TagDto
-                {
-                    TagId = mediaTag.TagId,
-                    TagName = mediaTag.Tag.TagName
-                }).ToList()
-            };
-        }
+            TagId = mediaTag.TagId,
+            TagName = mediaTag.Tag.TagName,
+            IsGenre = mediaTag.Tag.IsGenre,        // Add this line
+            Description = mediaTag.Tag.Description  // Add this line
+        }).ToList()
+        // Remove the entire Genres property mapping
+    };
+}
         
         private MediaDto MapMediaWithLocation(Media m, int? userLocationZoneId = null, decimal? maxDistanceMiles = null)
         {
@@ -319,10 +322,12 @@ namespace QLAPLibraryCatalogAPI.Services
                 TotalCopiesCount = totalCopiesCount,
                 AvailableCopiesCount = availableCopiesCount,
                 Tags = m.MediaTags.Select(mediaTag => new TagDto
-                {
-                    TagId = mediaTag.TagId,
-                    TagName = mediaTag.Tag.TagName
-                }).ToList(),
+{
+    TagId = mediaTag.TagId,
+    TagName = mediaTag.Tag.TagName,
+    IsGenre = mediaTag.Tag.IsGenre,        // Add this line
+    Description = mediaTag.Tag.Description  // Add this line
+}).ToList(),
                 NearestCopyDistance = nearestDistance,
                 NearestCopyLocationName = nearestLocationName
             };

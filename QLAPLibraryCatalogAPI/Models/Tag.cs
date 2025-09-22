@@ -22,6 +22,8 @@ namespace QLAPLibraryCatalogAPI.Models
         public DateTime UpdatedAt { get; set; }
 
         public int UpdatedBy { get; set; }
+public bool IsGenre { get; set; }
+public string? Description { get; set; }
 
         public virtual ICollection<MediaTag> MediaTags { get; set; }
         public virtual ICollection<UserTag> UserTags { get; set; } // Added for user tag relationship

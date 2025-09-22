@@ -163,7 +163,7 @@ const handleEditSubmit = async ( data: CreateOrUpdateUserProfile ): Promise<User
           {isOwnProfile && (
             <Button
               variant="primary"
-              size="md"
+              size="sm"
               icon={Edit}
               onClick={() => setIsEditModalOpen(true)}
               className="flex-shrink-0"
