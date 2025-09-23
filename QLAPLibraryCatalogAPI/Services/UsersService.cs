@@ -27,11 +27,13 @@ namespace QLAPLibraryCatalogAPI.Services
     {
         private readonly LibraryCatalogContext _context;
         private readonly IAuthService _authService;
+        private readonly IRoleService _roleService;
         /// <summary> Constructor </summary>
-        public UsersService(LibraryCatalogContext context, IAuthService authService)
+        public UsersService(LibraryCatalogContext context, IAuthService authService, IRoleService roleService)
         {
             _context = context;
             _authService = authService;
+            _roleService = roleService;
         }
         /// <summary>
         /// Gets all users
@@ -87,41 +89,31 @@ namespace QLAPLibraryCatalogAPI.Services
             if (existingUser != null)
                 throw new ArgumentException("User with this email already exists");
 
-            var user = new User
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                Email = userDto.Email!,
-                Username = userDto.Username,
-                PasswordHash = _authService.HashPassword(userDto.Password!),
-                EmailVerified = false,
-                IsActive = true,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
-
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            // Create user preferences if provided
-            if (userDto.UserPreferences != null)
-            {
-                var preferences = new UserPreferences
-                {
-                    UserId = user.UserId,
-                    DefaultLoanDays = userDto.UserPreferences.DefaultLoanDays,
-                    AutoApproveRequests = userDto.UserPreferences.AutoApproveRequests,
-                    EmailNotifications = userDto.UserPreferences.EmailNotifications,
-                    SmsNotifications = userDto.UserPreferences.SmsNotifications,
-                    NotificationSettings = userDto.UserPreferences.NotificationSettings,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                };
-
-                _context.UserPreferences.Add(preferences);
-                await _context.SaveChangesAsync();
-                user.UserPreferences = preferences;
+                // Create user
+                var user = await CreateUserEntityAsync(userDto);
+                
+                // Create preferences
+                await CreateUserPreferencesAsync(user.UserId, userDto.UserPreferences);
+                
+                // Create profile
+                await CreateUserProfileAsync(user.UserId);
+                
+                // Assign default role
+                await _roleService.AssignRoleToUserAsync(user.UserId, "user");
+                
+                await transaction.CommitAsync();
+                
+                return await GetUserByIdAsync(user.UserId) ?? 
+                    throw new InvalidOperationException("Failed to retrieve created user");
             }
-
-            return await GetUserByIdAsync(user.UserId) ?? throw new InvalidOperationException("Failed to retrieve created user");
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
         /// <summary>
@@ -175,11 +167,7 @@ namespace QLAPLibraryCatalogAPI.Services
 
 
 
-            prefs.DefaultLoanDays = preferencesDto.DefaultLoanDays;
-            prefs.AutoApproveRequests = preferencesDto.AutoApproveRequests;
             prefs.EmailNotifications = preferencesDto.EmailNotifications;
-            prefs.SmsNotifications = preferencesDto.SmsNotifications;
-            prefs.NotificationSettings = preferencesDto.NotificationSettings;
             prefs.UpdatedAt = DateTime.UtcNow;
 
             prefs.UpdatedAt = DateTime.UtcNow;
@@ -190,11 +178,7 @@ namespace QLAPLibraryCatalogAPI.Services
             {
                 PreferenceId = prefs.PreferenceId,
                 UserId = prefs.UserId,
-                DefaultLoanDays = prefs.DefaultLoanDays,
-                AutoApproveRequests = prefs.AutoApproveRequests,
                 EmailNotifications = prefs.EmailNotifications,
-                SmsNotifications = prefs.SmsNotifications,
-                NotificationSettings = prefs.NotificationSettings
             };
         }
         /// <summary>
@@ -241,16 +225,59 @@ namespace QLAPLibraryCatalogAPI.Services
                 UserId = user.UserId,
                 Email = user.Email,
                 Username = user.Username,
-                UserPreferences = new UserPreferencesDto
-                {
-                    UserId = user.UserId,
-                    DefaultLoanDays = user.UserPreferences?.DefaultLoanDays,
-                    AutoApproveRequests = user.UserPreferences?.AutoApproveRequests,
-                    EmailNotifications = user.UserPreferences?.EmailNotifications,
-                    SmsNotifications = user.UserPreferences?.SmsNotifications,
-                    NotificationSettings = user.UserPreferences?.NotificationSettings,
-                }
+                UserPreferences = user.UserPreferences == null ? null : new UserPreferencesDto
+                    {
+                        PreferenceId = user.UserPreferences.PreferenceId, 
+                        UserId = user.UserId,
+                        EmailNotifications = user.UserPreferences.EmailNotifications,
+                    }
             };
+        }
+        #endregion
+        #region Helper Functions
+        private async Task<User> CreateUserEntityAsync(CreateUserDto userDto)
+        {
+            var user = new User
+            {
+                Email = userDto.Email!,
+                Username = userDto.Username,
+                PasswordHash = _authService.HashPassword(userDto.Password!),
+                EmailVerified = false,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+            return user;
+        }
+
+        private async Task CreateUserPreferencesAsync(int userId, UserPreferencesDto? preferencesDto)
+        {
+            var preferences = new UserPreferences
+            {
+                UserId = userId,
+                EmailNotifications = preferencesDto?.EmailNotifications,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+            
+            _context.UserPreferences.Add(preferences);
+            await _context.SaveChangesAsync();
+        }
+
+        private async Task CreateUserProfileAsync(int userId)
+        {
+            var profile = new UserProfile
+            {
+                UserId = userId,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+            
+            _context.UserProfiles.Add(profile);
+            await _context.SaveChangesAsync();
         }
         #endregion
     }

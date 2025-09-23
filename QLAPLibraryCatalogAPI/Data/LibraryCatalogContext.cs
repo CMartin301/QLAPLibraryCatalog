@@ -31,6 +31,10 @@ public partial class LibraryCatalogContext : DbContext
     public virtual DbSet<UserTag> UserTags { get; set; }
     public virtual DbSet<PronounSet> PronounSets { get; set; }
     public virtual DbSet<UserPronoun> UserPronouns { get; set; }
+    public virtual DbSet<Role> Roles { get; set; }
+    public virtual DbSet<Permission> Permissions { get; set; }
+    public virtual DbSet<UserRole> UserRoles { get; set; }
+    public virtual DbSet<RolePermission> RolePermissions { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseNpgsql("Name=ConnectionStrings:DefaultConnection");
@@ -52,6 +56,10 @@ public partial class LibraryCatalogContext : DbContext
         ConfigureUserTag(modelBuilder);
         ConfigurePronounSet(modelBuilder);
         ConfigureUserPronoun(modelBuilder);
+        ConfigureRole(modelBuilder);
+        ConfigurePermission(modelBuilder);
+        ConfigureUserRole(modelBuilder);
+        ConfigureRolePermission(modelBuilder);
 
         OnModelCreatingPartial(modelBuilder);
     }
@@ -373,24 +381,12 @@ public partial class LibraryCatalogContext : DbContext
             entity.HasIndex(e => e.UserId, "user_preferences_user_id_key").IsUnique();
 
             entity.Property(e => e.PreferenceId).HasColumnName("preference_id");
-            entity.Property(e => e.AutoApproveRequests)
-                .HasDefaultValue(false)
-                .HasColumnName("auto_approve_requests");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("created_at");
-            entity.Property(e => e.DefaultLoanDays)
-                .HasDefaultValue(14)
-                .HasColumnName("default_loan_days");
             entity.Property(e => e.EmailNotifications)
                 .HasDefaultValue(true)
                 .HasColumnName("email_notifications");
-            entity.Property(e => e.NotificationSettings)
-                .HasColumnType("json")
-                .HasColumnName("notification_settings");
-            entity.Property(e => e.SmsNotifications)
-                .HasDefaultValue(false)
-                .HasColumnName("sms_notifications");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("updated_at");
@@ -510,7 +506,7 @@ public partial class LibraryCatalogContext : DbContext
                 .HasConstraintName("user_tags_tag_id_fkey");
         });
     }
-    
+
     private static void ConfigurePronounSet(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<PronounSet>(entity =>
@@ -576,6 +572,95 @@ public partial class LibraryCatalogContext : DbContext
                 .HasForeignKey(d => d.PronounId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("fk_user_pronouns_pronoun_id");
+        });
+    }
+    
+    private static void ConfigureRole(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Role>(entity =>
+        {
+            entity.HasKey(e => e.RoleId).HasName("roles_pkey");
+            entity.ToTable("roles");
+
+            entity.HasIndex(e => e.RoleName, "roles_role_name_key").IsUnique();
+
+            entity.Property(e => e.RoleId).HasColumnName("role_id");
+            entity.Property(e => e.RoleName)
+                .HasMaxLength(50)
+                .HasColumnName("role_name");
+            entity.Property(e => e.Description).HasColumnName("description");
+        });
+    }
+
+    private static void ConfigurePermission(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Permission>(entity =>
+        {
+            entity.HasKey(e => e.PermissionId).HasName("permissions_pkey");
+            entity.ToTable("permissions");
+
+            entity.HasIndex(e => e.PermissionName, "permissions_permission_name_key").IsUnique();
+
+            entity.Property(e => e.PermissionId).HasColumnName("permission_id");
+            entity.Property(e => e.PermissionName)
+                .HasMaxLength(100)
+                .HasColumnName("permission_name");
+            entity.Property(e => e.Description).HasColumnName("description");
+        });
+    }
+
+    private static void ConfigureUserRole(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<UserRole>(entity =>
+        {
+            entity.HasKey(e => new { e.UserId, e.RoleId }).HasName("user_roles_pkey");
+            entity.ToTable("user_roles");
+
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.RoleId).HasColumnName("role_id");
+            entity.Property(e => e.GrantedAt)
+                .HasDefaultValueSql("now()")
+                .HasColumnName("granted_at");
+            entity.Property(e => e.GrantedBy).HasColumnName("granted_by");
+
+            // Relationships
+            entity.HasOne(d => d.User).WithMany(p => p.UserRoles)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("user_roles_user_id_fkey");
+
+            entity.HasOne(d => d.Role).WithMany(p => p.UserRoles)
+                .HasForeignKey(d => d.RoleId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("user_roles_role_id_fkey");
+
+            entity.HasOne(d => d.GrantedByUser).WithMany()
+                .HasForeignKey(d => d.GrantedBy)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("user_roles_granted_by_fkey");
+        });
+    }
+
+    private static void ConfigureRolePermission(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<RolePermission>(entity =>
+        {
+            entity.HasKey(e => new { e.RoleId, e.PermissionId }).HasName("role_permissions_pkey");
+            entity.ToTable("role_permissions");
+
+            entity.Property(e => e.RoleId).HasColumnName("role_id");
+            entity.Property(e => e.PermissionId).HasColumnName("permission_id");
+
+            // Relationships
+            entity.HasOne(d => d.Role).WithMany(p => p.RolePermissions)
+                .HasForeignKey(d => d.RoleId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("role_permissions_role_id_fkey");
+
+            entity.HasOne(d => d.Permission).WithMany(p => p.RolePermissions)
+                .HasForeignKey(d => d.PermissionId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("role_permissions_permission_id_fkey");
         });
     }
 }
