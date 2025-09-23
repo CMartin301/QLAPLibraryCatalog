@@ -21,7 +21,6 @@ builder.Services.AddScoped<ILoansService, LoansService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<ILocationsService, LocationsService>();
 builder.Services.AddScoped<ITagsService, TagsService>();
-builder.Services.AddScoped<IGenresService, GenresService>();
 builder.Services.AddScoped<IUserProfilesService, UserProfilesService>();
 
 

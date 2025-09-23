@@ -1,4 +1,5 @@
 import { FilterConfig, Filter, SelectFilter, MultiSelectFilter, BooleanFilter, RangeFilter } from '../types/filters';
+import { LocationZoneDto } from '../types/locations';
 import { MediaDto } from '../types/media';
 
 // Helper function to get unique values from media array
@@ -27,48 +28,11 @@ const getValueCounts = (data: MediaDto[], accessor: (item: MediaDto) => string |
   return counts;
 };
 
-const getUniqueTags = (data: MediaDto[]): string[] => {
-  const tags = new Set<string>();
-  
-  data.forEach(item => {
-    if (item.tags && Array.isArray(item.tags)) {
-      item.tags.forEach(tag => {
-        if (tag.tagName && tag.tagName.trim()) {
-          tags.add(tag.tagName.trim());
-        }
-      });
-    }
-  });
-  
-  return Array.from(tags).sort();
-};
-
-// Helper function to get tag counts
-const getTagCounts = (data: MediaDto[]): Record<string, number> => {
-  const counts: Record<string, number> = {};
-  
-  data.forEach(item => {
-    if (item.tags && Array.isArray(item.tags)) {
-      item.tags.forEach(tag => {
-        if (tag.tagName && tag.tagName.trim()) {
-          const tagName = tag.tagName.trim();
-          counts[tagName] = (counts[tagName] || 0) + 1;
-        }
-      });
-    }
-  });
-  
-  return counts;
-};
-
 // Create initial filter configuration based on available data
-export const createMediaFilterConfig = (data: MediaDto[]): FilterConfig<MediaDto> => {
+export const createMediaFilterConfig = (data: MediaDto[], locationZones: LocationZoneDto[] = []): FilterConfig<MediaDto> => {
   // Get unique values and counts for each filterable field
   const mediaTypes = getUniqueValues(data, item => item.mediaTypeName);
   const mediaTypeCounts = getValueCounts(data, item => item.mediaTypeName);
-  
-  const genres = getUniqueValues(data, item => item.genre);
-  const genreCounts = getValueCounts(data, item => item.genre);
   
   const languages = getUniqueValues(data, item => item.language);
   const languageCounts = getValueCounts(data, item => item.language);
@@ -83,6 +47,8 @@ export const createMediaFilterConfig = (data: MediaDto[]): FilterConfig<MediaDto
   
   const minYear = years.length > 0 ? Math.min(...years) : 1900;
   const maxYear = years.length > 0 ? Math.max(...years) : new Date().getFullYear();
+
+  
 
   const filters: Filter[] = [
     // Media Type filter
@@ -100,21 +66,6 @@ export const createMediaFilterConfig = (data: MediaDto[]): FilterConfig<MediaDto
       }))
     } as SelectFilter,
 
-    // Genre multi-select filter
-    {
-      id: 'genre',
-      label: 'Genre',
-      type: 'multiselect',
-      active: false,
-    priority: 'primary', 
-      value: [],
-      options: genres.map(genre => ({
-        value: genre,
-        label: genre,
-        count: genreCounts[genre]
-      }))
-    } as MultiSelectFilter,
-
     // Language filter
     {
       id: 'language',
@@ -130,7 +81,7 @@ export const createMediaFilterConfig = (data: MediaDto[]): FilterConfig<MediaDto
       }))
     } as SelectFilter,
 
-    // Publisher filter (only show if there are multiple publishers)
+    // Publisher filter 
     ...(publishers.length > 1 ? [{
       id: 'publisher',
       label: 'Publisher',
@@ -169,25 +120,132 @@ export const createMediaFilterConfig = (data: MediaDto[]): FilterConfig<MediaDto
       max: maxYear,
       step: 1
     } as RangeFilter,
+    
+    // Genres filter - only tags where isGenre: true
+    {
+      id: 'genres',
+      label: 'Genres',
+      type: 'multiselect',
+      active: false,
+      priority: 'primary', 
+      value: [],
+      options: (() => {
+  const genreTagsMap = new Map<number, { tagId: number; tagName: string }>();
+  
+  data.forEach(item => {
+    if (item.tags && Array.isArray(item.tags)) {
+      item.tags.forEach(tag => {
+        if (tag.isGenre && tag.tagName && tag.tagName.trim()) {
+          genreTagsMap.set(tag.tagId, { tagId: tag.tagId, tagName: tag.tagName.trim() });
+        }
+      });
+    }
+  });
+  
+  const genreCounts: Record<number, number> = {};
+  
+  // Calculate counts for each genre
+  data.forEach(item => {
+    if (item.tags && Array.isArray(item.tags)) {
+      item.tags.forEach(tag => {
+        if (tag.isGenre) {
+          genreCounts[tag.tagId] = (genreCounts[tag.tagId] || 0) + 1;
+        }
+      });
+    }
+  });
+  
+  return Array.from(genreTagsMap.values())
+    .sort((a, b) => a.tagName.localeCompare(b.tagName))
+    .map(tag => ({
+      value: tag.tagId.toString(),
+      label: tag.tagName,
+      count: genreCounts[tag.tagId] || 0
+    }));
+})()
+    } as MultiSelectFilter,
+
+    // Replace your existing tags filter (around line 130) with:
+    // Non-genre tags filter - only tags where isGenre: false
     {
       id: 'tags',
       label: 'Tags',
       type: 'multiselect',
       active: false,
-      priority: 'primary',
+      priority: 'advanced', // Moving to advanced section
       value: [],
       options: (() => {
-        const uniqueTags = getUniqueTags(data);
-        const tagCounts = getTagCounts(data);
-        return uniqueTags.map(tag => ({
-          value: tag,
-          label: tag,
-          count: tagCounts[tag]
-        }));
-      })()
+  const nonGenreTagsMap = new Map<number, { tagId: number; tagName: string }>();
+  
+  data.forEach(item => {
+    if (item.tags && Array.isArray(item.tags)) {
+      item.tags.forEach(tag => {
+        if (!tag.isGenre && tag.tagName && tag.tagName.trim()) {
+          nonGenreTagsMap.set(tag.tagId, { tagId: tag.tagId, tagName: tag.tagName.trim() });
+        }
+      });
+    }
+  });
+  
+  const tagCounts: Record<number, number> = {};
+  
+  // Calculate counts for each tag
+  data.forEach(item => {
+    if (item.tags && Array.isArray(item.tags)) {
+      item.tags.forEach(tag => {
+        if (!tag.isGenre) {
+          tagCounts[tag.tagId] = (tagCounts[tag.tagId] || 0) + 1;
+        }
+      });
+    }
+  });
+  
+  return Array.from(nonGenreTagsMap.values())
+    .sort((a, b) => a.tagName.localeCompare(b.tagName))
+    .map(tag => ({
+      value: tag.tagId.toString(),
+      label: tag.tagName,
+      count: tagCounts[tag.tagId] || 0
+    }));
+})()
     } as MultiSelectFilter,
-  ];
 
+// Location Zone filter
+{
+  id: 'locationZone',
+  label: 'Location',
+  type: 'select',
+  active: false,
+  priority: 'primary',
+  value: null,
+  options: [] // Will be populated dynamically
+} as SelectFilter,
+
+// Distance filter  
+{
+  id: 'distance',
+  label: 'Distance',
+  type: 'select',
+  active: false,
+  priority: 'primary',
+  value: null,
+  options: [
+    { value: '5', label: 'Within 5 miles', count: 0 },
+    { value: '10', label: 'Within 10 miles', count: 0 },
+    { value: '20', label: 'Within 20 miles', count: 0 },
+    { value: '50', label: 'Within 50 miles', count: 0 }
+  ]
+} as SelectFilter,
+  ];
+  // Update location filter options with actual location zones
+  const locationFilter = filters.find(f => f.id === 'locationZone') as SelectFilter;
+  if (locationFilter) {
+    locationFilter.options = locationZones.map(zone => ({
+      value: zone.zoneId.toString(),
+      label: zone.zoneName,
+      count: 0 // You could calculate actual counts if needed
+    }));
+  }
   return {
     filters,
     applyFilters: (data: MediaDto[], activeFilters: Filter[]) => {
@@ -207,19 +265,33 @@ export const createMediaFilterConfig = (data: MediaDto[]): FilterConfig<MediaDto
             case 'multiselect': {
               const multiFilter = filter as MultiSelectFilter;
               if (multiFilter.value.length === 0) return true;
-              
-              // Handle tags filtering (AND logic - item must have ALL selected tags)
+              // Handle genres filtering (AND logic - item must have ALL selected genres)
+              if (filter.id === 'genres') {
+                if (!item.tags || item.tags.length === 0) return false;
+                
+                // Get all genre tag IDs for this item
+                const itemGenreIds = item.tags
+                  .filter(tag => tag.isGenre)
+                  .map(tag => tag.tagId.toString());
+                
+                // Check if the item has ALL of the selected genres (AND logic)
+                return multiFilter.value.every(selectedGenreId => 
+                  itemGenreIds.includes(selectedGenreId)
+                );
+              }
+
+              // Handle non-genre tags filtering (AND logic - item must have ALL selected tags)
               if (filter.id === 'tags') {
                 if (!item.tags || item.tags.length === 0) return false;
                 
-                // Get all tag names for this item
-                const itemTagNames = item.tags
-                  .map(tag => tag.tagName?.trim())
-                  .filter((tagName): tagName is string => Boolean(tagName));
+                // Get all non-genre tag IDs for this item
+                const itemTagIds = item.tags
+                  .filter(tag => !tag.isGenre)
+                  .map(tag => tag.tagId.toString());
                 
                 // Check if the item has ALL of the selected tags (AND logic)
-                return multiFilter.value.every(selectedTag => 
-                  itemTagNames.includes(selectedTag)
+                return multiFilter.value.every(selectedTagId => 
+                  itemTagIds.includes(selectedTagId)
                 );
               }
               const itemValue = getFilterValue(item, filter.id);

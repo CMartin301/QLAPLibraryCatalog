@@ -48,7 +48,7 @@ namespace QLAPLibraryCatalogAPI.Controllers
             {
                 var userId = GetUserId();
                 var profile = await _userProfilesService.GetUserProfileAsync(userId);
-                
+
                 if (profile == null) return NotFound(new { message = "Profile not found" });
 
                 return Ok(profile);
@@ -70,7 +70,7 @@ namespace QLAPLibraryCatalogAPI.Controllers
             {
                 var userId = GetUserId();
                 var userWithProfile = await _userProfilesService.GetUserWithProfileAsync(userId);
-                
+
                 if (userWithProfile == null) return NotFound(new { message = "User not found" });
 
                 return Ok(userWithProfile);
@@ -92,7 +92,7 @@ namespace QLAPLibraryCatalogAPI.Controllers
             try
             {
                 var profile = await _userProfilesService.GetUserProfileAsync(userId);
-                
+
                 if (profile == null) return NotFound(new { message = "Profile not found" });
 
                 return Ok(profile);
@@ -114,7 +114,7 @@ namespace QLAPLibraryCatalogAPI.Controllers
             try
             {
                 var userWithProfile = await _userProfilesService.GetUserWithProfileAsync(userId);
-                
+
                 if (userWithProfile == null) return NotFound(new { message = "User not found" });
 
                 return Ok(userWithProfile);
@@ -198,7 +198,7 @@ namespace QLAPLibraryCatalogAPI.Controllers
             {
                 var userId = GetUserId();
                 var result = await _userProfilesService.DeleteUserProfileAsync(userId);
-                
+
                 if (!result) return NotFound(new { message = "Profile not found" });
 
                 return NoContent();
@@ -262,7 +262,7 @@ namespace QLAPLibraryCatalogAPI.Controllers
                 var userId = GetUserId();
                 var result = await _userProfilesService.AddUserTagAsync(userId, tagId);
 
-                if (!result) 
+                if (!result)
                     return BadRequest(new { error = "Tag already exists for user or invalid tag/user ID" });
 
                 return Ok(new { message = "Tag successfully added to user profile" });
@@ -294,7 +294,7 @@ namespace QLAPLibraryCatalogAPI.Controllers
 
                 var result = await _userProfilesService.AddUserTagAsync(userId, tagId);
 
-                if (!result) 
+                if (!result)
                     return BadRequest(new { error = "Tag already exists for user or invalid tag/user ID" });
 
                 return Ok(new { message = "Tag successfully added to user profile" });
@@ -352,6 +352,83 @@ namespace QLAPLibraryCatalogAPI.Controllers
                 if (!result) return NotFound(new { error = "User tag relationship not found" });
 
                 return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+        
+        /// <summary>
+        /// Gets pronouns for the current user
+        /// </summary>
+        [HttpGet("Pronouns")]
+        public async Task<IActionResult> GetMyPronouns()
+        {
+            try
+            {
+                var userId = GetUserId();
+                var pronouns = await _userProfilesService.GetUserPronounsAsync(userId);
+                return Ok(pronouns);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Updates pronouns for the current user
+        /// </summary>
+        [HttpPut("Pronouns")]
+        public async Task<IActionResult> UpdateMyPronouns([FromBody] UpdateUserPronounsDto pronounsDto)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+
+                var userId = GetUserId();
+                var result = await _userProfilesService.UpdateUserPronounsAsync(userId, pronounsDto);
+                
+                if (!result) return BadRequest(new { error = "Failed to update pronouns" });
+
+                return Ok(new { message = "Pronouns updated successfully" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Gets common pronoun sets for selection
+        /// </summary>
+        [HttpGet("Pronouns/Common")]
+        public async Task<IActionResult> GetCommonPronouns()
+        {
+            try
+            {
+                var pronouns = await _userProfilesService.GetCommonPronounSetsAsync();
+                return Ok(pronouns);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Creates a custom pronoun set
+        /// </summary>
+        [HttpPost("Pronouns/Custom")]
+        public async Task<IActionResult> CreateCustomPronoun([FromBody] CreatePronounSetDto createDto)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+
+                var pronoun = await _userProfilesService.CreateCustomPronounSetAsync(createDto);
+                return Ok(pronoun);
             }
             catch (Exception ex)
             {

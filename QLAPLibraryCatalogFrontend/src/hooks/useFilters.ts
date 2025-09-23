@@ -4,6 +4,8 @@ import { BooleanFilter, Filter, FilterConfig, MultiSelectFilter, RangeFilter, Se
 interface UseFiltersProps<T> {
   data: T[];
   createFilterConfig: (data: T[]) => FilterConfig<T>;
+  searchTerm?: string;
+  searchFields?: (keyof T)[]; // This is fine as is
 }
 
 interface UseFiltersReturn<T> {
@@ -16,7 +18,9 @@ interface UseFiltersReturn<T> {
 
 export function useFilters<T>({ 
   data, 
-  createFilterConfig 
+  createFilterConfig,
+  searchTerm = '',
+  searchFields = [] 
 }: UseFiltersProps<T>): UseFiltersReturn<T> {
   
   // Generate initial filter configuration based on data
@@ -88,12 +92,33 @@ useEffect(() => {
   setFilters(updatedFilters);
 }, [data, createFilterConfig]);
   // Apply filters to data
-  const filteredData = useMemo(() => {
-    const activeFilters = filters.filter(f => f.active);
-    if (activeFilters.length === 0) return data;
-    
-    return filterConfig.applyFilters(data, activeFilters);
-  }, [data, filters, filterConfig]);
+  // Apply filters AND search to data
+const filteredData = useMemo(() => {
+  let filtered = data; // Changed from 'result' to 'filtered'
+  
+  // Apply search first
+  if (searchTerm.trim() && searchFields.length > 0) {
+    const searchLower = searchTerm.toLowerCase().trim();
+    filtered = filtered.filter((item: T) => // Added explicit type annotation
+      searchFields.some(field => {
+        const value = item[field];
+        if (typeof value === 'string') {
+          return value.toLowerCase().includes(searchLower);
+        }
+        if (typeof value === 'number') {
+          return value.toString().includes(searchLower);
+        }
+        return false;
+      })
+    );
+  }
+  
+  // Then apply filters
+  const activeFilters = filters.filter(f => f.active);
+  if (activeFilters.length === 0) return filtered; // Changed from 'result' to 'filtered'
+  
+  return filterConfig.applyFilters(filtered, activeFilters); // Changed from 'result' to 'filtered'
+}, [data, filters, filterConfig, searchTerm, searchFields]);
 
   // Count active filters
   const activeFilterCount = useMemo(() => 

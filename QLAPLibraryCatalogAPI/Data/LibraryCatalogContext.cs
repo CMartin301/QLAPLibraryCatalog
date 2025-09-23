@@ -27,12 +27,10 @@ public partial class LibraryCatalogContext : DbContext
     public virtual DbSet<UserPreferences> UserPreferences { get; set; }
     public virtual DbSet<Tag> Tags { get; set; }
     public virtual DbSet<MediaTag> MediaTags { get; set; }
-
-    // New DbSets for the missing entities
-    public virtual DbSet<Genre> Genres { get; set; }
-    public virtual DbSet<MediaGenre> MediaGenres { get; set; }
     public virtual DbSet<UserProfile> UserProfiles { get; set; }
     public virtual DbSet<UserTag> UserTags { get; set; }
+    public virtual DbSet<PronounSet> PronounSets { get; set; }
+    public virtual DbSet<UserPronoun> UserPronouns { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseNpgsql("Name=ConnectionStrings:DefaultConnection");
@@ -50,12 +48,10 @@ public partial class LibraryCatalogContext : DbContext
         ConfigureUserPreferences(modelBuilder);
         ConfigureTag(modelBuilder);
         ConfigureMediaTag(modelBuilder);
-
-        // New entity configurations
-        ConfigureGenre(modelBuilder);
-        ConfigureMediaGenre(modelBuilder);
         ConfigureUserProfile(modelBuilder);
         ConfigureUserTag(modelBuilder);
+        ConfigurePronounSet(modelBuilder);
+        ConfigureUserPronoun(modelBuilder);
 
         OnModelCreatingPartial(modelBuilder);
     }
@@ -146,9 +142,9 @@ public partial class LibraryCatalogContext : DbContext
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 
 
-// Add these methods to your LibraryCatalogContext class
+    // Add these methods to your LibraryCatalogContext class
 
-private static void ConfigureMediaCopy(ModelBuilder modelBuilder)
+    private static void ConfigureMediaCopy(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<MediaCopy>(entity =>
         {
@@ -431,6 +427,10 @@ private static void ConfigureMediaCopy(ModelBuilder modelBuilder)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnName("updated_at");
             entity.Property(e => e.UpdatedBy).HasColumnName("updated_by");
+            entity.Property(e => e.IsGenre)
+                .HasColumnName("is_genre");
+            entity.Property(e => e.Description)
+                .HasColumnName("description");
         });
     }
 
@@ -462,83 +462,9 @@ private static void ConfigureMediaCopy(ModelBuilder modelBuilder)
                 .HasConstraintName("media_tags_tag_id_fkey");
         });
     }
-// Replace the ConfigureGenre method in your LibraryCatalogContext with this version
-// that matches your existing database structure
+    // Replace the ConfigureGenre method in your LibraryCatalogContext with this version
+    // that matches your existing database structure
 
-private static void ConfigureGenre(ModelBuilder modelBuilder)
-{
-    modelBuilder.Entity<Genre>(entity =>
-    {
-        entity.HasKey(e => e.GenreId).HasName("genre_pkey");
-        entity.ToTable("genres");
-
-        // Indexes to match your existing structure
-        entity.HasIndex(e => e.GenreName, "idx_genre_name");
-        entity.HasIndex(e => e.CreatedAt, "idx_genre_created_at");
-        entity.HasIndex(e => e.UpdatedAt, "idx_genre_updated_at");
-        entity.HasIndex(e => e.IsActive, "idx_genres_is_active");
-        entity.HasIndex(e => e.GenreName, "genre_genre_name_key").IsUnique();
-
-        // Properties to match your existing database
-        entity.Property(e => e.GenreId)
-            .HasDefaultValueSql("nextval('genre_genre_id_seq'::regclass)")
-            .HasColumnName("genre_id");
-        
-        entity.Property(e => e.GenreName)
-            .HasMaxLength(100) // Match your existing 100-char limit
-            .HasColumnName("genre_name");
-            
-        entity.Property(e => e.Description)
-            .HasColumnName("description");
-            
-        entity.Property(e => e.IsActive)
-            .HasDefaultValue(true)
-            .HasColumnName("is_active");
-            
-        entity.Property(e => e.CreatedAt)
-            .HasDefaultValueSql("CURRENT_TIMESTAMP")
-            .HasColumnName("created_at");
-            
-        entity.Property(e => e.CreatedBy)
-            .HasColumnName("created_by");
-            
-        entity.Property(e => e.UpdatedAt)
-            .HasDefaultValueSql("CURRENT_TIMESTAMP")
-            .HasColumnName("updated_at");
-            
-        entity.Property(e => e.UpdatedBy)
-            .HasColumnName("updated_by");
-    });
-}
-
-    private static void ConfigureMediaGenre(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<MediaGenre>(entity =>
-        {
-            entity.HasKey(e => new { e.MediaId, e.GenreId }).HasName("media_genres_pkey");
-            entity.ToTable("media_genres");
-
-            entity.HasIndex(e => e.MediaId, "idx_media_genres_media_id");
-            entity.HasIndex(e => e.GenreId, "idx_media_genres_genre_id");
-
-            entity.Property(e => e.MediaId).HasColumnName("media_id");
-            entity.Property(e => e.GenreId).HasColumnName("genre_id");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnName("created_at");
-            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
-
-            entity.HasOne(d => d.Media).WithMany(p => p.MediaGenres)
-                .HasForeignKey(d => d.MediaId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("media_genres_media_id_fkey");
-
-            entity.HasOne(d => d.Genre).WithMany(p => p.MediaGenres)
-                .HasForeignKey(d => d.GenreId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("media_genres_genre_id_fkey");
-        });
-    }
 
     private static void ConfigureUserProfile(ModelBuilder modelBuilder)
     {
@@ -582,6 +508,74 @@ private static void ConfigureGenre(ModelBuilder modelBuilder)
                 .HasForeignKey(d => d.TagId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("user_tags_tag_id_fkey");
+        });
+    }
+    
+    private static void ConfigurePronounSet(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<PronounSet>(entity =>
+        {
+            entity.HasKey(e => e.PronounId).HasName("pronoun_sets_pkey");
+            entity.ToTable("pronoun_sets");
+
+            // Indexes
+            entity.HasIndex(e => e.PronounText, "idx_pronoun_sets_text_unique").IsUnique();
+            entity.HasIndex(e => new { e.IsCommon, e.IsActive, e.DisplayOrder }, "idx_pronoun_sets_common_active");
+
+            // Properties
+            entity.Property(e => e.PronounId).HasColumnName("pronoun_id");
+            entity.Property(e => e.PronounText)
+                .HasMaxLength(50)
+                .HasColumnName("pronoun_text");
+            entity.Property(e => e.DisplayOrder)
+                .HasDefaultValue(0)
+                .HasColumnName("display_order");
+            entity.Property(e => e.IsCommon)
+                .HasDefaultValue(false)
+                .HasColumnName("is_common");
+            entity.Property(e => e.IsActive)
+                .HasDefaultValue(true)
+                .HasColumnName("is_active");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnName("created_at");
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnName("updated_at");
+        });
+    }
+
+    private static void ConfigureUserPronoun(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<UserPronoun>(entity =>
+        {
+            entity.HasKey(e => new { e.UserId, e.PronounId }).HasName("user_pronouns_pkey");
+            entity.ToTable("user_pronouns");
+
+            // Indexes
+            entity.HasIndex(e => new { e.UserId, e.DisplayOrder }, "idx_user_pronouns_user_id");
+            entity.HasIndex(e => e.PronounId, "idx_user_pronouns_pronoun_id");
+
+            // Properties
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.PronounId).HasColumnName("pronoun_id");
+            entity.Property(e => e.DisplayOrder)
+                .HasDefaultValue(0)
+                .HasColumnName("display_order");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnName("created_at");
+
+            // Relationships
+            entity.HasOne(d => d.User).WithMany(p => p.UserPronouns)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fk_user_pronouns_user_id");
+
+            entity.HasOne(d => d.PronounSet).WithMany(p => p.UserPronouns)
+                .HasForeignKey(d => d.PronounId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fk_user_pronouns_pronoun_id");
         });
     }
 }

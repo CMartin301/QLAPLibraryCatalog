@@ -19,6 +19,7 @@ interface TableContainerProps<T> {
   className?: string;
   onRowClick?: (row: T) => void;
   rowClassName?: string;
+  showSearch?: boolean;
 }
 
 export function TableContainer<T>({
@@ -35,6 +36,7 @@ export function TableContainer<T>({
   className = 'bg-[var(--color-card)] rounded-lg shadow-sm border border-[var(--color-border)]',
   onRowClick,
   rowClassName,
+  showSearch = true,
 }: TableContainerProps<T>) {
   return (
     <div className={className}>
@@ -72,6 +74,7 @@ export function TableContainer<T>({
           onRefresh={onRefresh}
           onRowClick={onRowClick}
           rowClassName={rowClassName}
+          showSearch={showSearch}
         />
       )}
 

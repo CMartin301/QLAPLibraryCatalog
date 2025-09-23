@@ -82,47 +82,40 @@ export function useUserMediaColumns({ onAddCopy }: UseUserMediaColumnsProps) {
     //   size: 120,
     // }),
 
-    // Genre
-    columnHelper.accessor(row => row.media?.genre ?? "Unknown", {
-      id: "genre",
-      header: "Genre",
-      cell: info => {
-        const config = {
-          text: info.getValue(),
-          color: 'purple' as const
-        };
-        return <StatusBadge config={config} />;
-      },
-      enableSorting: true,
-      size: 90,
-    }),
-
-    // Tags
-    columnHelper.accessor(row => row.media?.tags ?? "", {
+    columnHelper.accessor(row => (row.media && row.media.tags) ?? "", {
       id: "tags",
-      header: "Tags",
+      header: "Genres and Tags",
       cell: info => {
-        const tags = info.getValue();
-        if (!tags || tags.length === 0) {
-          return <span className="text-sm text-gray-400">No tags</span>;
-        }
+    const tags = info.getValue();
+    if (!tags || tags.length === 0) {
+      return <span className="text-sm text-gray-400">No tags</span>;
+    }
+    
+    return (
+      <div className="flex flex-wrap gap-1">
+        {/* Display genre tags first */}
+        {tags.filter((tag: TagDto) => tag.isGenre).map((tag: TagDto) => {
+          const config = {
+            text: tag.tagName,
+            color: 'purple' as const
+          };
+          return <StatusBadge key={tag.tagId} config={config} />;
+        })}
         
-        return (
-          <div className="flex flex-wrap gap-1">
-            {tags.map((tag: TagDto) => {
-              const config = {
-                text: tag.tagName,
-                color: 'gray' as const
-              };
-              return <StatusBadge key={tag.tagId} config={config} />;
-            })}
-          </div>
-        );
+        {/* Then display non-genre tags */}
+        {tags.filter((tag: TagDto) => !tag.isGenre).map((tag: TagDto) => {
+          const config = {
+            text: tag.tagName,
+            color: 'gray' as const
+          };
+          return <StatusBadge key={tag.tagId} config={config} />;
+        })}
+      </div>
+    );
       },
       enableSorting: false,
-      size: 160,
+      size: 200,
     }),
-
     // Status
     columnHelper.accessor(row => row.isAvailable , {
       id: "status",

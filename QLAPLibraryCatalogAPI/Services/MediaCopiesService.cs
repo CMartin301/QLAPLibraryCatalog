@@ -238,7 +238,9 @@ namespace QLAPLibraryCatalogAPI.Services
                     Tags = mediaCopy.Media.MediaTags.Select(mediaTag => new TagDto
                         {
                             TagId = mediaTag.TagId,
-                            TagName = mediaTag.Tag.TagName
+                            TagName = mediaTag.Tag.TagName,
+                            IsGenre = mediaTag.Tag.IsGenre,        
+                            Description = mediaTag.Tag.Description 
                         }).ToList()
                 }
             };

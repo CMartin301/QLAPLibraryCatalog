@@ -29,4 +29,5 @@ public partial class User
     public virtual UserProfile? UserProfile { get; set; } // Added for user profile
 
     public virtual ICollection<UserTag> UserTags { get; set; } = new HashSet<UserTag>();
+    public virtual ICollection<UserPronoun> UserPronouns { get; set; } = new HashSet<UserPronoun>();
 }

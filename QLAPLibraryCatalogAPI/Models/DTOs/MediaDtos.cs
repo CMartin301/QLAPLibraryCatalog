@@ -45,7 +45,7 @@ namespace QLAPLibraryCatalogAPI.Models.DTOs
         public string? NearestCopyLocationName { get; set; }
 
         public List<TagDto> Tags { get; set; } = new();
-        public List<GenreDto> Genres { get; set; } = new(); // Added genre support
+        // public List<TagDto> GenreTags { get; set; } = new(); 
     }
 
     // Supporting classes (unchanged)

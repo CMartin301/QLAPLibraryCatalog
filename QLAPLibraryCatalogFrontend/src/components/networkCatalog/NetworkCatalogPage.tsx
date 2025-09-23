@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import useAuth from '../../hooks/useAuth';
-import { Media, MediaDto } from '../../types/media';
+import { MediaDto } from '../../types/media';
 import { MediaSearchParams, mediaService } from '../../services/mediaService';
 import { NetworkMediaTable } from '../media/networkMediaTable/NetworkMediaTable';
 import { LocationZoneDto } from '../../types/locations';
@@ -9,7 +7,6 @@ import { LocationFilters, LocationParams } from '../shared/filters/LocationFilte
 import { locationService } from '../../services/locationService';
 
 const NetworkCatalogPage: React.FC = () => {
-  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [media, setMedia] = useState<MediaDto[]>([]);
@@ -96,13 +93,13 @@ const NetworkCatalogPage: React.FC = () => {
             </div>
         </div>
 
-            {/* Location Filters */}
+            {/* Location Filters
       <LocationFilters
         locationZones={locationZones}
         currentLocation={locationParams}
         onChange={handleLocationChange}
         className="mb-6"
-      />
+      /> */}
 
 <NetworkMediaTable 
   media={media} 
@@ -110,6 +107,7 @@ const NetworkCatalogPage: React.FC = () => {
   mode='catalog'
   loading={isLoading}
   error={error}
+  locationZones={locationZones}
 />
 
     </div>
