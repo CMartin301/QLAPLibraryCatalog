@@ -35,6 +35,7 @@ public partial class LibraryCatalogContext : DbContext
     public virtual DbSet<Permission> Permissions { get; set; }
     public virtual DbSet<UserRole> UserRoles { get; set; }
     public virtual DbSet<RolePermission> RolePermissions { get; set; }
+    public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseNpgsql("Name=ConnectionStrings:DefaultConnection");
@@ -60,6 +61,7 @@ public partial class LibraryCatalogContext : DbContext
         ConfigurePermission(modelBuilder);
         ConfigureUserRole(modelBuilder);
         ConfigureRolePermission(modelBuilder);
+        ConfigureRefreshToken(modelBuilder);
 
         OnModelCreatingPartial(modelBuilder);
     }
@@ -574,7 +576,7 @@ public partial class LibraryCatalogContext : DbContext
                 .HasConstraintName("fk_user_pronouns_pronoun_id");
         });
     }
-    
+
     private static void ConfigureRole(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Role>(entity =>
@@ -663,4 +665,34 @@ public partial class LibraryCatalogContext : DbContext
                 .HasConstraintName("role_permissions_permission_id_fkey");
         });
     }
+    private static void ConfigureRefreshToken(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<RefreshToken>(entity =>
+        {
+            entity.HasKey(e => e.RefreshTokenId);
+            
+            entity.Property(e => e.Token)
+                .HasMaxLength(500)
+                .IsRequired();
+                
+            entity.Property(e => e.CreatedByIp)
+                .HasMaxLength(45);
+                
+            entity.Property(e => e.RevokedByIp)
+                .HasMaxLength(45);
+                
+            entity.Property(e => e.ReplacedByToken)
+                .HasMaxLength(500);
+            
+            entity.HasOne(d => d.User)
+                .WithMany(p => p.RefreshTokens)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+                
+            entity.HasIndex(e => e.Token)
+                .IsUnique();
+        });
+    }
+    
+    
 }
