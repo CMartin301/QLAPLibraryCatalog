@@ -29,5 +29,8 @@ public partial class User
     public virtual UserProfile? UserProfile { get; set; } // Added for user profile
 
     public virtual ICollection<UserTag> UserTags { get; set; } = new HashSet<UserTag>();
-    public virtual ICollection<UserPronoun> UserPronouns { get; set; } = new HashSet<UserPronoun>();
+    public virtual ICollection<UserPronoun> UserPronouns { get; set; } = new HashSet<UserPronoun>();// Add this line to your existing User class properties
+    public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+    public virtual ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
+
 }

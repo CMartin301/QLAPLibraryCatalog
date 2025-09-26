@@ -360,11 +360,7 @@ public async Task<PronounSetDto> CreateCustomPronounSetAsync(CreatePronounSetDto
                 {
                     PreferenceId = user.UserPreferences.PreferenceId,
                     UserId = user.UserPreferences.UserId,
-                    DefaultLoanDays = user.UserPreferences.DefaultLoanDays,
-                    AutoApproveRequests = user.UserPreferences.AutoApproveRequests,
                     EmailNotifications = user.UserPreferences.EmailNotifications,
-                    SmsNotifications = user.UserPreferences.SmsNotifications,
-                    NotificationSettings = user.UserPreferences.NotificationSettings
                 },
                 UserProfile = user.UserProfile == null ? null : new UserProfileDto
                 {

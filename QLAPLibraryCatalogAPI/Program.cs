@@ -22,6 +22,7 @@ builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<ILocationsService, LocationsService>();
 builder.Services.AddScoped<ITagsService, TagsService>();
 builder.Services.AddScoped<IUserProfilesService, UserProfilesService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
 
 
 // Add Swagger
