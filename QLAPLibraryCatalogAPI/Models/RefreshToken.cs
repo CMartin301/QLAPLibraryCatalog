@@ -16,11 +16,9 @@ namespace QLAPLibraryCatalogAPI.Models
         
         public bool IsRevoked { get; set; }
         
-        public string? CreatedByIp { get; set; }
+        public string? DeviceFingerprint { get; set; } // Replace IP with device fingerprint
         
         public DateTime? RevokedAt { get; set; }
-        
-        public string? RevokedByIp { get; set; }
         
         public string? ReplacedByToken { get; set; }
 

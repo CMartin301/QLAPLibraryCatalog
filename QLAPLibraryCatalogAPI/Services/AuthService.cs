@@ -15,14 +15,14 @@ namespace QLAPLibraryCatalogAPI.Services
     public interface IAuthService
     {
 #pragma warning disable 1591
-        Task<AuthResponseDto?> AuthenticateAsync(LoginDto loginDto, string? ipAddress = null);
+        Task<AuthResponseDto?> AuthenticateAsync(LoginDto loginDto, string? deviceFingerprint = null);
         string GenerateJwtToken(int userId, string email);
         string HashPassword(string password);
         bool VerifyPassword(string password, string hash);
-        Task<AuthResponseDto?> RefreshTokenAsync(string refreshToken, string? ipAddress = null);
-        Task<string> GenerateRefreshTokenAsync(int userId, string? ipAddress = null);
-        Task<bool> RevokeRefreshTokenAsync(string refreshToken, string? ipAddress = null);
         Task CleanupExpiredTokensAsync();
+        Task<AuthResponseDto?> RefreshTokenAsync(string refreshToken, string? deviceFingerprint = null);
+        Task<string> GenerateRefreshTokenAsync(int userId, string? deviceFingerprint = null);
+        Task<bool> RevokeRefreshTokenAsync(string refreshToken, string? deviceFingerprint = null);
 #pragma warning restore 1591
     }
 
@@ -42,7 +42,7 @@ namespace QLAPLibraryCatalogAPI.Services
         /// <summary>
         /// Authenticate user and return both access and refresh tokens
         /// </summary>
-        public async Task<AuthResponseDto?> AuthenticateAsync(LoginDto loginDto, string? ipAddress = null)
+        public async Task<AuthResponseDto?> AuthenticateAsync(LoginDto loginDto, string? deviceFingerprint = null)
         {
             var user = await _context.Users
                 .Include(u => u.UserPreferences)
@@ -53,7 +53,7 @@ namespace QLAPLibraryCatalogAPI.Services
 
             // Generate tokens
             var accessToken = GenerateJwtToken(user.UserId, user.Email);
-            var refreshToken = await GenerateRefreshTokenAsync(user.UserId, ipAddress);
+            var refreshToken = await GenerateRefreshTokenAsync(user.UserId, deviceFingerprint);
 
             var hoursValid = _configuration.GetValue<double>("JwtHoursValid");
             var accessTokenExpiry = DateTime.UtcNow.AddHours(hoursValid);
@@ -135,59 +135,74 @@ namespace QLAPLibraryCatalogAPI.Services
         {
             return BCrypt.Net.BCrypt.Verify(password, hash);
         }
-        
-                
+
+        /// <summary>
+        /// Generate device fingerprint from User-Agent and other non-PII headers
+        /// </summary>
+        public string? GenerateDeviceFingerprint(HttpContext context)
+        {
+            var userAgent = context.Request.Headers["User-Agent"].ToString();
+            var acceptLanguage = context.Request.Headers["Accept-Language"].ToString();
+            var acceptEncoding = context.Request.Headers["Accept-Encoding"].ToString();
+
+            if (string.IsNullOrEmpty(userAgent))
+                return null;
+
+            var fingerprint = $"{userAgent}|{acceptLanguage}|{acceptEncoding}";
+            return Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(fingerprint));
+        }
+
         /// <summary>
         /// Generates a new refresh token for the user
         /// </summary>
-        public async Task<string> GenerateRefreshTokenAsync(int userId, string? ipAddress = null)
+        public async Task<string> GenerateRefreshTokenAsync(int userId, string? deviceFingerprint = null)
         {
             var refreshToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
-            
+            var hashedToken = HashRefreshToken(refreshToken);
+
             var tokenEntity = new RefreshToken
             {
-                Token = refreshToken,
+                Token = hashedToken, // Store hash
                 UserId = userId,
                 ExpiresAt = DateTime.UtcNow.AddDays(_configuration.GetValue<int>("RefreshTokenDays", 7)),
                 CreatedAt = DateTime.UtcNow,
-                CreatedByIp = ipAddress,
+                DeviceFingerprint = deviceFingerprint,
                 IsRevoked = false
             };
-            
+
             _context.RefreshTokens.Add(tokenEntity);
             await _context.SaveChangesAsync();
-            
-            return refreshToken;
+
+            return refreshToken; // Return plain token
         }
 
         /// <summary>
         /// Validates refresh token and generates new access token
         /// </summary>
-        public async Task<AuthResponseDto?> RefreshTokenAsync(string refreshToken, string? ipAddress = null)
+        public async Task<AuthResponseDto?> RefreshTokenAsync(string refreshToken, string? deviceFingerprint = null)
         {
             var token = await _context.RefreshTokens
                 .Include(rt => rt.User)
                 .ThenInclude(u => u.UserPreferences)
                 .FirstOrDefaultAsync(rt => rt.Token == refreshToken);
-            
+
             if (token == null || !token.IsActive || token.User.IsActive != true)
                 return null;
-            
+
             // Generate new tokens
             var newAccessToken = GenerateJwtToken(token.UserId, token.User.Email);
-            var newRefreshToken = await GenerateRefreshTokenAsync(token.UserId, ipAddress);
-            
+            var newRefreshToken = await GenerateRefreshTokenAsync(token.UserId, deviceFingerprint);
+
             // Revoke old refresh token
             token.IsRevoked = true;
             token.RevokedAt = DateTime.UtcNow;
-            token.RevokedByIp = ipAddress;
             token.ReplacedByToken = newRefreshToken;
-            
+
             await _context.SaveChangesAsync();
-            
+
             var accessTokenExpiry = DateTime.UtcNow.AddHours(_configuration.GetValue<double>("JwtHoursValid"));
             var refreshTokenExpiry = DateTime.UtcNow.AddDays(_configuration.GetValue<int>("RefreshTokenDays", 7));
-            
+
             return new AuthResponseDto
             {
                 AccessToken = newAccessToken,
@@ -212,18 +227,20 @@ namespace QLAPLibraryCatalogAPI.Services
         /// <summary>
         /// Revokes a refresh token
         /// </summary>
-        public async Task<bool> RevokeRefreshTokenAsync(string refreshToken, string? ipAddress = null)
+        public async Task<bool> RevokeRefreshTokenAsync(string refreshToken, string? deviceFingerprint = null)
         {
-            var token = await _context.RefreshTokens
-                .FirstOrDefaultAsync(rt => rt.Token == refreshToken);
-            
-            if (token == null || token.IsRevoked)
+            var candidateTokens = await _context.RefreshTokens
+                .Where(rt => !rt.IsRevoked)
+                .ToListAsync();
+
+            var token = candidateTokens.FirstOrDefault(rt => VerifyRefreshToken(refreshToken, rt.Token));
+
+            if (token == null)
                 return false;
-            
+
             token.IsRevoked = true;
             token.RevokedAt = DateTime.UtcNow;
-            token.RevokedByIp = ipAddress;
-            
+
             await _context.SaveChangesAsync();
             return true;
         }
@@ -236,9 +253,57 @@ namespace QLAPLibraryCatalogAPI.Services
             var expiredTokens = await _context.RefreshTokens
                 .Where(rt => rt.ExpiresAt < DateTime.UtcNow)
                 .ToListAsync();
-            
+
             _context.RefreshTokens.RemoveRange(expiredTokens);
             await _context.SaveChangesAsync();
         }
+
+
+        /// <summary>
+        /// Revoke all refresh tokens for a user (useful for logout all devices)
+        /// </summary>
+        public async Task<bool> RevokeAllUserTokensAsync(int userId, string? deviceFingerprint = null)
+        {
+            var userTokens = await _context.RefreshTokens
+                .Where(rt => rt.UserId == userId && !rt.IsRevoked)
+                .ToListAsync();
+
+            foreach (var token in userTokens)
+            {
+                token.IsRevoked = true;
+                token.RevokedAt = DateTime.UtcNow;
+            }
+
+            await _context.SaveChangesAsync();
+            return userTokens.Any();
+        }
+
+        /// <summary>
+        /// Get active token count for user (detect suspicious activity)
+        /// </summary>
+        public async Task<int> GetActiveTokenCountAsync(int userId)
+        {
+            return await _context.RefreshTokens
+                .CountAsync(rt => rt.UserId == userId && !rt.IsRevoked && rt.ExpiresAt > DateTime.UtcNow);
+        }
+
+        #region Helper Functions
+        /// <summary>
+        /// Hash refresh token for secure storage
+        /// </summary>
+        private string HashRefreshToken(string token)
+        {
+            return BCrypt.Net.BCrypt.HashPassword(token, 12);
+        }
+
+        /// <summary>
+        /// Verify refresh token against hash
+        /// </summary>
+        private bool VerifyRefreshToken(string token, string hash)
+        {
+            return BCrypt.Net.BCrypt.Verify(token, hash);
+        }
+
+        #endregion
     }
 }
